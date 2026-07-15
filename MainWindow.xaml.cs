@@ -16,7 +16,7 @@ namespace ControlAcceso
             if (dgvEmpleados.SelectedItem is Empleado emp)
             {
                 // 1. Instanciamos la ventana y le pasamos el ID
-                VentanaHuella modal = new VentanaHuella(emp.ID);
+                VentanaHuella modal = new VentanaHuella();
 
                 // 2. Establecemos a MainWindow como dueño para que el modal se centre sobre ella
                 modal.Owner = this;

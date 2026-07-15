@@ -1,31 +1,38 @@
 using System.Windows;
-using System.Windows.Controls;
+using System.Threading; // Necesario para CancellationTokenSource
+using ControlAcceso.Services;
 
 namespace ControlAcceso
 {
-    public class VentanaHuella : Window
+    public partial class VentanaHuella : Window
     {
-        public VentanaHuella(int idEmpleado)
+        // 1. Declarar el campo de clase aquí
+        private CancellationTokenSource _cts = new CancellationTokenSource();
+
+        public VentanaHuella()
         {
-            Title = "Captura de Huella";
-            Width = 300;
-            Height = 200;
-            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            InitializeComponent();
+        }
 
-            StackPanel panel = new StackPanel { Margin = new Thickness(20) };
+        private async void BtnCapturar_Click(object sender, RoutedEventArgs e)
+        {
+            _cts = new CancellationTokenSource(); // Reinicia el token
 
-            TextBlock lblMensaje = new TextBlock
-            {
-                Text = $"Capturando huella para ID: {idEmpleado}",
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
+            lblMensaje.Text = "Coloque su dedo en el lector...";
 
-            Button btnCerrar = new Button { Content = "Cerrar", Margin = new Thickness(0, 20, 0, 0) };
-            btnCerrar.Click += (s, e) => this.Close();
+            // 2. Pasamos el token al servicio
+            byte[]? rawData = await HardwareService.CapturarHuellaAsync(_cts.Token);
 
-            panel.Children.Add(lblMensaje);
-            panel.Children.Add(btnCerrar);
-            this.Content = panel;
+            if (rawData != null) {
+                Scanner.GuardarComoImagen(rawData, 320, 480);
+                lblMensaje.Text = "Huella capturada.";
+            }
+        }
+
+        private void BtnCerrar_Click(object sender, RoutedEventArgs e)
+        {
+            _cts.Cancel(); // Esto detiene el bucle en HardwareService
+            this.Close();
         }
     }
 }

@@ -26,15 +26,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MahApps.Metro" Version="2.4.11" />
     <PackageReference Include="MySql.Data" Version="9.7.0" />
     <!-- <PackageReference Include="OpenCvSharp4" Version="4.10.0.20241108" />
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.10.0.20241108" />-->
     <PackageReference Include="SourceAFIS" Version="3.14.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Page Update="VentanaHuella.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
+
 </Project>

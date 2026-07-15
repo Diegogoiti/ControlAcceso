@@ -4,15 +4,16 @@ namespace ControlAcceso.Services;
 
 public static class HardwareService
 {
-    public static async Task<byte[]> CapturarHuellaAsync()
+    public static async Task<byte[]?> CapturarHuellaAsync(CancellationToken token)
     {
         return await Task.Run(() => {
-            while (true) {
+            while (!token.IsCancellationRequested) { // Se detiene si cancelas
                 var data = Scanner.GetRawImage();
                 if (EsHuellaValida(data)) return data!;
                 System.Threading.Thread.Sleep(300);
             }
-        });
+            return null; // Retorna null si se canceló
+        }, token);
     }
 
     public static bool EsHuellaValida(byte[]? data)
