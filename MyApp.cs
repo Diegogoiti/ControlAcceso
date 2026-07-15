@@ -1,3 +1,5 @@
+using ControlAcceso.Services;
+
 namespace ControlAcceso
 {
     public class MyApp
@@ -11,6 +13,11 @@ namespace ControlAcceso
         public void CargarEmpleadosDesdeDb()
         {
             Empleados = Db.ObtenerEmpleados();
+        }
+
+        public Empleado ObtenerEmpleadoPorId(int id)
+        {
+            return Empleados.FirstOrDefault(e => e.id == id);
         }
     }
 }

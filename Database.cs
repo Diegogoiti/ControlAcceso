@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 
-namespace ControlAcceso
+
+
+namespace ControlAcceso.Services
+
 {
     public class Database
     {
@@ -14,7 +17,7 @@ namespace ControlAcceso
             using (var conn = new MySqlConnection(_connString))
             {
                 conn.Open();
-                string query = "SELECT id, Nombre, Cedula FROM Empleados";
+                string query = "SELECT id, Nombre, Cedula, HuellaTemplate FROM Empleados";
                 using (var cmd = new MySqlCommand(query, conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -23,7 +26,8 @@ namespace ControlAcceso
                         empleados.Add(new Empleado(
                             reader.GetInt32("id"),
                             reader.GetString("Nombre"),
-                            reader.GetInt32("Cedula")
+                            reader.GetInt32("Cedula"),
+                            FingerprintService.CargarDesdeBytes((byte[])reader["HuellaTemplate"])
                         ));
                     }
                 }

@@ -9,10 +9,14 @@ namespace ControlAcceso
         // 1. Declarar el campo para el servicio
         private readonly FingerprintService _fingerprintService = new FingerprintService();
         private CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly MyApp _app;
+        private readonly int _empleadoId;
 
-        public VentanaHuella()
+        public VentanaHuella(MyApp app, int empleadoId)
         {
             InitializeComponent();
+            _app = app;
+            _empleadoId = empleadoId;
         }
 
         private async void BtnCapturar_Click(object sender, RoutedEventArgs e)
@@ -27,9 +31,15 @@ namespace ControlAcceso
             {
                 // 2. Usar la instancia _fingerprintService en lugar de llamar al servicio de forma estática
                 var template = _fingerprintService.CrearTemplate(rawData);
-                _fingerprintService.Guardar(template, "./template.bin");
 
-                lblMensaje.Text = "Huella capturada.";
+                var empleado = _app.ObtenerEmpleadoPorId(_empleadoId);
+
+                if (empleado != null)
+                {
+                    double similarity = _fingerprintService.Comparar(template, empleado.Huella);
+                    lblMensaje.Text = $"Similitud: {similarity}";
+                }
+
             }
         }
 

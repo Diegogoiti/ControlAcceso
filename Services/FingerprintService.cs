@@ -16,4 +16,7 @@ public class FingerprintService
 
     public FingerprintTemplate Cargar(string path) =>
         new FingerprintTemplate(File.ReadAllBytes(path));
+
+    public static FingerprintTemplate CargarDesdeBytes(byte[] templateBytes) =>
+        new FingerprintTemplate(templateBytes);
 }
