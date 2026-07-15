@@ -36,7 +36,7 @@ namespace ControlAcceso
 
                 if (empleado != null)
                 {
-                    double similarity = _fingerprintService.Comparar(template, empleado.Huella);
+                    bool similarity = _fingerprintService.Comparar(template, empleado.Huella);
                     lblMensaje.Text = $"Similitud: {similarity}";
                 }
 

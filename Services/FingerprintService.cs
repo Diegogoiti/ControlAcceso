@@ -8,8 +8,8 @@ public class FingerprintService
     public FingerprintTemplate CrearTemplate(byte[] rawData) =>
         Comparador.GenerarTemplate(rawData, 320, 480);
 
-    public double Comparar(FingerprintTemplate t1, FingerprintTemplate t2) =>
-        Comparador.CalcularSimilitud(t1, t2);
+    public bool Comparar(FingerprintTemplate t1, FingerprintTemplate t2) =>
+        (Comparador.CalcularSimilitud(t1, t2) > 50);
 
     public void Guardar(FingerprintTemplate template, string path) =>
         File.WriteAllBytes(path, template.ToByteArray());
