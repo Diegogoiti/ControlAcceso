@@ -9,10 +9,11 @@ namespace ControlAcceso
         public MainWindow()
         {
 
-            InitializeComponent();
-            CargarDatosPrueba();
-            /*_app.CargarEmpleadosDesdeDb(); // Trae los datos
-            dgvEmpleados.ItemsSource = _app.Empleados; // Los muestra*/
+              InitializeComponent();
+            //CargarDatosPrueba();
+            _app.CargarEmpleadosDesdeDb(); // Trae los datos
+            dgvEmpleados.ItemsSource = _app.Empleados; // Los muestra
+
         }
 
         private void dgvEmpleados_MouseDoubleClick(object sender, MouseButtonEventArgs e)

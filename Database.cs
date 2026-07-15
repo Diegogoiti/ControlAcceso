@@ -5,7 +5,7 @@ namespace ControlAcceso
 {
     public class Database
     {
-        private readonly string _connString = "Server=localhost;Database=acceso_db;Uid=root;Pwd=tu_password;";
+        private readonly string _connString = "Server=localhost;Database=acceso_db;Uid=root;Pwd=;";
 
         // READ: Obtener todos los empleados
         public List<Empleado> ObtenerEmpleados()
