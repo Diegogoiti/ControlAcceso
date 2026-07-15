@@ -30,9 +30,9 @@ namespace ControlAcceso
             // Creamos una lista de prueba
             var lista = new List<Empleado>
             {
-                new Empleado { ID = 1, Nombre = "Diego", CI = "V-12345678" },
-                new Empleado { ID = 2, Nombre = "Luis", CI = "V-87654321" },
-                new Empleado { ID = 3, Nombre = "Jostin", CI = "V-11223344" }
+                new Empleado(1, "Diego", 12345678),
+                new Empleado(2, "Luis", 87654321),
+                new Empleado(3, "Jostin", 11223344)
             };
 
             lista = lista.SelectMany(x => Enumerable.Repeat(x, 15)).ToList();
