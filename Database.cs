@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 
-namespace ControlAcceso.Services
+namespace ControlAcceso
 {
     public class Database
     {
