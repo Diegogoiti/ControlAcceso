@@ -5,10 +5,14 @@ namespace ControlAcceso
 {
     public partial class MainWindow : Window
     {
+        private MyApp _app = new MyApp();
         public MainWindow()
         {
+
             InitializeComponent();
             CargarDatosPrueba();
+            /*_app.CargarEmpleadosDesdeDb(); // Trae los datos
+            dgvEmpleados.ItemsSource = _app.Empleados; // Los muestra*/
         }
 
         private void dgvEmpleados_MouseDoubleClick(object sender, MouseButtonEventArgs e)
