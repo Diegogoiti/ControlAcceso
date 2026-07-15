@@ -1,0 +1,24 @@
+# Carpetas de compilación
+bin/
+obj/
+
+# Archivos de configuración de usuario
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Archivos de log
+*.log
+
+# Ejecutables (si quieres ignorar el compilado final)
+*.exe
+*.pdb
+
+# Mantener la DLL (esto es lo único que quieres que sí suba al repo)
+!ftrScanAPI.dll
+
+# Carpetas ocultas del sistema
+.DS_Store
+Thumbs.db
