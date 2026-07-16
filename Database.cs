@@ -41,11 +41,12 @@ namespace ControlAcceso.Services
             using (var conn = new MySqlConnection(_connString))
             {
                 conn.Open();
-                string query = "INSERT INTO Empleados (Nombre, Cedula) VALUES (@nombre, @cedula)";
+                string query = "INSERT INTO Empleados (Nombre, Cedula, HuellaTemplate) VALUES (@nombre, @cedula, @huellaTemplate)";
                 using (var cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@nombre", emp.Nombre);
                     cmd.Parameters.AddWithValue("@cedula", emp.Cedula);
+                    cmd.Parameters.AddWithValue("@huellaTemplate", emp.Huella.ToByteArray());
                     cmd.ExecuteNonQuery();
                 }
             }

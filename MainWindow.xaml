@@ -6,44 +6,41 @@
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <!-- Fila para el buscador: se ajusta al contenido -->
+            <!-- Fila para el botón: se ajusta al contenido -->
             <RowDefinition Height="Auto"/>
             <!-- Fila para la tabla: toma todo el espacio restante -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Barra de búsqueda -->
+        <!-- Barra de control superior con el botón -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-            <TextBlock Text="Introduzca su Nombre:"
-                       VerticalAlignment="Center"
-                       Margin="0,0,10,0"
-                       FontSize="14"/>
-            <TextBox x:Name="txtBuscar"
-                     Width="300"
-                     Height="30"
-                     VerticalContentAlignment="Center"/>
+            <Button x:Name="btnMarcarAsistencia"
+                    Content="Marcar Entrada/Salida"
+                    Width="180"
+                    Height="35"
+                    FontSize="14"
+                    FontWeight="Bold"/>
         </StackPanel>
 
         <!-- Tabla de datos -->
-       <DataGrid Grid.Row="1"
-          x:Name="dgvEmpleados"
-          AutoGenerateColumns="False"
-          IsReadOnly="True"
-          SelectionMode="Single"
-          HeadersVisibility="Column"
-          GridLinesVisibility="All"
-          VerticalGridLinesBrush="LightGray"
-          HorizontalGridLinesBrush="LightGray"
-          BorderThickness="1"
-          BorderBrush="Gray"
-          MouseDoubleClick="dgvEmpleados_MouseDoubleClick">
+        <DataGrid Grid.Row="1"
+                  x:Name="dgvEmpleados"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="All"
+                  VerticalGridLinesBrush="LightGray"
+                  HorizontalGridLinesBrush="LightGray"
+                  BorderThickness="1"
+                  BorderBrush="Gray"
+                  MouseDoubleClick="dgvEmpleados_MouseDoubleClick">
 
-    <DataGrid.Columns>
-        <DataGridTextColumn Header="ID" Binding="{Binding id}" Width="60"/>
-        <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-        <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="150"/>
-    </DataGrid.Columns>
-
-</DataGrid>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding id}" Width="60"/>
+                <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
+                <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
