@@ -24,7 +24,7 @@ namespace ControlAcceso
 
         public void CargarHistorialAsistencias()
         {
-            //HistorialAsistencias = Db.ObtenerAsistencias();
+            HistorialAsistencias = Db.ObtenerAsistencias();
             // pronto lo implementaré
         }
     }

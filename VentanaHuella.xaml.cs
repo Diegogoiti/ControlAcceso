@@ -36,7 +36,10 @@ namespace ControlAcceso
                 {
                     if (_fingerprintService.Comparar(empleado.Huella, template))
                     {
+                        var asistencia = new Asistencia(empleado.id, DateTime.Now, 1);
+                        _app.Db.RegistrarAsistencia(asistencia);
                         lblMensaje.Text = $"Huella reconocida. Bienvenido, {empleado.id}.";
+
                         break;
                     }
                 }

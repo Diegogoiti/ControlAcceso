@@ -11,8 +11,15 @@ namespace ControlAcceso
         {
             InitializeComponent();
 
-            _app.CargarEmpleadosDesdeDb(); // Trae los datos
-            dgvEmpleados.ItemsSource = _app.Empleados; // Los muestra
+            _app.CargarEmpleadosDesdeDb();
+            _app.CargarHistorialAsistencias();
+            dgvEmpleados.ItemsSource = _app.Empleados.Select(emp => new
+            {
+                // Guardamos el empleado completo
+                Datos = emp,
+                // Calculamos el estado aquí mismo y lo pasamos como un string aparte
+                Estado = _app.HistorialAsistencias.Any(a => a.EmpleadoID == emp.id && a.Tipo == 1) ? "Presente" : "Ausente"
+            }).ToList();
             btnMarcarAsistencia.Click += btnMarcarAsistencia_click;
 
             // TEST: Abre la ventana de huella automáticamente al iniciar

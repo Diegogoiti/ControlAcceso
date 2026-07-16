@@ -25,10 +25,12 @@ public class Asistencia
 {
     public int EmpleadoID { get; set; }
     public DateTime Timestamp { get; set; }
+    public int Tipo { get; set; }
 
-    public Asistencia(int empleadoId, DateTime timestamp)
+    public Asistencia(int empleadoId, DateTime timestamp, int tipo)
     {
         EmpleadoID = empleadoId;
         Timestamp = timestamp;
+        Tipo = tipo;
     }
 }

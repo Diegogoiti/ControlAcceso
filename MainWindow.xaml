@@ -37,9 +37,10 @@
                   MouseDoubleClick="dgvEmpleados_MouseDoubleClick">
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding id}" Width="60"/>
-                <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-                <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="150"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding Datos.id}" Width="60"/>
+    <DataGridTextColumn Header="Nombre" Binding="{Binding Datos.Nombre}" Width="*"/>
+    <DataGridTextColumn Header="Cédula" Binding="{Binding Datos.Cedula}" Width="150"/>
+                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
