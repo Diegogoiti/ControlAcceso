@@ -66,5 +66,19 @@ namespace ControlAcceso.Services
                 }
             }
         }
+
+        public void RegistrarAsistencia(Asistencia asistencia)
+        {
+            using (var conn = new MySqlConnection(_connString))
+            {
+                conn.Open();
+                string query = "INSERT INTO Asistencia (EmpleadoID, Timestamp) VALUES (@empleadoId, NOW())";
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@empleadoId", asistencia.EmpleadoID);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }
