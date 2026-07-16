@@ -10,6 +10,8 @@ namespace ControlAcceso
         // Estado global: lista de empleados cargada en memoria
         public List<Empleado> Empleados { get; set; } = new List<Empleado>();
 
+        public List<Asistencia> HistorialAsistencias { get; set; } = new List<Asistencia>();
+
         public void CargarEmpleadosDesdeDb()
         {
             Empleados = Db.ObtenerEmpleados();
@@ -18,6 +20,12 @@ namespace ControlAcceso
         public Empleado ObtenerEmpleadoPorId(int id)
         {
             return Empleados.FirstOrDefault(e => e.id == id);
+        }
+
+        public void CargarHistorialAsistencias()
+        {
+            //HistorialAsistencias = Db.ObtenerAsistencias();
+            // pronto lo implementaré
         }
     }
 }
