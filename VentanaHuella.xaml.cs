@@ -32,15 +32,14 @@ namespace ControlAcceso
                 // 2. Usar la instancia _fingerprintService en lugar de llamar al servicio de forma estática
                 var template = _fingerprintService.CrearTemplate(rawData);
 
-                var empleado = _app.ObtenerEmpleadoPorId(_empleadoId);
-
-                Empleado nuevo_empleado = new Empleado(0, "Diego Goitia", Random.Shared.Next(10000000, 99999999), template);
-
-                _app.Db.AgregarEmpleado(nuevo_empleado);
-
-                _app.CargarEmpleadosDesdeDb();
-                 Console.WriteLine("Empleado agregado: " + nuevo_empleado.Nombre);
-                lblMensaje.Text = "Empleado agregado: " + nuevo_empleado.Nombre;
+                foreach (var empleado in _app.Empleados)
+                {
+                    if (_fingerprintService.Comparar(empleado.Huella, template))
+                    {
+                        lblMensaje.Text = $"Huella reconocida. Bienvenido, {empleado.id}.";
+                        break;
+                    }
+                }
             }
         }
 

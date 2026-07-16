@@ -13,6 +13,7 @@ namespace ControlAcceso
 
             _app.CargarEmpleadosDesdeDb(); // Trae los datos
             dgvEmpleados.ItemsSource = _app.Empleados; // Los muestra
+            btnMarcarAsistencia.Click += btnMarcarAsistencia_click;
 
             // TEST: Abre la ventana de huella automáticamente al iniciar
             //this.Loaded += MainWindow_Loaded;
@@ -40,6 +41,15 @@ namespace ControlAcceso
                 };
                 modal.ShowDialog();
             }
+        }
+
+        private void btnMarcarAsistencia_click(object sender, RoutedEventArgs e)
+        {
+            VentanaHuella modal = new VentanaHuella(_app, 0)
+            {
+                Owner = this
+            };
+            modal.ShowDialog();
         }
     }
 }
