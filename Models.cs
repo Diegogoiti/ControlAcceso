@@ -1,5 +1,7 @@
 using Microsoft.VisualBasic;
 using SourceAFIS;
+using System;
+
 
 public class Empleado
 {
@@ -15,5 +17,18 @@ public class Empleado
         Nombre = nombre;
         Cedula = cedula;
         Huella = huella;
+    }
+}
+
+
+public class Asistencia
+{
+    public int EmpleadoID { get; set; }
+    public DateTime Timestamp { get; set; }
+
+    public Asistencia(int empleadoId, DateTime timestamp)
+    {
+        EmpleadoID = empleadoId;
+        Timestamp = timestamp;
     }
 }
