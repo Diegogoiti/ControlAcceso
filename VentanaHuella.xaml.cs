@@ -40,6 +40,7 @@ namespace ControlAcceso
                         _app.Db.RegistrarAsistencia(asistencia);
                         lblMensaje.Text = $"Huella reconocida. Bienvenido, {empleado.id}.";
 
+
                         break;
                     }
                 }

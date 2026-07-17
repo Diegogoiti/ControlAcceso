@@ -57,6 +57,7 @@ namespace ControlAcceso
                 Owner = this
             };
             modal.ShowDialog();
+            ActualizarTablaEmpleados();
         }
 
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
@@ -69,6 +70,17 @@ namespace ControlAcceso
 
             // La abrimos como un cuadro de diálogo modal
             modal.ShowDialog();
+        }
+        private void ActualizarTablaEmpleados()
+        {
+            _app.CargarEmpleadosDesdeDb();
+            _app.CargarHistorialAsistencias(); // Asegúrate de recargar el historial también
+
+            dgvEmpleados.ItemsSource = _app.Empleados.Select(emp => new
+            {
+                Datos = emp,
+                Estado = _app.HistorialAsistencias.Any(a => a.EmpleadoID == emp.id && a.Tipo == 1) ? "Presente" : "Ausente"
+            }).ToList();
         }
     }
 }
