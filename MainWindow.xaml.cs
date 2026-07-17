@@ -61,11 +61,14 @@ namespace ControlAcceso
 
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
         {
-            /*VentanaHuella modal = new VentanaHuella(_app, 0)
+            // Creamos la ventana pasando la instancia global de '_app'
+            VentanaAdministrar modal = new VentanaAdministrar(_app)
             {
-                Owner = this
+                Owner = this // Mantiene la ventana por encima de la principal
             };
-            modal.ShowDialog();*/
+
+            // La abrimos como un cuadro de diálogo modal
+            modal.ShowDialog();
         }
     }
 }
