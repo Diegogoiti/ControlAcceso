@@ -17,7 +17,7 @@ namespace ControlAcceso
             Empleados = Db.ObtenerEmpleados();
         }
 
-        public Empleado ObtenerEmpleadoPorId(int id)
+        public Empleado? ObtenerEmpleadoPorId(int id)
         {
             return Empleados.FirstOrDefault(e => e.id == id);
         }
