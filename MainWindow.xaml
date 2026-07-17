@@ -6,29 +6,40 @@
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <!-- Fila para el botón: se ajusta al contenido -->
+            <!-- Fila para los botones: se ajusta al contenido -->
             <RowDefinition Height="Auto"/>
             <!-- Fila para la tabla: toma todo el espacio restante -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Barra de control superior con el botón -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+        <!-- Contenedor superior dividido en 3 columnas para alinear correctamente -->
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>     <!-- Izquierda (vacía para equilibrar el centro) -->
+                <ColumnDefinition Width="Auto"/>  <!-- Centro (se ajusta al botón de asistencia) -->
+                <ColumnDefinition Width="*"/>     <!-- Derecha (toma el resto del espacio) -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Botón de asistencia: colocado en el centro (Columna 1) -->
             <Button x:Name="btnMarcarAsistencia"
+                    Grid.Column="1"
                     Content="Marcar Entrada/Salida"
                     Width="180"
                     Height="35"
                     FontSize="14"
                     FontWeight="Bold"/>
-          <Button x:Name="btnAdministrar"
-        Content="Administrar"
-        Width="120"
-        Height="35"
-        Margin="10,0,0,0"
-        FontSize="14"
-        FontWeight="Bold"
-        Click="btnAdministrar_Click"/>
-        </StackPanel>
+
+            <!-- Botón de administrar: colocado en la derecha (Columna 2) alineado al extremo derecho -->
+            <Button x:Name="btnAdministrar"
+                    Grid.Column="2"
+                    Content="Administrar"
+                    Width="120"
+                    Height="35"
+                    HorizontalAlignment="Right"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    Click="btnAdministrar_Click"/>
+        </Grid>
 
         <!-- Tabla de datos -->
         <DataGrid Grid.Row="1"
@@ -46,8 +57,8 @@
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding Datos.id}" Width="60"/>
-    <DataGridTextColumn Header="Nombre" Binding="{Binding Datos.Nombre}" Width="*"/>
-    <DataGridTextColumn Header="Cédula" Binding="{Binding Datos.Cedula}" Width="150"/>
+                <DataGridTextColumn Header="Nombre" Binding="{Binding Datos.Nombre}" Width="*"/>
+                <DataGridTextColumn Header="Cédula" Binding="{Binding Datos.Cedula}" Width="150"/>
                 <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
