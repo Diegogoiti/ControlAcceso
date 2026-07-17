@@ -58,5 +58,14 @@ namespace ControlAcceso
             };
             modal.ShowDialog();
         }
+
+        private void btnAdministrar_Click(object sender, RoutedEventArgs e)
+        {
+            /*VentanaHuella modal = new VentanaHuella(_app, 0)
+            {
+                Owner = this
+            };
+            modal.ShowDialog();*/
+        }
     }
 }

@@ -20,6 +20,14 @@
                     Height="35"
                     FontSize="14"
                     FontWeight="Bold"/>
+          <Button x:Name="btnAdministrar"
+        Content="Administrar"
+        Width="120"
+        Height="35"
+        Margin="10,0,0,0"
+        FontSize="14"
+        FontWeight="Bold"
+        Click="btnAdministrar_Click"/>
         </StackPanel>
 
         <!-- Tabla de datos -->
