@@ -90,8 +90,8 @@ namespace ControlAcceso
                 return;
             }
 
-            // Aquí guardas los datos normalizados de vuelta en la DB:
-            // _app.Db.GuardarConfiguracion(tiempoEntrada, tiempoSalida, password);
+            _app.Db.GuardarConfiguracion(tiempoEntrada, tiempoSalida, password);
+
 
             MessageBox.Show($"Configuración procesada con éxito.\nEntrada: {tiempoEntrada:hh\\:mm}\nSalida: {tiempoSalida:hh\\:mm}",
                             "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
