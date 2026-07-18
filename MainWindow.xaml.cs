@@ -62,15 +62,30 @@ namespace ControlAcceso
 
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
         {
-            // Creamos la ventana pasando la instancia global de '_app'
-            VentanaAdministrar modal = new VentanaAdministrar(_app)
+            // 1. Recuperar la contraseña correcta directamente desde la base de datos a través de '_app'
+            var (passwordCorrecta, _, _) = _app.Db.ObtenerConfiguracion();
+            Console.WriteLine($"Contraseña correcta: {passwordCorrecta}");
+
+            // 2. Instanciar la ventana de validación pasándole la contraseña
+            VentanaContrasena loginModal = new VentanaContrasena(passwordCorrecta)
             {
-                Owner = this // Mantiene la ventana por encima de la principal
+                Owner = this // Centra la ventana sobre la principal y bloquea el fondo
             };
 
-            // La abrimos como un cuadro de diálogo modal
-            modal.ShowDialog();
+            // 3. Abrir la ventana como diálogo modal y evaluar la respuesta
+            if (loginModal.ShowDialog() == true)
+            {
+                // Si la contraseña fue correcta (DialogResult = true), permitimos el paso:
+                VentanaAdministrar modal = new VentanaAdministrar(_app)
+                {
+                    Owner = this
+                };
+
+                modal.ShowDialog();
+            }
+            // Si cancela o falla, el flujo termina aquí sin levantar el panel de administración
         }
+
         private void ActualizarTablaEmpleados()
         {
             _app.CargarEmpleadosDesdeDb();
