@@ -105,5 +105,69 @@ namespace ControlAcceso.Services
             }
             return asistencias;
         }
+        public (string password, TimeSpan entrada, TimeSpan salida) ObtenerConfiguracion()
+        {
+            // Valores predeterminados de respaldo por si la tabla está vacía
+            string passDecodificada = "admin";
+            TimeSpan horaEntrada = new TimeSpan(8, 0, 0);
+            TimeSpan horaSalida = new TimeSpan(17, 0, 0);
+
+            using (var conn = new MySqlConnection(_connString))
+            {
+                conn.Open();
+                string query = "SELECT AdminPasword, HoraEntrada, HoraSalida FROM configuracion WHERE id = 1";
+
+                using (var cmd = new MySqlCommand(query, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        // 1. Extraer y decodificar la contraseña desde Base64
+                        if (!reader.IsDBNull(reader.GetOrdinal("AdminPasword")))
+                        {
+                            string passBase64 = reader.GetString("AdminPasword");
+                            byte[] bytes = Convert.FromBase64String(passBase64);
+                            passDecodificada = System.Text.Encoding.UTF8.GetString(bytes);
+                        }
+
+                        // 2. Extraer los objetos de tiempo directamente como estructuras TimeSpan
+                        horaEntrada = reader.GetTimeSpan(reader.GetOrdinal("HoraEntrada"));
+                        horaSalida = reader.GetTimeSpan(reader.GetOrdinal("HoraSalida"));
+                    }
+                }
+            }
+
+            return (passDecodificada, horaEntrada, horaSalida);
+
+
+        }
+        // UPDATE: Actualizar la configuración existente en la base de datos
+        public void GuardarConfiguracion(TimeSpan entrada, TimeSpan salida, string passwordPlana)
+        {
+            // 1. Codificar la contraseña de texto plano a Base64
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(passwordPlana);
+            string passBase64 = Convert.ToBase64String(bytes);
+
+            using (var conn = new MySqlConnection(_connString))
+            {
+                conn.Open();
+                string query = @"UPDATE configuracion
+                                 SET AdminPasword = @password,
+                                     HoraEntrada = @entrada,
+                                     HoraSalida = @salida
+                                 WHERE id = 1";
+
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    // 2. Mapear parámetros de manera fuertemente tipada
+                    cmd.Parameters.AddWithValue("@password", passBase64);
+                    cmd.Parameters.AddWithValue("@entrada", entrada);
+                    cmd.Parameters.AddWithValue("@salida", salida);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
     }
 }
