@@ -7,11 +7,13 @@ namespace ControlAcceso
     public partial class VentanaAdministrar : Window
     {
         private readonly MyApp _app;
+        private System.Threading.CancellationTokenSource? _cts;
 
         public VentanaAdministrar(MyApp app)
         {
             InitializeComponent();
             _app = app;
+
 
             InicializarSelectoresTiempo();
             CargarDatosReporte();
@@ -92,26 +94,110 @@ namespace ControlAcceso
 
             _app.Db.GuardarConfiguracion(tiempoEntrada, tiempoSalida, password);
 
-
             MessageBox.Show($"Configuración procesada con éxito.\nEntrada: {tiempoEntrada:hh\\:mm}\nSalida: {tiempoSalida:hh\\:mm}",
                             "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private async void BtnGuardarEmpleado_Click(object sender, RoutedEventArgs e)
+        {
+            string nombre = txtNombreEmpleado.Text.Trim();
+            string cedulaTexto = txtCedulaEmpleado.Text.Trim();
+
+            // 1. Validaciones de interfaz
+            if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(cedulaTexto))
+            {
+                MessageBox.Show("Por favor, rellene todos los campos del empleado.", "Campos Vacíos", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!int.TryParse(cedulaTexto, out int cedula))
+            {
+                MessageBox.Show("La identificación/cédula debe ser un número válido.", "Error de Formato", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 2. Preparar el token de cancelación y feedback visual en el botón
+            _cts?.Cancel();
+            _cts = new System.Threading.CancellationTokenSource();
+
+            btnGuardarEmpleado.IsEnabled = false;
+            btnGuardarEmpleado.Content = "Coloque el dedo en el lector...";
+
+            try
+            {
+                // 3. Usar tu HardwareService asíncrono pasándole el token
+                byte[]? rawData = await Services.HardwareService.CapturarHuellaAsync(_cts.Token);
+
+                if (rawData == null)
+                {
+                    MessageBox.Show("Operación de captura cancelada o fallida.", "Registro Interrumpido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // 4. Cambiar estado visual indicando el procesamiento
+                btnGuardarEmpleado.Content = "Procesando huella...";
+
+                // 5. Usar tu FingerprintService para generar el template
+                Services.FingerprintService fpService = new Services.FingerprintService();
+                SourceAFIS.FingerprintTemplate template = fpService.CrearTemplate(rawData);
+
+                // 6. Instanciar y persistir en base de datos
+                Empleado nuevoEmpleado = new Empleado(0, nombre, cedula, template);
+                _app.Db.AgregarEmpleado(nuevoEmpleado);
+                _app.CargarEmpleadosDesdeDb();
+
+                MessageBox.Show($"Empleado {nombre} registrado con éxito.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                _app.CargarEmpleadosDesdeDb();
+
+                // Limpiar campos
+                txtNombreEmpleado.Clear();
+                txtCedulaEmpleado.Clear();
+                CargarDatosReporte();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al registrar empleado: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Restablecer el botón pase lo que pase
+                btnGuardarEmpleado.IsEnabled = true;
+                btnGuardarEmpleado.Content = "Escanear Huella y Guardar";
+            }
         }
 
         private void BtnNavReporte_Click(object sender, RoutedEventArgs e)
         {
             panelReporte.Visibility = Visibility.Visible;
             panelConfiguracion.Visibility = Visibility.Collapsed;
+            panelRegistrar.Visibility = Visibility.Collapsed;
+
             btnNavReporte.FontWeight = FontWeights.Bold;
             btnNavConfig.FontWeight = FontWeights.Normal;
+            btnNavRegistrar.FontWeight = FontWeights.Normal;
             CargarDatosReporte();
+        }
+
+        private void BtnNavRegistrar_Click(object sender, RoutedEventArgs e)
+        {
+            panelReporte.Visibility = Visibility.Collapsed;
+            panelConfiguracion.Visibility = Visibility.Collapsed;
+            panelRegistrar.Visibility = Visibility.Visible;
+
+            btnNavReporte.FontWeight = FontWeights.Normal;
+            btnNavConfig.FontWeight = FontWeights.Normal;
+            btnNavRegistrar.FontWeight = FontWeights.Bold;
         }
 
         private void BtnNavConfig_Click(object sender, RoutedEventArgs e)
         {
             panelReporte.Visibility = Visibility.Collapsed;
             panelConfiguracion.Visibility = Visibility.Visible;
+            panelRegistrar.Visibility = Visibility.Collapsed;
+
             btnNavReporte.FontWeight = FontWeights.Normal;
             btnNavConfig.FontWeight = FontWeights.Bold;
+            btnNavRegistrar.FontWeight = FontWeights.Normal;
         }
 
         private void BtnVolver_Click(object sender, RoutedEventArgs e)

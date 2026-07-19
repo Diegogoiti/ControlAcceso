@@ -15,12 +15,14 @@
         </Grid.RowDefinitions>
 
         <!-- 1. BARRA DE NAVEGACIÓN -->
-        <UniformGrid Grid.Row="0" Columns="2" Margin="0,0,0,15">
+        <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,15">
             <Button x:Name="btnNavReporte" Content="Reporte General" Height="30" Click="BtnNavReporte_Click" FontWeight="Bold"/>
+            <Button x:Name="btnNavRegistrar" Content="Registrar Empleado" Height="30" Click="BtnNavRegistrar_Click"/>
             <Button x:Name="btnNavConfig" Content="Configuración" Height="30" Click="BtnNavConfig_Click"/>
         </UniformGrid>
 
         <!-- 2. CONTENIDO PRINCIPAL -->
+
         <!-- Panel 1: Reporte General -->
         <Grid x:Name="panelReporte" Grid.Row="1" Visibility="Visible">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -30,7 +32,40 @@
             </StackPanel>
         </Grid>
 
-        <!-- Panel 2: Configuración (Formulario Robusto) -->
+        <!-- Panel 2: Registrar Empleado -->
+        <Grid x:Name="panelRegistrar" Grid.Row="1" Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" MaxWidth="340">
+                <TextBlock Text="Registro de Nuevo Empleado" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Campo Nombre -->
+                    <Label Grid.Row="0" Grid.Column="0" Content="Nombre:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+                    <TextBox x:Name="txtNombreEmpleado" Grid.Row="0" Grid.Column="1" Margin="0,5,0,5" Height="26" VerticalContentAlignment="Center"/>
+
+                    <!-- Campo Identificación / Cédula -->
+                    <Label Grid.Row="1" Grid.Column="0" Content="Identificación:" VerticalAlignment="Center" Margin="0,5,5,5"/>
+                    <TextBox x:Name="txtCedulaEmpleado" Grid.Row="1" Grid.Column="1" Margin="0,5,0,5" Height="26" VerticalContentAlignment="Center"/>
+                </Grid>
+
+                <Button x:Name="btnGuardarEmpleado"
+                        Content="Escanear Huella y Guardar"
+                        Height="35"
+                        Margin="0,20,0,0"
+                        FontWeight="Bold"
+                        Click="BtnGuardarEmpleado_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Panel 3: Configuración -->
         <Grid x:Name="panelConfiguracion" Grid.Row="1" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" MaxWidth="340">
                 <TextBlock Text="Configuración del Sistema" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,15"/>

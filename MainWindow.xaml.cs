@@ -69,21 +69,24 @@ namespace ControlAcceso
             // 2. Instanciar la ventana de validación pasándole la contraseña
             VentanaContrasena loginModal = new VentanaContrasena(passwordCorrecta)
             {
-                Owner = this // Centra la ventana sobre la principal y bloquea el fondo
+                Owner = this
             };
 
             // 3. Abrir la ventana como diálogo modal y evaluar la respuesta
             if (loginModal.ShowDialog() == true)
             {
-                // Si la contraseña fue correcta (DialogResult = true), permitimos el paso:
+                // Si la contraseña fue correcta, permitimos el paso:
                 VentanaAdministrar modal = new VentanaAdministrar(_app)
                 {
                     Owner = this
                 };
 
+                // El código se detiene aquí hasta que cierren esta ventana
                 modal.ShowDialog();
+
+                // 4. AL SALIR: Actualizamos la tabla de la ventana principal automáticamente
+                ActualizarTablaEmpleados();
             }
-            // Si cancela o falla, el flujo termina aquí sin levantar el panel de administración
         }
 
         private void ActualizarTablaEmpleados()
