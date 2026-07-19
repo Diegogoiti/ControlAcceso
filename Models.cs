@@ -31,6 +31,7 @@ public class Asistencia
     {
         EmpleadoID = empleadoId;
         Timestamp = timestamp;
+        //1 = entrada, 0 = salida
         Tipo = tipo;
     }
 }

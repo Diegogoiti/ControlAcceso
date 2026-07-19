@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 
@@ -14,14 +15,12 @@ namespace ControlAcceso
             InitializeComponent();
             _app = app;
 
-
             InicializarSelectoresTiempo();
             CargarDatosReporte();
         }
 
         private void InicializarSelectoresTiempo()
         {
-            // 1. Poblamos los selectores de Horas (00 a 23)
             for (int h = 0; h < 24; h++)
             {
                 string itemHora = h.ToString("D2");
@@ -29,7 +28,6 @@ namespace ControlAcceso
                 cmbHoraSalida.Items.Add(itemHora);
             }
 
-            // 2. Poblamos los selectores de Minutos (00 a 59)
             for (int m = 0; m < 60; m++)
             {
                 string itemMinuto = m.ToString("D2");
@@ -41,12 +39,8 @@ namespace ControlAcceso
             AsignarValoresTiempo(horaEntrada, horaSalida);
         }
 
-        /// <summary>
-        /// Método encargado de mapear objetos TimeSpan de forma robusta hacia los ComboBox visuales.
-        /// </summary>
         private void AsignarValoresTiempo(TimeSpan entrada, TimeSpan salida)
         {
-            // El formato "hh" y "mm" extrae la hora y minuto con dos dígitos ("08", "05", etc.)
             cmbHoraEntrada.SelectedItem = entrada.ToString("hh");
             cmbMinutoEntrada.SelectedItem = entrada.ToString("mm");
 
@@ -56,14 +50,93 @@ namespace ControlAcceso
 
         private void CargarDatosReporte()
         {
-            if (_app.Empleados != null)
+            if (_app.Empleados == null || _app.HistorialAsistencias == null) return;
+
+            // 1. Obtener los horarios límites configurados en el sistema
+            var (_, horaEntradaConfig, horaSalidaConfig) = _app.Db.ObtenerConfiguracion();
+
+            // 2. Obtener las marcas del día actual
+            DateTime hoy = DateTime.Today;
+            var marcasHoy = _app.HistorialAsistencias
+                .Where(a => a.Timestamp.Date == hoy)
+                .ToList();
+
+            // 3. Generar el reporte con las nuevas columnas calculadas
+            dgvReporteDiario.ItemsSource = _app.Empleados.Select(emp =>
             {
-                lblTotalEmpleados.Text = $"Total Empleados Registrados: {_app.Empleados.Count}";
-            }
-            if (_app.HistorialAsistencias != null)
-            {
-                lblTotalAsistencias.Text = $"Asistencias Registradas: {_app.HistorialAsistencias.Count}";
-            }
+                // Buscar primera entrada (Tipo = 1) y primera salida (Tipo = 0)
+                var entrada = marcasHoy
+                    .Where(a => a.EmpleadoID == emp.id && a.Tipo == 1)
+                    .OrderBy(a => a.Timestamp)
+                    .FirstOrDefault();
+
+                var salida = marcasHoy
+                    .Where(a => a.EmpleadoID == emp.id && a.Tipo == 0)
+                    .OrderBy(a => a.Timestamp)
+                    .FirstOrDefault();
+
+                // Inicializar variables de texto
+                string retrasoEntradaStr = "0 min";
+                string tiempoExtraStr = "0 min";
+                string tiempoTrabajadoStr = "Incompleto";
+
+                // --- CÁLCULO DE RETRASO EN ENTRADA ---
+                if (entrada != null)
+                {
+                    TimeSpan tiempoEntradaReal = entrada.Timestamp.TimeOfDay;
+                    if (tiempoEntradaReal > horaEntradaConfig)
+                    {
+                        int minutosRetraso = (int)(tiempoEntradaReal - horaEntradaConfig).TotalMinutes;
+                        retrasoEntradaStr = $"{minutosRetraso} min";
+                    }
+                }
+                else
+                {
+                    retrasoEntradaStr = "No calculado";
+                }
+
+                // --- CÁLCULO DE TIEMPO EXTRA EN SALIDA ---
+                if (salida != null)
+                {
+                    TimeSpan tiempoSalidaReal = salida.Timestamp.TimeOfDay;
+                    if (tiempoSalidaReal > horaSalidaConfig)
+                    {
+                        int minutosExtra = (int)(tiempoSalidaReal - horaSalidaConfig).TotalMinutes;
+                        tiempoExtraStr = $"{minutosExtra} min";
+                    }
+                }
+                else
+                {
+                    tiempoExtraStr = "No calculado";
+                }
+
+                // --- CÁLCULO DE TIEMPO TOTAL TRABAJADO ---
+                if (entrada != null && salida != null)
+                {
+                    TimeSpan diferenciaTrabajada = salida.Timestamp - entrada.Timestamp;
+
+                    // Formato amigable: "Xh Ym" (Ej: 8h 15m) o "Ym" si es menos de una hora
+                    if (diferenciaTrabajada.TotalHours >= 1)
+                    {
+                        tiempoTrabajadoStr = $"{(int)diferenciaTrabajada.TotalHours}h {diferenciaTrabajada.Minutes}m";
+                    }
+                    else
+                    {
+                        tiempoTrabajadoStr = $"{diferenciaTrabajada.Minutes}m";
+                    }
+                }
+
+                return new
+                {
+                    Nombre = emp.Nombre,
+                    Cedula = emp.Cedula,
+                    HoraEntrada = entrada != null ? entrada.Timestamp.ToString("hh:mm tt") : "No calculado",
+                    HoraSalida = salida != null ? salida.Timestamp.ToString("hh:mm tt") : "No calculado",
+                    Retraso = retrasoEntradaStr,
+                    TiempoExtra = tiempoExtraStr,
+                    TiempoTrabajado = tiempoTrabajadoStr
+                };
+            }).ToList();
         }
 
         private void BtnGuardarConfig_Click(object sender, RoutedEventArgs e)
@@ -103,7 +176,6 @@ namespace ControlAcceso
             string nombre = txtNombreEmpleado.Text.Trim();
             string cedulaTexto = txtCedulaEmpleado.Text.Trim();
 
-            // 1. Validaciones de interfaz
             if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(cedulaTexto))
             {
                 MessageBox.Show("Por favor, rellene todos los campos del empleado.", "Campos Vacíos", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -116,7 +188,6 @@ namespace ControlAcceso
                 return;
             }
 
-            // 2. Preparar el token de cancelación y feedback visual en el botón
             _cts?.Cancel();
             _cts = new System.Threading.CancellationTokenSource();
 
@@ -125,7 +196,6 @@ namespace ControlAcceso
 
             try
             {
-                // 3. Usar tu HardwareService asíncrono pasándole el token
                 byte[]? rawData = await Services.HardwareService.CapturarHuellaAsync(_cts.Token);
 
                 if (rawData == null)
@@ -134,14 +204,11 @@ namespace ControlAcceso
                     return;
                 }
 
-                // 4. Cambiar estado visual indicando el procesamiento
                 btnGuardarEmpleado.Content = "Procesando huella...";
 
-                // 5. Usar tu FingerprintService para generar el template
                 Services.FingerprintService fpService = new Services.FingerprintService();
                 SourceAFIS.FingerprintTemplate template = fpService.CrearTemplate(rawData);
 
-                // 6. Instanciar y persistir en base de datos
                 Empleado nuevoEmpleado = new Empleado(0, nombre, cedula, template);
                 _app.Db.AgregarEmpleado(nuevoEmpleado);
                 _app.CargarEmpleadosDesdeDb();
@@ -149,7 +216,6 @@ namespace ControlAcceso
                 MessageBox.Show($"Empleado {nombre} registrado con éxito.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                 _app.CargarEmpleadosDesdeDb();
 
-                // Limpiar campos
                 txtNombreEmpleado.Clear();
                 txtCedulaEmpleado.Clear();
                 CargarDatosReporte();
@@ -160,7 +226,6 @@ namespace ControlAcceso
             }
             finally
             {
-                // Restablecer el botón pase lo que pase
                 btnGuardarEmpleado.IsEnabled = true;
                 btnGuardarEmpleado.Content = "Escanear Huella y Guardar";
             }
