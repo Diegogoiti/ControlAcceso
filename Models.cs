@@ -9,17 +9,17 @@ public class Empleado
     public string Nombre { get; set; }
     public int Cedula { get; set; }
     public FingerprintTemplate Huella { get; set; }
+    public bool Activo { get; set; } // <--- Agregado
 
-    // Constructor que obliga a pasar los datos
-    public Empleado(int id_empleado, string nombre, int cedula, FingerprintTemplate huella)
+    public Empleado(int id_empleado, string nombre, int cedula, FingerprintTemplate huella, bool activo = true)
     {
         id = id_empleado;
         Nombre = nombre;
         Cedula = cedula;
         Huella = huella;
+        Activo = activo; // <--- Agregado
     }
 }
-
 
 public class Asistencia
 {

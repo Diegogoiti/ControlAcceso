@@ -1,23 +1,22 @@
+using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 
-
-
 namespace ControlAcceso.Services
-
 {
     public class Database
     {
         private readonly string _connString = "Server=localhost;Database=acceso_db;Uid=root;Pwd=;";
 
-        // READ: Obtener todos los empleados
+        // READ: Obtener todos los empleados (Incluyendo el estado Activo)
         public List<Empleado> ObtenerEmpleados()
         {
             var empleados = new List<Empleado>();
             using (var conn = new MySqlConnection(_connString))
             {
                 conn.Open();
-                string query = "SELECT id, Nombre, Cedula, HuellaTemplate FROM Empleados";
+                // Agregamos la columna 'Activo' a la consulta SQL
+                string query = "SELECT id, Nombre, Cedula, HuellaTemplate, Activo FROM Empleados";
                 using (var cmd = new MySqlCommand(query, conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -27,7 +26,8 @@ namespace ControlAcceso.Services
                             reader.GetInt32("id"),
                             reader.GetString("Nombre"),
                             reader.GetInt32("Cedula"),
-                            FingerprintService.CargarDesdeBytes((byte[])reader["HuellaTemplate"])
+                            FingerprintService.CargarDesdeBytes((byte[])reader["HuellaTemplate"]),
+                            reader.GetBoolean("Activo") // El driver de MySQL convierte el TINYINT(1) a bool automáticamente
                         ));
                     }
                 }
@@ -35,24 +35,58 @@ namespace ControlAcceso.Services
             return empleados;
         }
 
-        // CREATE: Insertar un empleado (ajusta si tienes más campos)
+        // CREATE: Insertar un empleado (Guardando el estado activo por defecto)
         public void AgregarEmpleado(Empleado emp)
         {
             using (var conn = new MySqlConnection(_connString))
             {
                 conn.Open();
-                string query = "INSERT INTO Empleados (Nombre, Cedula, HuellaTemplate) VALUES (@nombre, @cedula, @huellaTemplate)";
+                // Añadimos 'Activo' en el INSERT para asegurar la consistencia del modelo
+                string query = "INSERT INTO Empleados (Nombre, Cedula, HuellaTemplate, Activo) VALUES (@nombre, @cedula, @huellaTemplate, @activo)";
                 using (var cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@nombre", emp.Nombre);
                     cmd.Parameters.AddWithValue("@cedula", emp.Cedula);
                     cmd.Parameters.AddWithValue("@huellaTemplate", emp.Huella.ToByteArray());
+                    cmd.Parameters.AddWithValue("@activo", emp.Activo); // Envía true/false mapeado a 1/0
                     cmd.ExecuteNonQuery();
                 }
             }
         }
 
-        // DELETE: Eliminar
+        // UPDATE: Alternar o cambiar el estado de activación de un empleado
+        public void CambiarEstadoEmpleado(int id, bool activo)
+        {
+            using (var conn = new MySqlConnection(_connString))
+            {
+                conn.Open();
+                string query = "UPDATE Empleados SET Activo = @activo WHERE id = @id";
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@activo", activo);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // UPDATE: Reemplazar o actualizar la huella digital de un empleado existente
+        public void ActualizarHuellaEmpleado(int id, byte[] nuevaHuellaBytes)
+        {
+            using (var conn = new MySqlConnection(_connString))
+            {
+                conn.Open();
+                string query = "UPDATE Empleados SET HuellaTemplate = @huellaTemplate WHERE id = @id";
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@huellaTemplate", nuevaHuellaBytes);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // DELETE: Eliminar físicamente de la base de datos
         public void EliminarEmpleado(int id)
         {
             using (var conn = new MySqlConnection(_connString))
@@ -67,6 +101,7 @@ namespace ControlAcceso.Services
             }
         }
 
+        // CREATE: Registrar marca de asistencia diaria
         public void RegistrarAsistencia(Asistencia asistencia)
         {
             using (var conn = new MySqlConnection(_connString))
@@ -76,19 +111,19 @@ namespace ControlAcceso.Services
                 using (var cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@empleadoId", asistencia.EmpleadoID);
-                    cmd.Parameters.AddWithValue("@tipo", asistencia.Tipo); // Se agrega el Tipo
+                    cmd.Parameters.AddWithValue("@tipo", asistencia.Tipo);
                     cmd.ExecuteNonQuery();
                 }
             }
         }
 
+        // READ: Obtener asistencias del día actual
         public List<Asistencia> ObtenerAsistencias()
         {
             var asistencias = new List<Asistencia>();
             using (var conn = new MySqlConnection(_connString))
             {
                 conn.Open();
-                // Filtramos para traer solo los registros donde la fecha sea HOY
                 string query = "SELECT EmpleadoID, Timestamp, Tipo FROM Asistencia WHERE DATE(Timestamp) = CURDATE() ORDER BY Timestamp DESC";
                 using (var cmd = new MySqlCommand(query, conn))
                 using (var reader = cmd.ExecuteReader())
@@ -105,9 +140,10 @@ namespace ControlAcceso.Services
             }
             return asistencias;
         }
+
+        // READ: Obtener parámetros de configuración global
         public (string password, TimeSpan entrada, TimeSpan salida) ObtenerConfiguracion()
         {
-            // Valores predeterminados de respaldo por si la tabla está vacía
             string passDecodificada = "admin";
             TimeSpan horaEntrada = new TimeSpan(8, 0, 0);
             TimeSpan horaSalida = new TimeSpan(17, 0, 0);
@@ -122,7 +158,6 @@ namespace ControlAcceso.Services
                 {
                     if (reader.Read())
                     {
-                        // 1. Extraer y decodificar la contraseña desde Base64
                         if (!reader.IsDBNull(reader.GetOrdinal("AdminPasword")))
                         {
                             string passBase64 = reader.GetString("AdminPasword");
@@ -130,7 +165,6 @@ namespace ControlAcceso.Services
                             passDecodificada = System.Text.Encoding.UTF8.GetString(bytes);
                         }
 
-                        // 2. Extraer los objetos de tiempo directamente como estructuras TimeSpan
                         horaEntrada = reader.GetTimeSpan(reader.GetOrdinal("HoraEntrada"));
                         horaSalida = reader.GetTimeSpan(reader.GetOrdinal("HoraSalida"));
                     }
@@ -138,13 +172,11 @@ namespace ControlAcceso.Services
             }
 
             return (passDecodificada, horaEntrada, horaSalida);
-
-
         }
-        // UPDATE: Actualizar la configuración existente en la base de datos
+
+        // UPDATE: Guardar los datos de configuración cifrados
         public void GuardarConfiguracion(TimeSpan entrada, TimeSpan salida, string passwordPlana)
         {
-            // 1. Codificar la contraseña de texto plano a Base64
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(passwordPlana);
             string passBase64 = Convert.ToBase64String(bytes);
 
@@ -159,7 +191,6 @@ namespace ControlAcceso.Services
 
                 using (var cmd = new MySqlCommand(query, conn))
                 {
-                    // 2. Mapear parámetros de manera fuertemente tipada
                     cmd.Parameters.AddWithValue("@password", passBase64);
                     cmd.Parameters.AddWithValue("@entrada", entrada);
                     cmd.Parameters.AddWithValue("@salida", salida);
@@ -168,6 +199,5 @@ namespace ControlAcceso.Services
                 }
             }
         }
-
     }
 }
