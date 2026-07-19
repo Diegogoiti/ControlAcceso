@@ -61,7 +61,22 @@ namespace ControlAcceso
                 .Where(a => a.Timestamp.Date == hoy)
                 .ToList();
 
-            // 3. Generar el reporte con las nuevas columnas calculadas
+            // Función auxiliar interna para formatear los TimeSpan de manera clara y compacta
+            string FormatearTiempo(TimeSpan tiempo)
+            {
+                if (tiempo.TotalMinutes <= 0) return "0m";
+
+                int horas = (int)tiempo.TotalHours;
+                int minutos = tiempo.Minutes;
+
+                if (horas > 0)
+                {
+                    return $"{horas}h {minutos}m";
+                }
+                return $"{minutos}m";
+            }
+
+            // 3. Generar el reporte con las columnas formateadas e incluyendo el ID
             dgvReporteDiario.ItemsSource = _app.Empleados.Select(emp =>
             {
                 // Buscar primera entrada (Tipo = 1) y primera salida (Tipo = 0)
@@ -75,9 +90,8 @@ namespace ControlAcceso
                     .OrderBy(a => a.Timestamp)
                     .FirstOrDefault();
 
-                // Inicializar variables de texto
-                string retrasoEntradaStr = "0 min";
-                string tiempoExtraStr = "0 min";
+                string retrasoEntradaStr = "0m";
+                string tiempoExtraStr = "0m";
                 string tiempoTrabajadoStr = "Incompleto";
 
                 // --- CÁLCULO DE RETRASO EN ENTRADA ---
@@ -86,8 +100,7 @@ namespace ControlAcceso
                     TimeSpan tiempoEntradaReal = entrada.Timestamp.TimeOfDay;
                     if (tiempoEntradaReal > horaEntradaConfig)
                     {
-                        int minutosRetraso = (int)(tiempoEntradaReal - horaEntradaConfig).TotalMinutes;
-                        retrasoEntradaStr = $"{minutosRetraso} min";
+                        retrasoEntradaStr = FormatearTiempo(tiempoEntradaReal - horaEntradaConfig);
                     }
                 }
                 else
@@ -101,8 +114,7 @@ namespace ControlAcceso
                     TimeSpan tiempoSalidaReal = salida.Timestamp.TimeOfDay;
                     if (tiempoSalidaReal > horaSalidaConfig)
                     {
-                        int minutosExtra = (int)(tiempoSalidaReal - horaSalidaConfig).TotalMinutes;
-                        tiempoExtraStr = $"{minutosExtra} min";
+                        tiempoExtraStr = FormatearTiempo(tiempoSalidaReal - horaSalidaConfig);
                     }
                 }
                 else
@@ -114,20 +126,12 @@ namespace ControlAcceso
                 if (entrada != null && salida != null)
                 {
                     TimeSpan diferenciaTrabajada = salida.Timestamp - entrada.Timestamp;
-
-                    // Formato amigable: "Xh Ym" (Ej: 8h 15m) o "Ym" si es menos de una hora
-                    if (diferenciaTrabajada.TotalHours >= 1)
-                    {
-                        tiempoTrabajadoStr = $"{(int)diferenciaTrabajada.TotalHours}h {diferenciaTrabajada.Minutes}m";
-                    }
-                    else
-                    {
-                        tiempoTrabajadoStr = $"{diferenciaTrabajada.Minutes}m";
-                    }
+                    tiempoTrabajadoStr = FormatearTiempo(diferenciaTrabajada);
                 }
 
                 return new
                 {
+                    Id = emp.id,
                     Nombre = emp.Nombre,
                     Cedula = emp.Cedula,
                     HoraEntrada = entrada != null ? entrada.Timestamp.ToString("hh:mm tt") : "No calculado",
