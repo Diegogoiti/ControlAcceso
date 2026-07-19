@@ -76,7 +76,7 @@ namespace ControlAcceso
                 return $"{minutos}m";
             }
 
-            // 3. Generar el reporte con las columnas formateadas e incluyendo el ID
+            // 3. Generar el reporte con las columnas formateadas e incluyendo el ID y la referencia del objeto
             dgvReporteDiario.ItemsSource = _app.Empleados.Select(emp =>
             {
                 // Buscar primera entrada (Tipo = 1) y primera salida (Tipo = 0)
@@ -131,6 +131,7 @@ namespace ControlAcceso
 
                 return new
                 {
+                    Datos = emp, // <--- Guardamos la referencia real del objeto Empleado[cite: 16]
                     Id = emp.id,
                     Nombre = emp.Nombre,
                     Cedula = emp.Cedula,
@@ -272,6 +273,27 @@ namespace ControlAcceso
         private void BtnVolver_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void DgvReporteDiario_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (dgvReporteDiario.SelectedItem != null)
+            {
+                dynamic filaSeleccionada = dgvReporteDiario.SelectedItem;
+                Empleado empReal = filaSeleccionada.Datos; // Extrae el objeto Empleado real[cite: 16]
+
+                // Abrir la ventana de opciones de gestión[cite: 16]
+                VentanaOpcionesEmpleado modalOpciones = new VentanaOpcionesEmpleado(_app, empReal)
+                {
+                    Owner = this
+                };
+
+                if (modalOpciones.ShowDialog() == true)
+                {
+                    // Si hubo confirmación de cambios, refrescamos la tabla[cite: 16]
+                    CargarDatosReporte();
+                }
+            }
         }
     }
 }

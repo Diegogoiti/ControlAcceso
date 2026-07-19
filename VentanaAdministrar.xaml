@@ -33,16 +33,17 @@
             <TextBlock Grid.Row="0" Text="Reporte de Asistencia Diaria" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
 
             <DataGrid Grid.Row="1"
-                      x:Name="dgvReporteDiario"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      SelectionMode="Single"
-                      HeadersVisibility="Column"
-                      GridLinesVisibility="All"
-                      VerticalGridLinesBrush="LightGray"
-                      HorizontalGridLinesBrush="LightGray"
-                      BorderThickness="1"
-                      BorderBrush="Gray">
+          x:Name="dgvReporteDiario"
+          AutoGenerateColumns="False"
+          IsReadOnly="True"
+          SelectionMode="Single"
+          HeadersVisibility="Column"
+          GridLinesVisibility="All"
+          MouseDoubleClick="DgvReporteDiario_MouseDoubleClick"
+          VerticalGridLinesBrush="LightGray"
+          HorizontalGridLinesBrush="LightGray"
+          BorderThickness="1"
+          BorderBrush="Gray">
                 <DataGrid.Columns>
     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
     <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>

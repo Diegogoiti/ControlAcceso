@@ -103,15 +103,14 @@ namespace ControlAcceso
         {
             DateTime hoy = DateTime.Today;
 
-            dgvEmpleados.ItemsSource = _app.Empleados.Select(emp =>
+            // Agregamos .Where(emp => emp.Activo) para ocultar empleados inactivos
+            dgvEmpleados.ItemsSource = _app.Empleados.Where(emp => emp.Activo).Select(emp =>
             {
-                // 1. Buscar la última marcación del empleado del día actual
                 var ultimaMarcaHoy = _app.HistorialAsistencias
                     .Where(a => a.EmpleadoID == emp.id && a.Timestamp.Date == hoy)
                     .OrderByDescending(a => a.Timestamp)
                     .FirstOrDefault();
 
-                // 2. Determinar el estado textual según el tipo de la última marca
                 string estadoCalculado = "Ausente";
                 if (ultimaMarcaHoy != null)
                 {
