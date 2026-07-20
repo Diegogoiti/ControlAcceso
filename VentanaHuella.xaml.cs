@@ -78,7 +78,7 @@ namespace ControlAcceso
                     // 4. Forzar la recarga del historial en la aplicación para que la siguiente lectura esté actualizada
                     _app.CargarHistorialAsistencias();
 
-                    lblMensaje.Text = $"{accionTexto} registrada con éxito. Empleado: {empleadoEncontrado.Nombre}.";
+                    lblMensaje.Text = $"{accionTexto} registrada con éxito.\nEmpleado: {empleadoEncontrado.Nombre}.";
                 }
                 else
                 {

@@ -15,20 +15,49 @@ namespace ControlAcceso.Services
             using (var conn = new MySqlConnection(_connString))
             {
                 conn.Open();
-                // Agregamos la columna 'Activo' a la consulta SQL
                 string query = "SELECT id, Nombre, Cedula, HuellaTemplate, Activo FROM Empleados";
                 using (var cmd = new MySqlCommand(query, conn))
                 using (var reader = cmd.ExecuteReader())
                 {
+                    int i = 0;
                     while (reader.Read())
                     {
-                        empleados.Add(new Empleado(
-                            reader.GetInt32("id"),
-                            reader.GetString("Nombre"),
-                            reader.GetInt32("Cedula"),
-                            FingerprintService.CargarDesdeBytes((byte[])reader["HuellaTemplate"]),
-                            reader.GetBoolean("Activo") // El driver de MySQL convierte el TINYINT(1) a bool automáticamente
-                        ));
+                        // Declaramos la ID fuera del try para que sea accesible en el bloque catch
+                        int idActual = -1;
+
+                        try
+                        {
+                            // 1. Extraemos los datos básicos
+                            idActual = reader.GetInt32("id");
+                            string nombre = reader.GetString("Nombre");
+                            int cedula = reader.GetInt32("Cedula");
+                            bool activo = reader.GetBoolean("Activo");
+
+                            // 2. Procesamos la huella de forma estricta
+                            SourceAFIS.FingerprintTemplate huella;
+
+                            if (reader["HuellaTemplate"] != DBNull.Value)
+                            {
+                                byte[] bytes = (byte[])reader["HuellaTemplate"];
+                                // Si esto truena por el CBOR, salta directo al catch
+                                huella = FingerprintService.CargarDesdeBytes(bytes);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Empleado [ID: {idActual}] no tiene datos en el campo HuellaTemplate (NULL).");
+                                continue;
+                            }
+                            i++;
+
+                            // 3. Si todo salió bien, lo guardamos en la lista
+                            empleados.Add(new Empleado(idActual, nombre, cedula, huella, activo));
+                        }
+                        catch (Exception ex)
+                        {
+                            // Ahora sí puedes ver exactamente cuál ID generó la excepción de Dahomey.Cbor
+                            Console.WriteLine($"[ERROR] Error al procesar la huella del Empleado [ID: {idActual}]. Detalles: {ex.Message}");
+                            continue;
+                        }
                     }
                 }
             }
