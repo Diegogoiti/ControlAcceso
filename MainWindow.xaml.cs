@@ -1,128 +1,85 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
-using System.Windows.Input;
+using ControlAcceso.Application;
+using ControlAcceso.DTOs;
 
 namespace ControlAcceso
 {
     public partial class MainWindow : Window
     {
-        private readonly MyApp _app = new MyApp();
+        private readonly MyApp _app;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _app.CargarEmpleadosDesdeDb();
-            _app.CargarHistorialAsistencias();
+            // Usamos la propiedad corregida de la instancia Singleton en App.xaml.cs
+            _app = App.AppInstance;
 
-            // Asignamos los datos usando la nueva lógica de estados
-            ActualizarOrigenDatosTabla();
-
-            btnMarcarAsistencia.Click += btnMarcarAsistencia_click;
+            // Cargar y mostrar los datos en la tabla directamente
+            ActualizarTablaEmpleados();
         }
 
-        private void dgvEmpleados_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// Consulta la base de datos a través de los servicios y mapea los datos a la tabla.
+        /// </summary>
+        private void ActualizarTablaEmpleados()
         {
-            // 1. Verificar si hay un elemento seleccionado
-            if (dgvEmpleados.SelectedItem != null)
+            try
             {
-                // 2. Asignar a una variable dynamic para leer las propiedades del tipo anónimo
-                dynamic filaSeleccionada = dgvEmpleados.SelectedItem;
-                Empleado emp = filaSeleccionada.Datos; // Extrae el objeto Empleado real
-
-                // 3. Solicitar contraseña del administrador
-                var (passwordCorrecta, _, _) = _app.Db.ObtenerConfiguracion();
-
-                VentanaContrasena loginModal = new VentanaContrasena(passwordCorrecta)
+                // 1. Consultar empleados activos directamente desde DatabaseService
+                var empleadosActivos = _app.DatabaseService.ObtenerEmpleados(new EmpleadoFilter
                 {
-                    Owner = this
-                };
+                    SoloActivos = true
+                });
 
-                // 4. Si la autenticación es correcta, abrir la ventana de marcación manual
-                if (loginModal.ShowDialog() == true)
+                // 2. Consultar asistencias a través de la Capa de Aplicación (MyApp)
+                var asistenciasHoy = _app.ObtenerAsistenciasDelDia();
+
+                // 3. Optimizar búsqueda: Agrupar por empleado para evitar escaneos O(N) dentro del Select
+                var ultimasMarcasPorEmpleado = asistenciasHoy
+                    .GroupBy(a => a.EmpleadoID)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.OrderByDescending(a => a.Timestamp).FirstOrDefault()
+                    );
+
+                // 4. Mapear al tipo anónimo para el DataGrid
+                dgvEmpleados.ItemsSource = empleadosActivos.Select(emp =>
                 {
-                    VentanaMarcacionManual marcacionModal = new VentanaMarcacionManual(_app, emp)
+                    ultimasMarcasPorEmpleado.TryGetValue(emp.Id, out var ultimaMarcaHoy);
+
+                    string estadoCalculado = ultimaMarcaHoy switch
                     {
-                        Owner = this
+                        null => "Ausente",
+                        { Tipo: 1 } => "Presente",
+                        _ => "Retirado"
                     };
 
-                    if (marcacionModal.ShowDialog() == true)
+                    return new
                     {
-                        // Actualizar la grilla de la ventana principal si se guardó el registro
-                        ActualizarTablaEmpleados();
-                    }
-                }
+                        Datos = emp,
+                        Estado = estadoCalculado
+                    };
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar datos en la tabla: {ex.Message}",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void btnMarcarAsistencia_click(object sender, RoutedEventArgs e)
+        // Manejadores de eventos deshabilitados o simplificados para no invocar otras UIs
+        private void dgvEmpleados_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            VentanaHuella modal = new VentanaHuella(_app, 0)
-            {
-                Owner = this
-            };
-            modal.ShowDialog();
-            ActualizarTablaEmpleados();
+            // Sin comportamiento hacia otras ventanas[cite: 13]
         }
 
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
         {
-            var (passwordCorrecta, _, _) = _app.Db.ObtenerConfiguracion();
-            Console.WriteLine($"Contraseña correcta: {passwordCorrecta}");
-
-            VentanaContrasena loginModal = new VentanaContrasena(passwordCorrecta)
-            {
-                Owner = this
-            };
-
-            if (loginModal.ShowDialog() == true)
-            {
-                VentanaAdministrar modal = new VentanaAdministrar(_app)
-                {
-                    Owner = this
-                };
-
-                modal.ShowDialog();
-                ActualizarTablaEmpleados();
-            }
-        }
-
-        private void ActualizarTablaEmpleados()
-        {
-            _app.CargarEmpleadosDesdeDb();
-            _app.CargarHistorialAsistencias();
-
-            ActualizarOrigenDatosTabla();
-        }
-
-        /// <summary>
-        /// Método auxiliar para evitar duplicar la lógica de proyección de LINQ
-        /// </summary>
-        private void ActualizarOrigenDatosTabla()
-        {
-            DateTime hoy = DateTime.Today;
-
-            // Agregamos .Where(emp => emp.Activo) para ocultar empleados inactivos
-            dgvEmpleados.ItemsSource = _app.Empleados.Where(emp => emp.Activo).Select(emp =>
-            {
-                var ultimaMarcaHoy = _app.HistorialAsistencias
-                    .Where(a => a.EmpleadoID == emp.id && a.Timestamp.Date == hoy)
-                    .OrderByDescending(a => a.Timestamp)
-                    .FirstOrDefault();
-
-                string estadoCalculado = "Ausente";
-                if (ultimaMarcaHoy != null)
-                {
-                    estadoCalculado = ultimaMarcaHoy.Tipo == 1 ? "Presente" : "Retirado";
-                }
-
-                return new
-                {
-                    Datos = emp,
-                    Estado = estadoCalculado
-                };
-            }).ToList();
+            // Sin comportamiento hacia otras ventanas[cite: 13]
         }
     }
 }

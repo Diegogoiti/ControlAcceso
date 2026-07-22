@@ -126,6 +126,11 @@ namespace ControlAcceso.Services
             return _dbAdapter.ObtenerAsistencias(filtro);
         }
 
+        public List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter filtro)
+        {
+            return _dbAdapter.ObtenerAsistencias(filtro);
+        }
+
         public (string password, TimeSpan entrada, TimeSpan salida) ObtenerConfiguracion()
         {
             return _dbAdapter.ObtenerConfiguracion();

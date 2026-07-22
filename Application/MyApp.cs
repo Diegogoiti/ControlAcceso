@@ -132,6 +132,17 @@ namespace ControlAcceso.Application
             return exito ? (true, "Empleado registrado correctamente con su biometría.") : (false, errorDb);
         }
 
+
+        public List<AsistenciaDto> ObtenerAsistenciasDelDia()
+        {
+            var hoy = DateTime.Today;
+            return DatabaseService.ObtenerAsistencias(new AsistenciaFilter
+            {
+                FechaInicio = hoy,
+                FechaFin = hoy
+            });
+        }
         #endregion
     }
+
 }
