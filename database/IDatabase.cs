@@ -11,7 +11,7 @@ namespace ControlAcceso.Database
 
         // CRUD Empleados
         void AgregarEmpleado(EmpleadoDto emp);
-        void ActualizarEmpleado(EmpleadoDto emp); // <-- NUEVO MÉTODO
+        void ActualizarEmpleado(EmpleadoDto emp);
         void CambiarEstadoEmpleado(int id, bool activo);
         void ActualizarHuellaEmpleado(int id, byte[] nuevaHuellaBytes);
         void EliminarEmpleado(int id);
@@ -22,5 +22,6 @@ namespace ControlAcceso.Database
         // Configuración
         (string password, TimeSpan entrada, TimeSpan salida) ObtenerConfiguracion();
         void GuardarConfiguracion(TimeSpan entrada, TimeSpan salida, string passwordPlana);
+        List<HuellaEmpleadoDto> ObtenerHuellasActivas();
     }
 }

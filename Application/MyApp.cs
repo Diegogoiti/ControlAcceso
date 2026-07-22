@@ -8,9 +8,11 @@ namespace ControlAcceso.Application
 {
     public class MyApp
     {
-        public DatabaseService DatabaseService { get; }
-        public BiometricService BiometricService { get; }
-        public CaptahuellasService CaptahuellasService { get; }
+        private DatabaseService DatabaseService { get; }
+        private BiometricService BiometricService { get; }
+        private CaptahuellasService CaptahuellasService { get; }
+
+        public IReadOnlyList<HuellaEmpleadoDto> HuellasCache { get; private set; }
 
         public MyApp(
             DatabaseService databaseService,
@@ -20,9 +22,11 @@ namespace ControlAcceso.Application
             DatabaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
             BiometricService = biometricService ?? throw new ArgumentNullException(nameof(biometricService));
             CaptahuellasService = captahuellasService ?? throw new ArgumentNullException(nameof(captahuellasService));
+
+            CargarHuellasActivas();
         }
 
-        #region --- Casos de Uso del Sistema ---
+
 
         /// <summary>
         /// Orquesta la captura biométrica desde el hardware, procesa los bytes crudos y busca coincidencias en 1:N.
@@ -142,7 +146,17 @@ namespace ControlAcceso.Application
                 FechaFin = hoy
             });
         }
-        #endregion
+
+        public List<HuellaEmpleadoDto> ObtenerHuellasActivas()
+        {
+            return DatabaseService.ObtenerHuellasActivas();
+        }
+
+        public void CargarHuellasActivas()
+        {
+            HuellasCache = DatabaseService.ObtenerHuellasActivas();
+
+        }
     }
 
 }

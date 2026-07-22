@@ -312,5 +312,36 @@ namespace ControlAcceso.Database
                 }
             }
         }
+
+        public List<HuellaEmpleadoDto> ObtenerHuellasActivas()
+        {
+            var huellas = new List<HuellaEmpleadoDto>();
+
+            using (var conn = new MySqlConnection(_connString))
+            {
+                conn.Open();
+
+                // Trae únicamente ID y Huella de los empleados activos que sí tengan huella registrada
+                string query = @"SELECT id, HuellaTemplate
+                                FROM Empleados
+                                WHERE Activo = 1
+                                  AND HuellaTemplate IS NOT NULL";
+
+                using (var cmd = new MySqlCommand(query, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        huellas.Add(new HuellaEmpleadoDto
+                        {
+                            EmpleadoId = reader.GetInt32("id"),
+                            TemplateHuella = (byte[])reader["HuellaTemplate"]
+                        });
+                    }
+                }
+            }
+
+            return huellas;
+        }
     }
 }
