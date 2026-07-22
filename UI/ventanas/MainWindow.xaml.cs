@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using ControlAcceso.Application;
-using ControlAcceso.DTOs;
 
 namespace ControlAcceso
 {
@@ -14,72 +12,75 @@ namespace ControlAcceso
         {
             InitializeComponent();
 
-            // Usamos la propiedad corregida de la instancia Singleton en App.xaml.cs
+            // Asignación mediante la instancia global Singleton
             _app = App.AppInstance;
 
-            // Cargar y mostrar los datos en la tabla directamente
+            // Refrescar y cargar la vista
             ActualizarTablaEmpleados();
         }
 
         /// <summary>
-        /// Consulta la base de datos a través de los servicios y mapea los datos a la tabla.
+        /// Consume directamente la proyección optimizada en la Capa de Aplicación.
         /// </summary>
         private void ActualizarTablaEmpleados()
         {
             try
             {
-                // 1. Consultar empleados activos directamente desde DatabaseService
-                var empleadosActivos = _app.DatabaseService.ObtenerEmpleados(new EmpleadoFilter
-                {
-                    SoloActivos = true
-                });
+                // Re-calcula y carga la caché expuesta por MyApp
+                _app.CargarEmpleadosViewCache();
 
-                // 2. Consultar asistencias a través de la Capa de Aplicación (MyApp)
-                var asistenciasHoy = _app.ObtenerAsistenciasDelDia();
-
-                // 3. Optimizar búsqueda: Agrupar por empleado para evitar escaneos O(N) dentro del Select
-                var ultimasMarcasPorEmpleado = asistenciasHoy
-                    .GroupBy(a => a.EmpleadoID)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.OrderByDescending(a => a.Timestamp).FirstOrDefault()
-                    );
-
-                // 4. Mapear al tipo anónimo para el DataGrid
-                dgvEmpleados.ItemsSource = empleadosActivos.Select(emp =>
-                {
-                    ultimasMarcasPorEmpleado.TryGetValue(emp.Id, out var ultimaMarcaHoy);
-
-                    string estadoCalculado = ultimaMarcaHoy switch
-                    {
-                        null => "Ausente",
-                        { Tipo: 1 } => "Presente",
-                        _ => "Retirado"
-                    };
-
-                    return new
-                    {
-                        Datos = emp,
-                        Estado = estadoCalculado
-                    };
-                }).ToList();
+                // Binding directo a la colección IReadOnlyList<EmpleadoViewDto>
+                dgvEmpleados.ItemsSource = null;
+                dgvEmpleados.ItemsSource = _app.EmpleadosViewCache;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar datos en la tabla: {ex.Message}",
-                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error al refrescar el monitoreo: {ex.Message}",
+                                "Error de Capa de Presentación", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // Manejadores de eventos deshabilitados o simplificados para no invocar otras UIs
+        /// <summary>
+        /// Ejecuta el caso de uso de marcado asistido por biometría.
+        /// </summary>
+        private async void btnMarcarAsistencia_Click(object sender, RoutedEventArgs e)
+        {
+            btnMarcarAsistencia.IsEnabled = false;
+
+            try
+            {
+                // Por defecto marcamos entrada (1) o lógica requerida por el caso de uso
+                var (exito, mensaje) = await _app.MarcarAsistenciaAsync(tipoAsistencia: 1);
+
+                if (exito)
+                {
+                    MessageBox.Show(mensaje, "Asistencia Registrada", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ActualizarTablaEmpleados();
+                }
+                else
+                {
+                    MessageBox.Show(mensaje, "Validación de Acceso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocurrió una falla durante el proceso: {ex.Message}",
+                                "Error de Sistema", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                btnMarcarAsistencia.IsEnabled = true;
+            }
+        }
+
         private void dgvEmpleados_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            // Sin comportamiento hacia otras ventanas[cite: 13]
+            // Sin comportamiento hacia otras ventanas
         }
 
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
         {
-            // Sin comportamiento hacia otras ventanas[cite: 13]
+            // Sin comportamiento hacia otras ventanas
         }
     }
 }

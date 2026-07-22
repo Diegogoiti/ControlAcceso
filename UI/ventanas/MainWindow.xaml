@@ -7,11 +7,8 @@
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <!-- Encabezado -->
             <RowDefinition Height="Auto"/>
-            <!-- Tabla Principal -->
             <RowDefinition Height="*"/>
-            <!-- Barra de Acciones / Botones -->
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -49,12 +46,10 @@
                       MouseDoubleClick="dgvEmpleados_MouseDoubleClick">
 
                 <DataGrid.Resources>
-                    <!-- Estilo para centrar celdas específicas -->
                     <Style x:Key="CenterElement" TargetType="TextBlock">
                         <Setter Property="HorizontalAlignment" Value="Center"/>
                         <Setter Property="VerticalAlignment" Value="Center"/>
                     </Style>
-                    <!-- Estilo general para texto en celdas -->
                     <Style x:Key="LeftElement" TargetType="TextBlock">
                         <Setter Property="VerticalAlignment" Value="Center"/>
                         <Setter Property="Margin" Value="10,0"/>
@@ -63,17 +58,17 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID"
-                                        Binding="{Binding Datos.Id}"
+                                        Binding="{Binding Id}"
                                         Width="70"
                                         ElementStyle="{StaticResource CenterElement}"/>
 
                     <DataGridTextColumn Header="Nombre Completo"
-                                        Binding="{Binding Datos.Nombre}"
+                                        Binding="{Binding Nombre}"
                                         Width="*"
                                         ElementStyle="{StaticResource LeftElement}"/>
 
                     <DataGridTextColumn Header="Cédula"
-                                        Binding="{Binding Datos.Cedula}"
+                                        Binding="{Binding Cedula}"
                                         Width="160"
                                         ElementStyle="{StaticResource CenterElement}"/>
 
@@ -89,6 +84,7 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button x:Name="btnMarcarAsistencia"
                     Content="📌 Registrar Asistencia"
+                    Click="btnMarcarAsistencia_Click"
                     Padding="16,10"
                     FontSize="14"
                     FontWeight="Bold"
