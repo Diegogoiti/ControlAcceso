@@ -24,18 +24,23 @@ namespace ControlAcceso
         {
             base.OnStartup(e);
 
-            // 1. Instanciar los adaptadores concretos de infraestructura
-            IDatabase databaseAdapter = new MySqlDatabaseAdapter();
-            IBiometricAdapter biometricAdapter = new SourceAFISAdapter();
-            ICaptahuellasService captahuellasAdapter = new FutronicCaptahuellasAdapter();
+            try
+                {
+                    IDatabase databaseAdapter = new MySqlDatabaseAdapter();
+                    IBiometricAdapter biometricAdapter = new SourceAFISAdapter();
+                    ICaptahuellasService captahuellasAdapter = new FutronicCaptahuellasAdapter();
 
-            // 2. Instanciar los servicios de la capa de aplicación wrapped sobre las interfaces
-            var databaseService = new DatabaseService(databaseAdapter);
-            var biometricService = new BiometricService(biometricAdapter);
-            var captahuellasService = new CaptahuellasService(captahuellasAdapter);
+                    var databaseService = new DatabaseService(databaseAdapter);
+                    var biometricService = new BiometricService(biometricAdapter);
+                    var captahuellasService = new CaptahuellasService(captahuellasAdapter);
 
-            // 3. Inicializar el orquestador global (Singleton)
-            AppInstance = new MyApp(databaseService, biometricService, captahuellasService);
+                    AppInstance = new MyApp(databaseService, biometricService, captahuellasService);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Falla crítica al inicializar la aplicación:\n{ex.Message}",
+                                    "Error Fatal", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
         }
     }
 }

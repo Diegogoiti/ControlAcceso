@@ -34,7 +34,24 @@ namespace ControlAcceso.Application
 
         public void CargarHuellasActivas()
         {
-            HuellasCache = DatabaseService.ObtenerHuellasActivas();
+            try
+            {
+                HuellasCache = DatabaseService.ObtenerHuellasActivas();
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Error de conexión a la Base de Datos:\n{ex.Message}\n\nVerifica que el servicio MySQL esté activo.",
+                    "Error de Conexión", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                HuellasCache = new List<HuellaEmpleadoDto>();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Ocurrió un error inesperado al cargar huellas:\n{ex.Message}",
+                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                HuellasCache = new List<HuellaEmpleadoDto>();
+            }
         }
 
         /// <summary>
@@ -42,49 +59,63 @@ namespace ControlAcceso.Application
         /// </summary>
         public void CargarEmpleadosViewCache()
         {
-            var hoy = DateTime.Today;
-
-            // 1. Obtenemos los datos frescos directamente para el cálculo local
-            var empleadosActivos = DatabaseService.ObtenerEmpleados(new EmpleadoFilter { SoloActivos = true });
-            var asistenciasHoy = DatabaseService.ObtenerAsistencias(new AsistenciaFilter
+            try
             {
-                FechaInicio = hoy,
-                FechaFin = hoy
-            });
+                var hoy = DateTime.Today;
 
-            // 2. Extraemos la última marca del día por cada empleado
-            var ultimasMarcasHoy = asistenciasHoy
-                .GroupBy(a => a.EmpleadoID)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.OrderByDescending(a => a.Timestamp).FirstOrDefault()
-                );
+                var empleadosActivos = DatabaseService.ObtenerEmpleados(new EmpleadoFilter { SoloActivos = true });
+                var asistenciasHoy = DatabaseService.ObtenerAsistencias(new AsistenciaFilter
+                {
+                    FechaInicio = hoy,
+                    FechaFin = hoy
+                });
 
-            // 3. Mapeamos hacia el DTO de la vista
-            EmpleadosViewCache = empleadosActivos.Select(emp =>
+                var ultimasMarcasHoy = asistenciasHoy
+                    .GroupBy(a => a.EmpleadoID)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.OrderByDescending(a => a.Timestamp).FirstOrDefault()
+                    );
+
+                EmpleadosViewCache = empleadosActivos.Select(emp =>
+                {
+                    ultimasMarcasHoy.TryGetValue(emp.Id, out var ultimaMarca);
+
+                    string estadoCalculado = ultimaMarca switch
+                    {
+                        { Tipo: 1 } => "Presente",
+                        { Tipo: 2 } => "Retirado",
+                        _ => "Inasistente"
+                    };
+
+                    return new EmpleadoViewDto
+                    {
+                        Id = emp.Id,
+                        Nombre = emp.Nombre,
+                        Cedula = emp.Cedula.ToString(),
+                        Estado = estadoCalculado,
+                        HoraEntrada = "No calculado",
+                        HoraSalida = "No calculado",
+                        Retraso = "No calculado",
+                        TiempoExtra = "No calculado",
+                        TotalLaborado = "Incompleto"
+                    };
+                }).ToList();
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
             {
-                ultimasMarcasHoy.TryGetValue(emp.Id, out var ultimaMarca);
-
-                string estadoCalculado = ultimaMarca switch
-                {
-                    { Tipo: 1 } => "Presente", // 1 = Entrada
-                    { Tipo: 2 } => "Retirado", // 2 = Salida
-                    _ => "Inasistente"
-                };
-
-                return new EmpleadoViewDto
-                {
-                    Id = emp.Id,
-                    Nombre = emp.Nombre,
-                    Cedula = emp.Cedula.ToString(),
-                    Estado = estadoCalculado,
-                    HoraEntrada = "No calculado",
-                    HoraSalida = "No calculado",
-                    Retraso = "No calculado",
-                    TiempoExtra = "No calculado",
-                    TotalLaborado = "Incompleto"
-                };
-            }).ToList();
+                System.Windows.MessageBox.Show(
+                    $"Error de conexión a la Base de Datos:\n{ex.Message}\n\nVerifica que MySQL esté corriendo.",
+                    "Error de Conexión", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                EmpleadosViewCache = new List<EmpleadoViewDto>();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Ocurrió un error inesperado al cargar la vista de empleados:\n{ex.Message}",
+                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                EmpleadosViewCache = new List<EmpleadoViewDto>();
+            }
         }
 
         #endregion
