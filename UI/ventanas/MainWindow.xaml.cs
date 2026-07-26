@@ -46,7 +46,7 @@ namespace ControlAcceso
         private void ActualizarHoraUI()
         {
             var ahora = DateTime.Now;
-            lblHora.Text = ahora.ToString("HH:mm:ss");
+            lblHora.Text = ahora.ToString("hh:mm:ss tt");
             lblFecha.Text = ahora.ToString("dddd, d 'de' MMMM 'de' yyyy");
         }
 
@@ -55,10 +55,12 @@ namespace ControlAcceso
             if (esperando)
             {
                 panelReloj.Visibility = Visibility.Collapsed;
+                PanelFallo.Visibility = Visibility.Collapsed;
+                PanelExito.Visibility = Visibility.Collapsed;
                 panelCaptahuellas.Visibility = Visibility.Visible;
                 btnMarcarEntrada.IsEnabled = false;
                 btnAdministrar.IsEnabled = false;
-                _contadorPuntos = 0;
+                _contadorPuntos = 2;
                 _animacionTimer.Start();
             }
             else
@@ -100,6 +102,40 @@ namespace ControlAcceso
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
         {
             _controller?.AbrirRegistroEmpleado();
+        }
+
+        public void MostrarResultadoMarcaje(bool exito, string mensaje, string nombreEmpleado, DateTime hora)
+        {
+            if (true)
+            {
+                TxtNombreEmpleado.Text = $"¡Bienvenido/a, Diego!";
+                TxtHoraEntrada.Text = $"Hora: {hora:hh:mm:ss tt}";
+                panelReloj.Visibility = Visibility.Collapsed;
+                PanelExito.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // En caso de fallo, muestras el mensaje ("Intenta de nuevo o llama a tu supervisor")
+                TxtMensajeError.Text = mensaje;
+                panelReloj.Visibility = Visibility.Collapsed;
+                PanelFallo.Visibility = Visibility.Visible;
+            }
+
+            ReiniciarVistaTemporal();
+        }
+
+        private void ReiniciarVistaTemporal()
+        {
+            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                PanelExito.Visibility = Visibility.Collapsed;
+                PanelFallo.Visibility = Visibility.Collapsed;
+                panelCaptahuellas.Visibility = Visibility.Collapsed;
+                panelReloj.Visibility = Visibility.Visible;
+            };
+            timer.Start();
         }
     }
 }

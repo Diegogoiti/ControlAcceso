@@ -38,10 +38,13 @@ namespace ControlAcceso.UI.controladores
 
             try
             {
-                var (exito, mensaje) = await _app.MarcarAsistenciaAsync(tipoAsistencia, _ctsCaptura.Token);
+                // Desempaquetamos los 4 valores retornados por tu nuevo método en MyApp
+                var (exito, mensaje, nombreEmpleado, hora) = await _app.MarcarAsistenciaAsync(tipoAsistencia, _ctsCaptura.Token);
 
                 _vista.ModoEsperaHuella(false);
-                _vista.MostrarMensaje(mensaje, exito);
+
+                // Le pasamos los datos a la Vista para que ella maneje los paneles, textos y el temporizador
+                _vista.MostrarResultadoMarcaje(exito, mensaje, nombreEmpleado, hora);
 
                 if (exito)
                 {

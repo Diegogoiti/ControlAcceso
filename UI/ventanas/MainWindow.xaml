@@ -87,6 +87,34 @@
                 </Button>
             </StackPanel>
 
+            <StackPanel x:Name="PanelExito" Visibility="Collapsed">
+        <TextBlock x:Name="TxtNombreEmpleado"
+                   FontSize="26"
+                   FontWeight="Bold"
+                   Foreground="#2E7D32"
+                   HorizontalAlignment="Center"/>
+        <TextBlock x:Name="TxtHoraEntrada"
+                   FontSize="20"
+                   Foreground="#4A4A4A"
+                   Margin="0,10,0,0"
+                   HorizontalAlignment="Center"/>
+    </StackPanel>
+
+    <!-- 3. PANEL DE FALLO (Se activa si la huella no se reconoce) -->
+    <StackPanel x:Name="PanelFallo" Visibility="Collapsed">
+        <TextBlock Text="Huella no reconocida"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Foreground="#C62828"
+                   HorizontalAlignment="Center"/>
+        <TextBlock x:Name="TxtMensajeError"
+                   Text="Intenta de nuevo o llama a tu supervisor"
+                   FontSize="16"
+                   Foreground="#555555"
+                   Margin="0,10,0,0"
+                   HorizontalAlignment="Center"/>
+    </StackPanel>
+
         </Grid>
 
         <!-- ACCESO A ADMINISTRACIÓN -->

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using ControlAcceso.DTOs;
 using ControlAcceso.Services;
 
+public record ResultadoMarcaje(bool Exito, string Nombre, DateTime? Hora, string Mensaje);
+
 namespace ControlAcceso.Application
 {
     public class MyApp
@@ -154,25 +156,31 @@ namespace ControlAcceso.Application
             return (true, empleado, "Empleado identificado con éxito.");
         }
 
-        public async Task<(bool Exito, string Mensaje)> MarcarAsistenciaAsync(int tipoAsistencia, CancellationToken cancellationToken = default)
+        public async Task<(bool Exito, string Mensaje, string NombreEmpleado, DateTime Hora)> MarcarAsistenciaAsync(int tipoAsistencia, CancellationToken cancellationToken = default)
         {
             var resultado = await IdentificarEmpleadoPorHuellaAsync(cancellationToken);
 
+            // 1. Fallo en la lectura/identificación biométrica
             if (!resultado.Exito || resultado.EmpleadoEncontrado == null)
             {
-                return (false, resultado.Mensaje);
+                return (false, "Intenta de nuevo o llama a tu supervisor", string.Empty, DateTime.Now);
             }
 
+            // 2. Intento de registro en la base de datos
             bool guardado = DatabaseService.RegistrarAsistencia(resultado.EmpleadoEncontrado.Id, tipoAsistencia);
             if (!guardado)
             {
-                return (false, "Error al registrar el marcado de asistencia en la base de datos.");
+                return (false, "Error al registrar el marcado de asistencia en la base de datos.", string.Empty, DateTime.Now);
             }
 
             CargarEmpleadosViewCache();
 
+            // 3. Éxito: retornamos la hora exacta y el nombre limpio para la vista
+            DateTime horaActual = DateTime.Now;
             string tipoTexto = tipoAsistencia == 1 ? "Entrada" : "Salida";
-            return (true, $"¡Marcado de {tipoTexto} exitoso! Bienvenido/a, {resultado.EmpleadoEncontrado.Nombre}.");
+            string mensajeExito = $"¡Marcado de {tipoTexto} exitoso!";
+
+            return (true, mensajeExito, resultado.EmpleadoEncontrado.Nombre, horaActual);
         }
 
         #endregion
