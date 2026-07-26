@@ -106,9 +106,9 @@ namespace ControlAcceso
 
         public void MostrarResultadoMarcaje(bool exito, string mensaje, string nombreEmpleado, DateTime hora)
         {
-            if (true)
+            if (exito)
             {
-                TxtNombreEmpleado.Text = $"¡Bienvenido/a, Diego!";
+                TxtNombreEmpleado.Text = $"¡Bienvenido/a, {nombreEmpleado}!";
                 TxtHoraEntrada.Text = $"Hora: {hora:hh:mm:ss tt}";
                 panelReloj.Visibility = Visibility.Collapsed;
                 PanelExito.Visibility = Visibility.Visible;
