@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Input;
+using System.Windows.Threading;
 using ControlAcceso.DTOs;
 using ControlAcceso.UI.controladores;
 
@@ -10,10 +10,21 @@ namespace ControlAcceso
     public partial class MainWindow : Window
     {
         private readonly MainController? _controller;
+        private readonly DispatcherTimer _relojTimer;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            // Sincronización continua a 200 ms para acoplarse al instante al cambio de segundo de Windows
+            _relojTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(200)
+            };
+            _relojTimer.Tick += RelojTimer_Tick;
+            _relojTimer.Start();
+
+            ActualizarHoraUI();
         }
 
         public MainWindow(MainController controller) : this()
@@ -21,14 +32,26 @@ namespace ControlAcceso
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
         }
 
+        private void RelojTimer_Tick(object? sender, EventArgs e)
+        {
+            ActualizarHoraUI();
+        }
+
+        private void ActualizarHoraUI()
+        {
+            var ahora = DateTime.Now;
+            lblHora.Text = ahora.ToString("HH:mm:ss");
+            lblFecha.Text = ahora.ToString("dddd, d 'de' MMMM 'de' yyyy");
+        }
+
         public void MostrarEmpleados(IEnumerable<EmpleadoViewDto> empleados)
         {
-            dgvEmpleados.ItemsSource = empleados;
+            // Método mantenido para evitar romper la interfaz con MainController
         }
 
         public void SetEstadoCargando(bool cargando)
         {
-            btnMarcarAsistencia.IsEnabled = !cargando;
+            btnMarcarEntrada.IsEnabled = !cargando;
             btnAdministrar.IsEnabled = !cargando;
         }
 
@@ -39,10 +62,11 @@ namespace ControlAcceso
             MessageBox.Show(mensaje, titulo, MessageBoxButton.OK, icono);
         }
 
-        private async void btnMarcarAsistencia_Click(object sender, RoutedEventArgs e)
+        private async void btnMarcarEntrada_Click(object sender, RoutedEventArgs e)
         {
             if (_controller != null)
             {
+                // Envía tipoAsistencia = 1 (Entrada)
                 await _controller.ProcesarMarcajeAsistenciaAsync(tipoAsistencia: 1);
             }
         }
@@ -50,11 +74,6 @@ namespace ControlAcceso
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
         {
             _controller?.AbrirRegistroEmpleado();
-        }
-
-        private void dgvEmpleados_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            // Evento para acciones al hacer doble clic sobre un registro
         }
     }
 }
