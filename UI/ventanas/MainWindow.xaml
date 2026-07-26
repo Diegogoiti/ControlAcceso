@@ -7,11 +7,8 @@
 
     <Grid Margin="30">
         <Grid.RowDefinitions>
-            <!-- Botón de Marcar Entrada arriba -->
             <RowDefinition Height="Auto"/>
-            <!-- Hora centrada en medio -->
             <RowDefinition Height="*"/>
-            <!-- Botón opcional de Administración abajo -->
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -34,25 +31,63 @@
             </Button.Resources>
         </Button>
 
-        <!-- RELOJ CENTRADO EN MEDIO -->
-        <StackPanel Grid.Row="1"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Center">
+        <!-- PANEL CENTRAL: RELOJ O MENSAJE SENSOR -->
+        <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
 
-            <TextBlock x:Name="lblHora"
-                       Text="00:00:00"
-                       FontSize="72"
-                       FontWeight="Bold"
-                       Foreground="#1E293B"
-                       HorizontalAlignment="Center"/>
+            <!-- CONTENEDOR DEL RELOJ -->
+            <StackPanel x:Name="panelReloj"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Visibility="Visible">
+                <TextBlock x:Name="lblHora"
+                           Text="00:00:00"
+                           FontSize="72"
+                           FontWeight="Bold"
+                           Foreground="#1E293B"
+                           HorizontalAlignment="Center"/>
 
-            <TextBlock x:Name="lblFecha"
-                       Text="Cargando fecha..."
-                       FontSize="20"
-                       Foreground="#64748B"
-                       HorizontalAlignment="Center"
-                       Margin="0,10,0,0"/>
-        </StackPanel>
+                <TextBlock x:Name="lblFecha"
+                           Text="Cargando fecha..."
+                           FontSize="20"
+                           Foreground="#64748B"
+                           HorizontalAlignment="Center"
+                           Margin="0,10,0,0"/>
+            </StackPanel>
+
+            <!-- CONTENEDOR DEL CAPTAHUELLAS (MENSAJE DINÁMICO) -->
+            <StackPanel x:Name="panelCaptahuellas"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Visibility="Collapsed">
+
+                <TextBlock x:Name="lblMensajeSensor"
+                           Text=""
+                           FontSize="32"
+                           FontWeight="SemiBold"
+                           Foreground="#2563EB"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"/>
+
+                <Button x:Name="btnCancelarCaptura"
+                        Content="Cancelar Marcaje"
+                        Click="btnCancelarCaptura_Click"
+                        Margin="0,25,0,0"
+                        Padding="20,10"
+                        FontSize="16"
+                        FontWeight="SemiBold"
+                        Foreground="#DC2626"
+                        Background="#FEE2E2"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </StackPanel>
+
+        </Grid>
 
         <!-- ACCESO A ADMINISTRACIÓN -->
         <Button x:Name="btnAdministrar"

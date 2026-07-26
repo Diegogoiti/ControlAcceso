@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ControlAcceso.DTOs;
 using ControlAcceso.Services;
@@ -54,9 +55,6 @@ namespace ControlAcceso.Application
             }
         }
 
-        /// <summary>
-        /// Consulta empleados y marcas del día a la BD para calcular la proyección que consume la interfaz.
-        /// </summary>
         public void CargarEmpleadosViewCache()
         {
             try
@@ -122,9 +120,9 @@ namespace ControlAcceso.Application
 
         #region --- Casos de Uso del Sistema ---
 
-        public async Task<(bool Exito, EmpleadoDto? EmpleadoEncontrado, string Mensaje)> IdentificarEmpleadoPorHuellaAsync()
+        public async Task<(bool Exito, EmpleadoDto? EmpleadoEncontrado, string Mensaje)> IdentificarEmpleadoPorHuellaAsync(CancellationToken cancellationToken = default)
         {
-            byte[]? rawImage = await CaptahuellasService.IniciarCapturaAsync();
+            byte[]? rawImage = await CaptahuellasService.IniciarCapturaAsync(cancellationToken);
             if (rawImage == null || rawImage.Length == 0)
             {
                 return (false, null, "No se logró capturar la imagen del sensor o la operación fue cancelada.");
@@ -156,9 +154,9 @@ namespace ControlAcceso.Application
             return (true, empleado, "Empleado identificado con éxito.");
         }
 
-        public async Task<(bool Exito, string Mensaje)> MarcarAsistenciaAsync(int tipoAsistencia)
+        public async Task<(bool Exito, string Mensaje)> MarcarAsistenciaAsync(int tipoAsistencia, CancellationToken cancellationToken = default)
         {
-            var resultado = await IdentificarEmpleadoPorHuellaAsync();
+            var resultado = await IdentificarEmpleadoPorHuellaAsync(cancellationToken);
 
             if (!resultado.Exito || resultado.EmpleadoEncontrado == null)
             {
@@ -171,55 +169,10 @@ namespace ControlAcceso.Application
                 return (false, "Error al registrar el marcado de asistencia en la base de datos.");
             }
 
-            // Recalculamos la vista tras insertar el nuevo registro en la BD
             CargarEmpleadosViewCache();
 
             string tipoTexto = tipoAsistencia == 1 ? "Entrada" : "Salida";
             return (true, $"¡Marcado de {tipoTexto} exitoso! Bienvenido/a, {resultado.EmpleadoEncontrado.Nombre}.");
-        }
-
-        public async Task<(bool Exito, string Mensaje)> RegistrarNuevoEmpleadoConHuellaAsync(string nombre, int cedula)
-        {
-            if (string.IsNullOrWhiteSpace(nombre))
-                return (false, "El nombre no puede estar vacío.");
-
-            if (cedula <= 0)
-                return (false, "La cédula no es válida.");
-
-            byte[]? rawImage = await CaptahuellasService.IniciarCapturaAsync();
-            if (rawImage == null)
-            {
-                return (false, "Lectura de huella cancelada o fallida.");
-            }
-
-            if (!BiometricService.ProcesarHuellaBruta(rawImage, out byte[]? templateGenerado, out string msgError))
-            {
-                return (false, msgError);
-            }
-
-            var todosLosEmpleados = DatabaseService.ObtenerEmpleados();
-            if (BiometricService.ExisteHuellaDuplicada(templateGenerado!, todosLosEmpleados, out string nombreDuplicado))
-            {
-                return (false, $"Esta huella ya pertenece al empleado registrado: {nombreDuplicado}.");
-            }
-
-            var nuevoEmpleado = new EmpleadoDto
-            {
-                Nombre = nombre,
-                Cedula = cedula,
-                HuellaBytes = templateGenerado,
-                Activo = true
-            };
-
-            bool exito = DatabaseService.RegistrarEmpleado(nuevoEmpleado, out string errorDb);
-
-            if (exito)
-            {
-                CargarHuellasActivas();
-                CargarEmpleadosViewCache();
-            }
-
-            return exito ? (true, "Empleado registrado correctamente con su biometría.") : (false, errorDb);
         }
 
         #endregion

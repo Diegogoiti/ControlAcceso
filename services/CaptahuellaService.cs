@@ -8,49 +8,25 @@ namespace ControlAcceso.Services;
 public class CaptahuellasService
 {
     private readonly ICaptahuellasService _captahuellasAdapter;
-    private CancellationTokenSource? _cts;
 
-    // Inyectamos el contrato del hardware por constructor
     public CaptahuellasService(ICaptahuellasService captahuellasAdapter)
     {
-        _captahuellasAdapter = captahuellasAdapter;
+        _captahuellasAdapter = captahuellasAdapter ?? throw new ArgumentNullException(nameof(captahuellasAdapter));
     }
 
     /// <summary>
-    /// Inicia la captura de la huella llamando al adaptador de hardware.
+    /// Inicia la captura de la huella delegando el token recibido directamente al adaptador.
     /// </summary>
-    public async Task<byte[]?> IniciarCapturaAsync()
+    public async Task<byte[]?> IniciarCapturaAsync(CancellationToken cancellationToken = default)
     {
-        // Cancelamos cualquier lectura previa activa por seguridad
-        CancelarCaptura();
-
-        _cts = new CancellationTokenSource();
-
         try
         {
-            // Llama a la implementación que encapsula el bucle y la DLL
-            return await _captahuellasAdapter.CapturarHuellaAsync(_cts.Token);
+            return await _captahuellasAdapter.CapturarHuellaAsync(cancellationToken);
         }
         catch (OperationCanceledException)
         {
-            // Se canceló la lectura intencionalmente
+            // Retorna null de manera limpia si la lectura fue cancelada
             return null;
-        }
-        finally
-        {
-            _cts?.Dispose();
-            _cts = null;
-        }
-    }
-
-    /// <summary>
-    /// Permite a la UI cancelar la lectura si el usuario cierra la ventana o presiona "Cancelar".
-    /// </summary>
-    public void CancelarCaptura()
-    {
-        if (_cts != null && !_cts.IsCancellationRequested)
-        {
-            _cts.Cancel();
         }
     }
 }

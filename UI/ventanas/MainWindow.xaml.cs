@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Threading;
-using ControlAcceso.DTOs;
 using ControlAcceso.UI.controladores;
 
 namespace ControlAcceso
@@ -11,18 +9,19 @@ namespace ControlAcceso
     {
         private readonly MainController? _controller;
         private readonly DispatcherTimer _relojTimer;
+        private readonly DispatcherTimer _animacionTimer;
+        private int _contadorPuntos = 0;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Sincronización continua a 200 ms para acoplarse al instante al cambio de segundo de Windows
-            _relojTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(200)
-            };
+            _relojTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
             _relojTimer.Tick += RelojTimer_Tick;
             _relojTimer.Start();
+
+            _animacionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+            _animacionTimer.Tick += AnimacionTimer_Tick;
 
             ActualizarHoraUI();
         }
@@ -37,6 +36,13 @@ namespace ControlAcceso
             ActualizarHoraUI();
         }
 
+        private void AnimacionTimer_Tick(object? sender, EventArgs e)
+        {
+            _contadorPuntos = (_contadorPuntos + 1) % 4;
+            string puntos = new string('.', _contadorPuntos);
+            lblMensajeSensor.Text = $"Coloque su dedo en el sensor\n{puntos}";
+        }
+
         private void ActualizarHoraUI()
         {
             var ahora = DateTime.Now;
@@ -44,9 +50,25 @@ namespace ControlAcceso
             lblFecha.Text = ahora.ToString("dddd, d 'de' MMMM 'de' yyyy");
         }
 
-        public void MostrarEmpleados(IEnumerable<EmpleadoViewDto> empleados)
+        public void ModoEsperaHuella(bool esperando)
         {
-            // Método mantenido para evitar romper la interfaz con MainController
+            if (esperando)
+            {
+                panelReloj.Visibility = Visibility.Collapsed;
+                panelCaptahuellas.Visibility = Visibility.Visible;
+                btnMarcarEntrada.IsEnabled = false;
+                btnAdministrar.IsEnabled = false;
+                _contadorPuntos = 0;
+                _animacionTimer.Start();
+            }
+            else
+            {
+                _animacionTimer.Stop();
+                panelCaptahuellas.Visibility = Visibility.Collapsed;
+                panelReloj.Visibility = Visibility.Visible;
+                btnMarcarEntrada.IsEnabled = true;
+                btnAdministrar.IsEnabled = true;
+            }
         }
 
         public void SetEstadoCargando(bool cargando)
@@ -66,9 +88,13 @@ namespace ControlAcceso
         {
             if (_controller != null)
             {
-                // Envía tipoAsistencia = 1 (Entrada)
                 await _controller.ProcesarMarcajeAsistenciaAsync(tipoAsistencia: 1);
             }
+        }
+
+        private void btnCancelarCaptura_Click(object sender, RoutedEventArgs e)
+        {
+            _controller?.CancelarCapturaHuella();
         }
 
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)

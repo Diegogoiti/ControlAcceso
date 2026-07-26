@@ -13,7 +13,6 @@ namespace ControlAcceso.Hardware
             public int nWidth, nHeight, nImageSize;
         }
 
-        // Llamadas nativas a la DLL (ftrScanAPI.dll)
         [DllImport("ftrScanAPI.dll")] private static extern IntPtr ftrScanOpenDevice();
         [DllImport("ftrScanAPI.dll")] private static extern bool ftrScanGetImageSize(IntPtr h, out FTRSCAN_IMAGE_SIZE s);
         [DllImport("ftrScanAPI.dll")] private static extern bool ftrScanGetFrame(IntPtr h, IntPtr p, IntPtr f);
@@ -21,10 +20,9 @@ namespace ControlAcceso.Hardware
 
         public Task<byte[]?> CapturarHuellaAsync(CancellationToken cancellationToken)
         {
-            // Ejecutamos la lectura del hardware en un hilo secundario para no congelar la UI
             return Task.Run(() =>
             {
-                if (cancellationToken.IsCancellationRequested) return null;
+                cancellationToken.ThrowIfCancellationRequested();
 
                 IntPtr h = ftrScanOpenDevice();
                 if (h == IntPtr.Zero) return null;
@@ -36,12 +34,22 @@ namespace ControlAcceso.Hardware
                         IntPtr p = Marshal.AllocHGlobal(size.nImageSize);
                         try
                         {
-                            if (ftrScanGetFrame(h, p, IntPtr.Zero))
+                            // Bucle de sondeo del sensor para permitir cancelación reactiva
+                            while (!cancellationToken.IsCancellationRequested)
                             {
-                                byte[] data = new byte[size.nImageSize];
-                                Marshal.Copy(p, data, 0, size.nImageSize);
-                                return data;
+                                if (ftrScanGetFrame(h, p, IntPtr.Zero))
+                                {
+                                    byte[] data = new byte[size.nImageSize];
+                                    Marshal.Copy(p, data, 0, size.nImageSize);
+                                    return data;
+                                }
+
+                                // Pequeño delay de cortesía para no saturar la CPU
+                                Thread.Sleep(100);
                             }
+
+                            // Lanza excepción canónica si el token fue cancelado
+                            cancellationToken.ThrowIfCancellationRequested();
                         }
                         finally
                         {

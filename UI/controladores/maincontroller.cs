@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using ControlAcceso.Application;
 
@@ -8,6 +9,7 @@ namespace ControlAcceso.UI.controladores
     {
         private readonly MyApp _app;
         private MainWindow? _vista;
+        private CancellationTokenSource? _ctsCaptura;
 
         public MainController(MyApp app)
         {
@@ -24,21 +26,21 @@ namespace ControlAcceso.UI.controladores
         public void RefrescarListaEmpleados()
         {
             if (_vista == null) return;
-
-            _vista.SetEstadoCargando(true);
             _app.CargarEmpleadosViewCache();
-            _vista.MostrarEmpleados(_app.EmpleadosViewCache);
-            _vista.SetEstadoCargando(false);
         }
 
         public async Task ProcesarMarcajeAsistenciaAsync(int tipoAsistencia)
         {
             if (_vista == null) return;
 
+            _ctsCaptura = new CancellationTokenSource();
+            _vista.ModoEsperaHuella(true);
+
             try
             {
-                _vista.SetEstadoCargando(true);
-                var (exito, mensaje) = await _app.MarcarAsistenciaAsync(tipoAsistencia);
+                var (exito, mensaje) = await _app.MarcarAsistenciaAsync(tipoAsistencia, _ctsCaptura.Token);
+
+                _vista.ModoEsperaHuella(false);
                 _vista.MostrarMensaje(mensaje, exito);
 
                 if (exito)
@@ -46,14 +48,26 @@ namespace ControlAcceso.UI.controladores
                     RefrescarListaEmpleados();
                 }
             }
+            catch (OperationCanceledException)
+            {
+                _vista.ModoEsperaHuella(false);
+                _vista.MostrarMensaje("Operación de lectura cancelada por el usuario.", false);
+            }
             catch (Exception ex)
             {
+                _vista.ModoEsperaHuella(false);
                 _vista.MostrarMensaje($"Error inesperado: {ex.Message}", false);
             }
             finally
             {
-                _vista.SetEstadoCargando(false);
+                _ctsCaptura?.Dispose();
+                _ctsCaptura = null;
             }
+        }
+
+        public void CancelarCapturaHuella()
+        {
+            _ctsCaptura?.Cancel();
         }
 
         public void AbrirRegistroEmpleado()
