@@ -1,7 +1,7 @@
 <Window x:Class="ControlAcceso.AdminWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Panel de Administración" Height="650" Width="950"
+        Title="Panel de Administración" Height="700" Width="1000"
         WindowStartupLocation="CenterScreen"
         Background="#F8FAFC"
         TextOptions.TextFormattingMode="Display"
@@ -22,6 +22,15 @@
                     <Setter Property="CornerRadius" Value="6"/>
                 </Style>
             </Style.Resources>
+        </Style>
+
+        <!-- Estilo para DatePicker -->
+        <Style x:Key="ModernDatePicker" TargetType="DatePicker">
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,4,0,14"/>
         </Style>
 
         <!-- Estilo para ComboBox -->
@@ -56,6 +65,23 @@
                 </Style>
             </Style.Resources>
         </Style>
+
+        <!-- Botones secundarios de Huella -->
+        <Style x:Key="FingerprintButton" TargetType="Button">
+            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="6"/>
+                </Style>
+            </Style.Resources>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="24">
@@ -80,7 +106,7 @@
         <Grid Grid.Row="1">
 
             <!-- VISTA 1: REGISTRAR EMPLEADO -->
-            <Border x:Name="PanelRegistrar" Visibility="Visible" Background="White" CornerRadius="12" Padding="24" MaxWidth="650" HorizontalAlignment="Stretch">
+            <Border x:Name="PanelRegistrar" Visibility="Visible" Background="White" CornerRadius="12" Padding="24" MaxWidth="850" HorizontalAlignment="Stretch">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="12" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
                 </Border.Effect>
@@ -88,20 +114,57 @@
                     <StackPanel>
                         <TextBlock Text="Registrar Nuevo Empleado" FontSize="20" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,20"/>
 
-                        <TextBlock Text="Cédula / Identificación" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="txtCedula" Style="{StaticResource ModernTextBox}"/>
+                        <!-- GRID 2 COLUMNAS PARA CAMPOS DE TEXTO -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/> <!-- Separador -->
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Nombre Completo" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="txtNombre" Style="{StaticResource ModernTextBox}"/>
+                            <!-- Columna Izquierda -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Cédula / Identificación" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtCedula" Style="{StaticResource ModernTextBox}"/>
 
-                        <TextBlock Text="Cargo / Rol" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="txtCargo" Style="{StaticResource ModernTextBox}"/>
+                                <TextBlock Text="Nombre Completo" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtNombreCompleto" Style="{StaticResource ModernTextBox}"/>
 
-                        <!-- Captura Biométrica -->
+                                <TextBlock Text="Fecha de Nacimiento" Style="{StaticResource FieldLabel}"/>
+                                <DatePicker x:Name="dpFechaNacimiento" Style="{StaticResource ModernDatePicker}"/>
+
+                                <TextBlock Text="Rol / Permiso" Style="{StaticResource FieldLabel}"/>
+                                <ComboBox x:Name="cmbRol" Style="{StaticResource ModernComboBox}">
+                                    <ComboBoxItem Content="Empleado" IsSelected="True"/>
+                                    <ComboBoxItem Content="Administrador"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- Columna Derecha -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Teléfono Principal" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtTelefono" Style="{StaticResource ModernTextBox}"/>
+
+                                <TextBlock Text="Teléfono de Emergencia" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtTelefonoEmergencia" Style="{StaticResource ModernTextBox}"/>
+
+                                <TextBlock Text="Dirección de Habitación" Style="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="txtDireccion" Style="{StaticResource ModernTextBox}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- SECCIÓN MULTI-HUELLA BIOMÉTRICA -->
                         <Border Background="#F1F5F9" CornerRadius="8" Padding="16" Margin="0,5,0,20">
-                            <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="Biometría" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                <Button x:Name="btnCapturarHuella" Content="👆 Capturar Huella Digital" Padding="16,10" Background="#E2E8F0" Foreground="#1E293B" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand">
+                            <StackPanel>
+                                <TextBlock Text="Registro Biométrico (Múltiples Huellas)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                                    <Button x:Name="btnHuella1" Content="👍 Índice Dch (No registrado)" Style="{StaticResource FingerprintButton}"/>
+                                    <Button x:Name="btnHuella2" Content="👍 Pulgar Dch (No registrado)" Style="{StaticResource FingerprintButton}"/>
+                                    <Button x:Name="btnHuella3" Content="👈 Índice Izq (No registrado)" Style="{StaticResource FingerprintButton}"/>
+                                </StackPanel>
+
+                                <Button x:Name="btnCapturarHuella" Content="👆 Capturar Huella Seleccionada" Width="240" Padding="12,8" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Center">
                                     <Button.Resources>
                                         <Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style>
                                     </Button.Resources>
@@ -109,7 +172,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Button x:Name="btnGuardarEmpleado" Content="Guardar Empleado" Height="45" Background="#2563EB" Foreground="White" FontSize="15" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
+                        <Button x:Name="btnGuardarEmpleado" Content="Guardar Empleado" Height="45" Background="#16A34A" Foreground="White" FontSize="15" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
                             <Button.Resources>
                                 <Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style>
                             </Button.Resources>
@@ -130,7 +193,7 @@
                         <RowDefinition Height="Auto"/> <!-- Botones -->
                     </Grid.RowDefinitions>
 
-                    <!-- Filtros con Grid adaptativo -->
+                    <!-- Filtros adaptativos -->
                     <Grid Grid.Row="0" Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -152,10 +215,11 @@
 
                     <DataGrid Grid.Row="1" x:Name="dgEmpleados" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="Transparent" BorderThickness="0">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="140"/>
-                            <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-                            <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" Width="180"/>
-                            <DataGridTextColumn Header="Estado" Binding="{Binding EstadoStr}" Width="110"/>
+                            <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="120"/>
+                            <DataGridTextColumn Header="Nombre Completo" Binding="{Binding NombreCompleto}" Width="*"/>
+                            <DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="130"/>
+                            <DataGridTextColumn Header="Rol ID" Binding="{Binding RolId}" Width="80"/>
+                            <DataGridTextColumn Header="Estado" Binding="{Binding EstadoStr}" Width="100"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
