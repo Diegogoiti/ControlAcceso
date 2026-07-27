@@ -24,7 +24,7 @@ namespace ControlAcceso.UI.controladores
             if (_adminWindow == null || !_adminWindow.IsLoaded)
             {
                 _adminWindow = new AdminWindow(this); // Le pasamos este mismo controlador a la vista
-                _adminWindow.Show(); // O _adminWindow.ShowDialog() si quieres que sea modal
+                _adminWindow.ShowDialog(); // O _adminWindow.ShowDialog() si quieres que sea modal
             }
             else
             {
