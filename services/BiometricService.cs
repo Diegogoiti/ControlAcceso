@@ -46,28 +46,28 @@ namespace ControlAcceso.Services
         /// <summary>
         /// Caso de Uso: Identificación 1:N. Recorre una lista de empleados para saber a quién pertenece la huella capturada.
         /// </summary>
-        public int? IdentificarEmpleado(byte[] templateCapturado, List<EmpleadoDto> empleadosRegistrados, double umbral = 50.0)
+        public int? IdentificarEmpleado(byte[] templateCapturado, List<HuellaEmpleadoDto> huellas, double umbral = 50.0)
         {
-            if (templateCapturado == null || templateCapturado.Length == 0 || empleadosRegistrados == null)
+            if (templateCapturado == null || templateCapturado.Length == 0 || huellas == null)
                 return null;
 
             int? idEmpleadoEncontrado = null;
             double mejorPuntaje = 0.0;
 
-            foreach (var emp in empleadosRegistrados)
+            foreach (var huella in huellas)
             {
                 // Ignoramos empleados inactivosa o sin huella registrada
-                if (!emp.Activo || emp.HuellaBytes == null || emp.HuellaBytes.Length == 0)
+                if (huella.TemplateHuella == null || huella.TemplateHuella.Length == 0)
                     continue;
 
                 try
                 {
-                    double similitud = _biometricAdapter.CalcularSimilitud(templateCapturado, emp.HuellaBytes);
+                    double similitud = _biometricAdapter.CalcularSimilitud(templateCapturado, huella.TemplateHuella);
 
                     if (similitud > mejorPuntaje && similitud >= umbral)
                     {
                         mejorPuntaje = similitud;
-                        idEmpleadoEncontrado = emp.Id;
+                        idEmpleadoEncontrado = huella.EmpleadoId;
                     }
                 }
                 catch
@@ -83,7 +83,7 @@ namespace ControlAcceso.Services
         /// <summary>
         /// Caso de Uso: Verificación 1:1. Compara si la huella dada pertenece a un empleado específico.
         /// </summary>
-        public bool VerificarEmpleado(byte[] templateCapturado, byte[] templateAlmacenado, double umbral = 50.0)
+        /*public bool VerificarEmpleado(byte[] templateCapturado, byte[] templateAlmacenado, double umbral = 50.0)
         {
             if (templateCapturado == null || templateAlmacenado == null)
                 return false;
@@ -96,7 +96,7 @@ namespace ControlAcceso.Services
             {
                 return false;
             }
-        }
+        }*/
 
         /// <summary>
         /// Caso de Uso: Valida si la nueva huella que se va a registrar ya pertenece a otro empleado existente.
