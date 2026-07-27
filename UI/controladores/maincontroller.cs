@@ -75,8 +75,9 @@ namespace ControlAcceso.UI.controladores
 
         public void AbrirRegistroEmpleado()
         {
-            if (_vista == null) return;
-            _vista.MostrarMensaje("Módulo de registro en desarrollo.", true);
+            // Instanciar y mostrar la ventana de administración
+            AdminWindow admin = new AdminWindow();
+            admin.Show(); // Usa ShowDialog() si quieres que sea una ventana modal (bloquee la principal)
         }
     }
 }
