@@ -72,6 +72,11 @@ namespace ControlAcceso.UI.controladores
         #endregion
         public void ProcesarGuardadoEmpleado()
         {
+            if (_adminWindow == null)
+    {
+        Console.WriteLine("Error: La vista no está inicializada.");
+        return;
+    }
             // 1. La Vista captura y entrega los datos
             (string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) dto = _adminWindow.ObtenerDatosFormulario();
 
@@ -82,39 +87,76 @@ namespace ControlAcceso.UI.controladores
                 return; // Detiene el flujo si la validación falla
             }
             Console.WriteLine("Validación exitosa.");
+            Console.WriteLine($"cargo: {dto.RolTexto}");
 
             // Hasta aquí llega tu alcance por ahora (falta llamar al servicio de guardado)
         }
 
         private bool EsFormularioValido((string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) datos)
-        {
-            if (string.IsNullOrWhiteSpace(datos.Cedula))
-            {
-                _adminWindow?.MostrarError("La cédula es obligatoria.");
-                return false;
-            }
+{
+    // 1. Validar Cédula (no vacía y numérica)
+    if (string.IsNullOrWhiteSpace(datos.Cedula))
+    {
+        _adminWindow?.MostrarError("La cédula es obligatoria.");
+        return false;
+    }
 
-            if (!int.TryParse(datos.Cedula, out _))
-            {
-                _adminWindow?.MostrarError("La cédula debe ser un número válido.");
-                return false;
-            }
+    if (!int.TryParse(datos.Cedula.Trim(), out int cedula) || cedula <= 0)
+    {
+        _adminWindow?.MostrarError("La cédula debe ser un número entero válido.");
+        return false;
+    }
 
-            // Cambiar 'dto' por 'datos'
-            if (string.IsNullOrWhiteSpace(datos.NombreCompleto))
-            {
-                _adminWindow?.MostrarError("El nombre completo es obligatorio.");
-                return false;
-            }
+    // 2. Validar Nombre Completo
+    if (string.IsNullOrWhiteSpace(datos.NombreCompleto))
+    {
+        _adminWindow?.MostrarError("El nombre completo es obligatorio.");
+        return false;
+    }
 
-            // Cambiar 'dto' por 'datos'
-            if (!datos.FechaNacimiento.HasValue)
-            {
-                _adminWindow?.MostrarError("Debe seleccionar una fecha de nacimiento.");
-                return false;
-            }
+    // 3. Validar Fecha de Nacimiento
+    if (!datos.FechaNacimiento.HasValue)
+    {
+        _adminWindow?.MostrarError("Debe seleccionar una fecha de nacimiento.");
+        return false;
+    }
 
-            return true;
-        }
+    // 4. Validar Teléfono Principal (no vacío y formato numérico)
+    if (string.IsNullOrWhiteSpace(datos.Telefono))
+    {
+        _adminWindow?.MostrarError("El teléfono principal es obligatorio.");
+        return false;
+    }
+
+    string telefonoLimpio = datos.Telefono.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
+    if (!long.TryParse(telefonoLimpio, out _))
+    {
+        _adminWindow?.MostrarError("El teléfono principal debe contener un número válido.");
+        return false;
+    }
+
+    // 5. Validar Teléfono de Emergencia (no vacío y formato numérico)
+    if (string.IsNullOrWhiteSpace(datos.TelefonoEmergencia))
+    {
+        _adminWindow?.MostrarError("El teléfono de emergencia es obligatorio.");
+        return false;
+    }
+
+    string telefonoEmergenciaLimpio = datos.TelefonoEmergencia.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
+    if (!long.TryParse(telefonoEmergenciaLimpio, out _))
+    {
+        _adminWindow?.MostrarError("El teléfono de emergencia debe contener un número válido.");
+        return false;
+    }
+
+    // 6. Validar Dirección
+    if (string.IsNullOrWhiteSpace(datos.Direccion))
+    {
+        _adminWindow?.MostrarError("La dirección de habitación es obligatoria.");
+        return false;
+    }
+
+    return true;
+}
     }
 }

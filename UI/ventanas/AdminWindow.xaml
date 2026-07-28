@@ -159,9 +159,9 @@
                                 <TextBlock Text="Registro Biométrico (Múltiples Huellas)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                                    <Button x:Name="btnHuella1" Content="👍 Índice Dch (No registrado)" Style="{StaticResource FingerprintButton}"/>
-                                    <Button x:Name="btnHuella2" Content="👍 Pulgar Dch (No registrado)" Style="{StaticResource FingerprintButton}"/>
-                                    <Button x:Name="btnHuella3" Content="👈 Índice Izq (No registrado)" Style="{StaticResource FingerprintButton}"/>
+                                    <Button x:Name="btnHuella1" Content="👍 Dedo 1 (No registrado)" Style="{StaticResource FingerprintButton}"/>
+                                    <Button x:Name="btnHuella2" Content="👍 Dedo 2 (No registrado)" Style="{StaticResource FingerprintButton}"/>
+                                    <Button x:Name="btnHuella3" Content="👍 Dedo 3 (No registrado)" Style="{StaticResource FingerprintButton}"/>
                                 </StackPanel>
 
                                 <Button x:Name="btnCapturarHuella" Content="👆 Capturar Huella Seleccionada" Width="240" Padding="12,8" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Center">
