@@ -181,5 +181,15 @@ namespace ControlAcceso.Application
         }
 
         #endregion
+
+        public async Task<byte[]?> IniciarCapturaAsync(CancellationToken cancellationToken = default)
+        {
+            return await CaptahuellasService.IniciarCapturaAsync(cancellationToken);
+        }
+
+        public bool ProcesarHuellaBruta(byte[] rawImage, out byte[]? templateCapturado, out string mensajeError)
+        {
+            return BiometricService.ProcesarHuellaBruta(rawImage, out templateCapturado, out mensajeError);
+        }
     }
 }

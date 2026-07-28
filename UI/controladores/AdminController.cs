@@ -10,6 +10,7 @@ namespace ControlAcceso.UI.controladores
     {
         private readonly MyApp _app;
         private AdminWindow? _adminWindow;
+        private readonly Dictionary<int, byte[]> _huellasCapturadas = new();
 
         public AdminController(MyApp app)
         {
@@ -156,7 +157,52 @@ namespace ControlAcceso.UI.controladores
         return false;
     }
 
+    if (_huellasCapturadas.Count < 3)
+    {
+        _adminWindow?.MostrarError("Debe registrar al menos tres huellas dactilares para el empleado.");
+        return false;
+    }
+
+
+
     return true;
 }
+public async Task CapturarHuellaDedoAsync(int numeroDedo, CancellationToken cancellationToken = default)
+{
+    try
+    {
+        // 1. Capturar imagen raw desde el lector
+        byte[]? rawImage = await _app.IniciarCapturaAsync(cancellationToken);
+        if (rawImage == null || rawImage.Length == 0)
+        {
+            _adminWindow?.MostrarError("No se logró capturar la imagen del sensor o la operación fue cancelada.");
+            return;
+        }
+
+        // 2. Extraer el template a partir de la imagen bruta
+        if (!_app.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string msgError))
+        {
+            _adminWindow?.MostrarError(msgError);
+            return;
+        }
+
+        if (templateCapturado == null)
+        {
+            _adminWindow?.MostrarError("Ocurrió un error inesperado al procesar el template biométrico.");
+            return;
+        }
+
+        // 3. Guardar o reemplazar el template en el diccionario asociado al dedo
+        _huellasCapturadas[numeroDedo] = templateCapturado;
+
+        // 4. Actualizar la interfaz para dar feedback visual
+        _adminWindow?.ActualizarEstadoHuella(numeroDedo, registrada: true);
     }
+    catch (Exception ex)
+    {
+        _adminWindow?.MostrarError($"Error en el proceso de captura: {ex.Message}");
+    }
+}
+    }
+
 }

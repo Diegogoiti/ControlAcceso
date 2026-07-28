@@ -65,5 +65,39 @@ namespace ControlAcceso
         {
             MessageBox.Show(mensaje, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+
+        private async void btnCapturarDedo_Click(object sender, RoutedEventArgs e)
+{
+    if (sender is Button btn && btn.Tag != null)
+    {
+        int numeroDedo = Convert.ToInt32(btn.Tag);
+        
+        // Llamamos al controlador pasándole el número de dedo seleccionado
+        if (_controller != null)
+        {
+            await _controller.CapturarHuellaDedoAsync(numeroDedo);
+        }
+    }
+}
+
+// Método para actualizar visualmente la etiqueta de los botones según el estado
+public void ActualizarEstadoHuella(int numeroDedo, bool registrada)
+{
+    string estado = registrada ? "✅ Registrado" : "No registrado";
+    string texto = $"👍 Dedo {numeroDedo} ({estado})";
+
+    switch (numeroDedo)
+    {
+        case 1:
+            btnHuella1.Content = texto;
+            break;
+        case 2:
+            btnHuella2.Content = texto;
+            break;
+        case 3:
+            btnHuella3.Content = texto;
+            break;
+    }
+}
     }
 }
