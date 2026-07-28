@@ -21,7 +21,7 @@ namespace ControlAcceso.Services
         {
             try
             {
-                return _dbAdapter.ObtenerEmpleados(filtro);
+                return _dbAdapter.ObtenerEmpleados(filtro ?? new EmpleadoFilter());
             }
             catch (Exception)
             {
@@ -30,12 +30,12 @@ namespace ControlAcceso.Services
             }
         }
 
-        public bool RegistrarEmpleado(EmpleadoDto empleado, out string mensajeError)
+        public bool RegistrarEmpleado(EmpleadoSaveDto empleado, out string mensajeError)
         {
             mensajeError = string.Empty;
 
             // Validaciones previas de la capa de negocio
-            if (string.IsNullOrWhiteSpace(empleado.Nombre))
+            if (string.IsNullOrWhiteSpace(empleado.NombreCompleto))
             {
                 mensajeError = "El nombre del empleado no puede estar vacío.";
                 return false;
@@ -59,7 +59,7 @@ namespace ControlAcceso.Services
             }
         }
 
-        public bool ActualizarEmpleado(EmpleadoDto empleado, out string mensajeError)
+        public bool ActualizarEmpleado(EmpleadoSaveDto empleado, out string mensajeError)
         {
             mensajeError = string.Empty;
 
@@ -131,7 +131,7 @@ namespace ControlAcceso.Services
             return _dbAdapter.ObtenerAsistencias(filtro);
         }
 
-        public (string password, TimeSpan entrada, TimeSpan salida) ObtenerConfiguracion()
+        public (string password, TimeSpan entrada, TimeSpan salida)? ObtenerConfiguracion()
         {
             return _dbAdapter.ObtenerConfiguracion();
         }
@@ -140,7 +140,7 @@ namespace ControlAcceso.Services
         {
             try
             {
-                _dbAdapter.GuardarConfiguracion(entrada, salida, password);
+                _dbAdapter.GuardarConfiguracion(password, entrada, salida);
                 return true;
             }
             catch

@@ -1,347 +1,315 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using MySql.Data.MySqlClient;
 using ControlAcceso.DTOs;
+using MySql.Data.MySqlClient;
 
 namespace ControlAcceso.Database
 {
     public class MySqlDatabaseAdapter : IDatabase
     {
-        private readonly string _connString;
+        private readonly string _connectionString;
 
-        public MySqlDatabaseAdapter(string connString = "Server=localhost;Database=acceso_db;Uid=root;Pwd=;")
+        public MySqlDatabaseAdapter(string connectionString = "Server=localhost;Database=acceso_db;Uid=root;Pwd=;")
         {
-            _connString = connString;
+            _connectionString = connectionString;
         }
 
-        // READ: Obtención dinámica basada en Filtros
-        public List<EmpleadoDto> ObtenerEmpleados(EmpleadoFilter? filtro = null)
+        private MySqlConnection GetConnection()
+        {
+            return new MySqlConnection(_connectionString);
+        }
+
+        #region --- Consultas / Lectura ---
+
+        public List<EmpleadoDto> ObtenerEmpleados(EmpleadoFilter filtro)
         {
             var empleados = new List<EmpleadoDto>();
 
-            using (var conn = new MySqlConnection(_connString))
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                SELECT id, cedula, nombre_completo, fecha_nacimiento, direccion,
+                       telefono, telefono_emergencia, rol_id, fecha_ingreso, activo
+                FROM empleados
+                WHERE 1=1";
+
+            if (filtro.SoloActivos)
             {
-                conn.Open();
-
-                // Base de la consulta
-                var queryBuilder = new StringBuilder("SELECT id, Nombre, Cedula, HuellaTemplate, Activo FROM Empleados WHERE 1=1");
-                using (var cmd = new MySqlCommand())
-                {
-                    cmd.Connection = conn;
-
-                    // Si mandaron un filtro, agregamos condiciones dinámicamente
-                    if (filtro != null)
-                    {
-                        if (filtro.Id.HasValue)
-                        {
-                            queryBuilder.Append(" AND id = @id");
-                            cmd.Parameters.AddWithValue("@id", filtro.Id.Value);
-                        }
-
-                        if (filtro.Cedula.HasValue)
-                        {
-                            queryBuilder.Append(" AND Cedula = @cedula");
-                            cmd.Parameters.AddWithValue("@cedula", filtro.Cedula.Value);
-                        }
-
-                        if (!string.IsNullOrWhiteSpace(filtro.Nombre))
-                        {
-                            queryBuilder.Append(" AND Nombre LIKE @nombre");
-                            cmd.Parameters.AddWithValue("@nombre", $"%{filtro.Nombre}%");
-                        }
-
-                        if (filtro.SoloActivos.HasValue)
-                        {
-                            queryBuilder.Append(" AND Activo = @activo");
-                            cmd.Parameters.AddWithValue("@activo", filtro.SoloActivos.Value);
-                        }
-                    }
-
-                    cmd.CommandText = queryBuilder.ToString();
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int idActual = reader.GetInt32("id");
-                            string nombre = reader.GetString("Nombre");
-                            int cedula = reader.GetInt32("Cedula");
-                            bool activo = reader.GetBoolean("Activo");
-
-                            // Extraemos solo los bytes crudos (La DB no sabe qué es SourceAFIS)
-                            byte[]? huellaBytes = null;
-                            if (reader["HuellaTemplate"] != DBNull.Value)
-                            {
-                                huellaBytes = (byte[])reader["HuellaTemplate"];
-                            }
-
-                            // Retornamos un DTO puro y limpio
-                            empleados.Add(new EmpleadoDto
-                            {
-                                Id = idActual,
-                                Nombre = nombre,
-                                Cedula = cedula,
-                                HuellaBytes = huellaBytes,
-                                Activo = activo
-                            });
-                        }
-                    }
-                }
+                query += " AND activo = 1";
             }
+
+            if (!string.IsNullOrWhiteSpace(filtro.NombreOCedula))
+            {
+                query += " AND (nombre_completo LIKE @busqueda OR CAST(cedula AS CHAR) LIKE @busqueda)";
+            }
+
+            using var cmd = new MySqlCommand(query, conn);
+
+            if (!string.IsNullOrWhiteSpace(filtro.NombreOCedula))
+            {
+                cmd.Parameters.AddWithValue("@busqueda", $"%{filtro.NombreOCedula.Trim()}%");
+            }
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                empleados.Add(new EmpleadoDto
+                {
+                    Id = reader.GetInt32("id"),
+                    Cedula = reader.GetInt32("cedula"),
+                    NombreCompleto = reader.GetString("nombre_completo"),
+                    FechaNacimiento = DateOnly.FromDateTime(reader.GetDateTime("fecha_nacimiento")),
+                    Direccion = reader.IsDBNull(reader.GetOrdinal("direccion")) ? null : reader.GetString("direccion"),
+                    Telefono = reader.IsDBNull(reader.GetOrdinal("telefono")) ? null : reader.GetString("telefono"),
+                    TelefonoEmergencia = reader.IsDBNull(reader.GetOrdinal("telefono_emergencia")) ? null : reader.GetString("telefono_emergencia"),
+                    RolId = reader.GetInt32("rol_id"),
+                    FechaIngreso = DateOnly.FromDateTime(reader.GetDateTime("fecha_ingreso")),
+                    Activo = reader.GetBoolean("activo")
+                });
+            }
+
             return empleados;
-        }
-
-        public void AgregarEmpleado(EmpleadoDto emp)
-        {
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-                string query = "INSERT INTO Empleados (Nombre, Cedula, HuellaTemplate, Activo) VALUES (@nombre, @cedula, @huellaTemplate, @activo)";
-                using (var cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@nombre", emp.Nombre);
-                    cmd.Parameters.AddWithValue("@cedula", emp.Cedula);
-                    cmd.Parameters.AddWithValue("@huellaTemplate", emp.HuellaBytes);
-                    cmd.Parameters.AddWithValue("@activo", emp.Activo);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void CambiarEstadoEmpleado(int id, bool activo)
-        {
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-                string query = "UPDATE Empleados SET Activo = @activo WHERE id = @id";
-                using (var cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.Parameters.AddWithValue("@activo", activo);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void ActualizarHuellaEmpleado(int id, byte[] nuevaHuellaBytes)
-        {
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-                string query = "UPDATE Empleados SET HuellaTemplate = @huellaTemplate WHERE id = @id";
-                using (var cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.Parameters.AddWithValue("@huellaTemplate", nuevaHuellaBytes);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void EliminarEmpleado(int id)
-        {
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-                string query = "DELETE FROM Empleados WHERE id = @id";
-                using (var cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void RegistrarAsistencia(AsistenciaDto asistencia)
-        {
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-                string query = "INSERT INTO Asistencia (EmpleadoID, Timestamp, Tipo) VALUES (@empleadoId, NOW(), @tipo)";
-                using (var cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@empleadoId", asistencia.EmpleadoID);
-                    cmd.Parameters.AddWithValue("@tipo", asistencia.Tipo);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter? filtro = null)
-        {
-            var asistencias = new List<AsistenciaDto>();
-
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-
-                var queryBuilder = new StringBuilder("SELECT EmpleadoID, Timestamp, Tipo FROM Asistencia WHERE 1=1");
-
-                using (var cmd = new MySqlCommand())
-                {
-                    cmd.Connection = conn;
-
-                    if (filtro != null)
-                    {
-                        if (filtro.EmpleadoId.HasValue)
-                        {
-                            queryBuilder.Append(" AND EmpleadoID = @empleadoId");
-                            cmd.Parameters.AddWithValue("@empleadoId", filtro.EmpleadoId.Value);
-                        }
-
-                        if (filtro.FechaInicio.HasValue)
-                        {
-                            // Desde las 00:00:00 del día
-                            queryBuilder.Append(" AND Timestamp >= @fechaInicio");
-                            cmd.Parameters.AddWithValue("@fechaInicio", filtro.FechaInicio.Value.Date);
-                        }
-
-                        if (filtro.FechaFin.HasValue)
-                        {
-                            // Hasta las 23:59:59 del día
-                            queryBuilder.Append(" AND Timestamp <= @fechaFin");
-                            cmd.Parameters.AddWithValue("@fechaFin", filtro.FechaFin.Value.Date.AddDays(1).AddTicks(-1));
-                        }
-
-                        if (filtro.Tipo.HasValue)
-                        {
-                            queryBuilder.Append(" AND Tipo = @tipo");
-                            cmd.Parameters.AddWithValue("@tipo", filtro.Tipo.Value);
-                        }
-                    }
-
-                    queryBuilder.Append(" ORDER BY Timestamp DESC");
-                    cmd.CommandText = queryBuilder.ToString();
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            asistencias.Add(new AsistenciaDto
-                            {
-                                EmpleadoID = reader.GetInt32("EmpleadoID"),
-                                Timestamp = reader.GetDateTime("Timestamp"),
-                                Tipo = reader.GetInt32("Tipo") // tinyint de MySQL mapea directo a int
-                            });
-                        }
-                    }
-                }
-            }
-            return asistencias;
-        }
-
-        public (string password, TimeSpan entrada, TimeSpan salida) ObtenerConfiguracion()
-        {
-            string passDecodificada = "admin";
-            TimeSpan horaEntrada = new TimeSpan(8, 0, 0);
-            TimeSpan horaSalida = new TimeSpan(17, 0, 0);
-
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-                string query = "SELECT AdminPasword, HoraEntrada, HoraSalida FROM configuracion WHERE id = 1";
-
-                using (var cmd = new MySqlCommand(query, conn))
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        if (!reader.IsDBNull(reader.GetOrdinal("AdminPasword")))
-                        {
-                            string passBase64 = reader.GetString("AdminPasword");
-                            byte[] bytes = Convert.FromBase64String(passBase64);
-                            passDecodificada = Encoding.UTF8.GetString(bytes);
-                        }
-
-                        horaEntrada = reader.GetTimeSpan(reader.GetOrdinal("HoraEntrada"));
-                        horaSalida = reader.GetTimeSpan(reader.GetOrdinal("HoraSalida"));
-                    }
-                }
-            }
-
-            return (passDecodificada, horaEntrada, horaSalida);
-        }
-
-        public void ActualizarEmpleado(EmpleadoDto emp)
-        {
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-                string query = @"UPDATE Empleados
-                                 SET Nombre = @nombre,
-                                     Cedula = @cedula,
-                                     HuellaTemplate = @huellaTemplate,
-                                     Activo = @activo
-                                 WHERE id = @id";
-
-                using (var cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", emp.Id);
-                    cmd.Parameters.AddWithValue("@nombre", emp.Nombre);
-                    cmd.Parameters.AddWithValue("@cedula", emp.Cedula);
-                    cmd.Parameters.AddWithValue("@huellaTemplate", (object?)emp.HuellaBytes ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@activo", emp.Activo);
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public void GuardarConfiguracion(TimeSpan entrada, TimeSpan salida, string passwordPlana)
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(passwordPlana);
-            string passBase64 = Convert.ToBase64String(bytes);
-
-            using (var conn = new MySqlConnection(_connString))
-            {
-                conn.Open();
-                string query = @"UPDATE configuracion
-                                 SET AdminPasword = @password,
-                                     HoraEntrada = @entrada,
-                                     HoraSalida = @salida
-                                 WHERE id = 1";
-
-                using (var cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@password", passBase64);
-                    cmd.Parameters.AddWithValue("@entrada", entrada);
-                    cmd.Parameters.AddWithValue("@salida", salida);
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
         }
 
         public List<HuellaEmpleadoDto> ObtenerHuellasActivas()
         {
             var huellas = new List<HuellaEmpleadoDto>();
 
-            using (var conn = new MySqlConnection(_connString))
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                SELECT h.id, h.empleado_id, h.dedo, h.template
+                FROM huellas h
+                INNER JOIN empleados e ON h.empleado_id = e.id
+                WHERE e.activo = 1";
+
+            using var cmd = new MySqlCommand(query, conn);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
             {
-                conn.Open();
-
-                // Trae únicamente ID y Huella de los empleados activos que sí tengan huella registrada
-                string query = @"SELECT id, HuellaTemplate
-                                FROM Empleados
-                                WHERE Activo = 1
-                                  AND HuellaTemplate IS NOT NULL";
-
-                using (var cmd = new MySqlCommand(query, conn))
-                using (var reader = cmd.ExecuteReader())
+                huellas.Add(new HuellaEmpleadoDto
                 {
-                    while (reader.Read())
-                    {
-                        huellas.Add(new HuellaEmpleadoDto
-                        {
-                            EmpleadoId = reader.GetInt32("id"),
-                            TemplateHuella = (byte[])reader["HuellaTemplate"]
-                        });
-                    }
-                }
+                    Id = reader.GetInt32("id"),
+                    EmpleadoId = reader.GetInt32("empleado_id"),
+                    Dedo = reader.GetInt32("dedo"),
+                    TemplateHuella = (byte[])reader["template"]
+                });
             }
 
             return huellas;
+        }
+
+        public List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter filtro)
+        {
+            var asistencias = new List<AsistenciaDto>();
+
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                SELECT id, empleado_id, fecha, hora, por_administrador, observacion
+                FROM asistencia
+                WHERE 1=1";
+
+            if (filtro.FechaInicio.HasValue)
+            {
+                query += " AND fecha >= @fechaInicio";
+            }
+
+            if (filtro.FechaFin.HasValue)
+            {
+                query += " AND fecha <= @fechaFin";
+            }
+
+            if (filtro.EmpleadoId.HasValue)
+            {
+                query += " AND empleado_id = @empleadoId";
+            }
+
+            query += " ORDER BY fecha DESC, hora DESC";
+
+            using var cmd = new MySqlCommand(query, conn);
+
+            if (filtro.FechaInicio.HasValue)
+                cmd.Parameters.AddWithValue("@fechaInicio", filtro.FechaInicio.Value.Date);
+
+            if (filtro.FechaFin.HasValue)
+                cmd.Parameters.AddWithValue("@fechaFin", filtro.FechaFin.Value.Date);
+
+            if (filtro.EmpleadoId.HasValue)
+                cmd.Parameters.AddWithValue("@empleadoId", filtro.EmpleadoId.Value);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                DateTime fecha = reader.GetDateTime("fecha");
+                TimeSpan hora = reader.GetTimeSpan("hora");
+                DateTime timestampCombinado = fecha.Date.Add(hora);
+
+                asistencias.Add(new AsistenciaDto
+                {
+                    Id = reader.GetInt32("id"),
+                    EmpleadoID = reader.GetInt32("empleado_id"),
+                    Timestamp = timestampCombinado,
+                    Tipo = 1,
+                    PorAdministrador = reader.GetBoolean("por_administrador"),
+                    Observacion = reader.IsDBNull(reader.GetOrdinal("observacion")) ? null : reader.GetString("observacion")
+                });
+            }
+
+            return asistencias;
+        }
+
+        #endregion
+
+        #region --- Escritura / Registro ---
+
+        public bool RegistrarAsistencia(AsistenciaDto asistencia)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                INSERT INTO asistencia (empleado_id, fecha, hora, por_administrador, observacion)
+                VALUES (@empleadoId, CURDATE(), CURTIME(), @porAdmin, @observacion)";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@empleadoId", asistencia.EmpleadoID);
+            cmd.Parameters.AddWithValue("@porAdmin", asistencia.PorAdministrador ? 1 : 0);
+            cmd.Parameters.AddWithValue("@observacion", (object?)asistencia.Observacion ?? DBNull.Value);
+
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        public bool AgregarEmpleado(EmpleadoSaveDto empleado)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                INSERT INTO empleados (cedula, nombre_completo, fecha_nacimiento, direccion, telefono, telefono_emergencia, rol_id, fecha_ingreso, activo)
+                VALUES (@cedula, @nombre, @fechaNac, @direccion, @telefono, @telEmergencia, @rolId, CURDATE(), 1)";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@cedula", empleado.Cedula);
+            cmd.Parameters.AddWithValue("@nombre", empleado.NombreCompleto);
+            cmd.Parameters.AddWithValue("@fechaNac", empleado.FechaNacimiento);
+            cmd.Parameters.AddWithValue("@direccion", (object?)empleado.Direccion ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@telefono", (object?)empleado.Telefono ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@telEmergencia", (object?)empleado.TelefonoEmergencia ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@rolId", empleado.RolId <= 0 ? 1 : empleado.RolId);
+
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        public bool ActualizarEmpleado( EmpleadoSaveDto empleado)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                UPDATE empleados
+                SET cedula = @cedula,
+                    nombre_completo = @nombre,
+                    fecha_nacimiento = @fechaNac,
+                    direccion = @direccion,
+                    telefono = @telefono,
+                    telefono_emergencia = @telEmergencia,
+                    rol_id = @rolId
+                WHERE id = @id";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@id", empleado.Id);
+            cmd.Parameters.AddWithValue("@cedula", empleado.Cedula);
+            cmd.Parameters.AddWithValue("@nombre", empleado.NombreCompleto);
+            cmd.Parameters.AddWithValue("@fechaNac", empleado.FechaNacimiento);
+            cmd.Parameters.AddWithValue("@direccion", (object?)empleado.Direccion ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@telefono", (object?)empleado.Telefono ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@telEmergencia", (object?)empleado.TelefonoEmergencia ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@rolId", empleado.RolId <= 0 ? 1 : empleado.RolId);
+
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        public bool InsertarHuella(int empleadoId, int dedo, byte[] template)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                INSERT INTO huellas (empleado_id, dedo, template)
+                VALUES (@empleadoId, @dedo, @template)";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@empleadoId", empleadoId);
+            cmd.Parameters.AddWithValue("@dedo", dedo);
+            cmd.Parameters.AddWithValue("@template", template);
+
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        #endregion
+
+        #region --- Administración / Configuración ---
+
+        public bool CambiarEstadoEmpleado(int id, bool activo)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = "UPDATE empleados SET activo = @activo WHERE id = @id";
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@activo", activo ? 1 : 0);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        public bool GuardarConfiguracion(string adminPassword, TimeSpan horaEntrada, TimeSpan horaSalida)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                INSERT INTO configuracion (id, admin_password, hora_entrada, hora_salida)
+                VALUES (1, @adminPassword, @horaEntrada, @horaSalida)
+                ON DUPLICATE KEY UPDATE
+                    admin_password = @adminPassword,
+                    hora_entrada = @horaEntrada,
+                    hora_salida = @horaSalida;";
+
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@adminPassword", adminPassword);
+            cmd.Parameters.AddWithValue("@horaEntrada", horaEntrada);
+            cmd.Parameters.AddWithValue("@horaSalida", horaSalida);
+
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        #endregion
+
+        public (string AdminPassword, TimeSpan HoraEntrada, TimeSpan HoraSalida)? ObtenerConfiguracion()
+        {
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+
+            string query = "SELECT admin_password, hora_entrada, hora_salida FROM configuracion LIMIT 1;";
+            using var command = new MySqlCommand(query, connection);
+            using var reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+                string password = reader.GetString("admin_password");
+                TimeSpan entrada = reader.GetTimeSpan("hora_entrada");
+                TimeSpan salida = reader.GetTimeSpan("hora_salida");
+
+                return (password, entrada, salida);
+            }
+
+            return null;
         }
     }
 }

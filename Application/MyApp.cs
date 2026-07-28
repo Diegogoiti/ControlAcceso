@@ -91,7 +91,7 @@ namespace ControlAcceso.Application
                     return new EmpleadoViewDto
                     {
                         Id = emp.Id,
-                        Nombre = emp.Nombre,
+                        Nombre = emp.NombreCompleto,
                         Cedula = emp.Cedula.ToString(),
                         Estado = estadoCalculado,
                         HoraEntrada = "No calculado",
@@ -141,12 +141,9 @@ namespace ControlAcceso.Application
             }
 
             var empleadosActivos = DatabaseService.ObtenerEmpleados(new EmpleadoFilter { SoloActivos = true });
-            if (empleadosActivos == null || empleadosActivos.Count == 0)
-            {
-                return (false, null, "No hay empleados activos registrados en la base de datos.");
-            }
 
-            int? idEmpleado = BiometricService.IdentificarEmpleado(templateCapturado, empleadosActivos);
+
+            int? idEmpleado = BiometricService.IdentificarEmpleado(templateCapturado, this.HuellasCache);
             if (!idEmpleado.HasValue)
             {
                 return (false, null, "Huella no reconocida. Acceso denegado.");
@@ -180,7 +177,7 @@ namespace ControlAcceso.Application
             string tipoTexto = tipoAsistencia == 1 ? "Entrada" : "Salida";
             string mensajeExito = $"¡Marcado de {tipoTexto} exitoso!";
 
-            return (true, mensajeExito, resultado.EmpleadoEncontrado.Nombre, horaActual);
+            return (true, mensajeExito, resultado.EmpleadoEncontrado.NombreCompleto, horaActual);
         }
 
         #endregion

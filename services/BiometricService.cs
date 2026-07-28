@@ -46,7 +46,7 @@ namespace ControlAcceso.Services
         /// <summary>
         /// Caso de Uso: Identificación 1:N. Recorre una lista de empleados para saber a quién pertenece la huella capturada.
         /// </summary>
-        public int? IdentificarEmpleado(byte[] templateCapturado, List<HuellaEmpleadoDto> huellas, double umbral = 50.0)
+        public int? IdentificarEmpleado(byte[] templateCapturado, IReadOnlyList<HuellaEmpleadoDto> huellas, double umbral = 50.0)
         {
             if (templateCapturado == null || templateCapturado.Length == 0 || huellas == null)
                 return null;
@@ -101,7 +101,7 @@ namespace ControlAcceso.Services
         /// <summary>
         /// Caso de Uso: Valida si la nueva huella que se va a registrar ya pertenece a otro empleado existente.
         /// </summary>
-        public bool ExisteHuellaDuplicada(byte[] nuevoTemplate, List<EmpleadoDto> empleadosExistentes, out string nombreEmpleadoDuplicado)
+        /*public bool ExisteHuellaDuplicada(byte[] nuevoTemplate, List<EmpleadoDto> empleadosExistentes, out string nombreEmpleadoDuplicado)
         {
             nombreEmpleadoDuplicado = string.Empty;
 
@@ -117,7 +117,7 @@ namespace ControlAcceso.Services
             }
 
             return false;
-        }
+            }*/
 
         #endregion
     }

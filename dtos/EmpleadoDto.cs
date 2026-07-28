@@ -3,7 +3,7 @@ namespace ControlAcceso.DTOs
     public class EmpleadoDto
     {
         public int Id { get; set; }
-        public string Nombre { get; set; } = string.Empty;
+        public string NombreCompleto { get; set; } = string.Empty;
         public int Cedula { get; set; }
         public DateOnly FechaNacimiento { get; set; }
         public string Direccion { get; set; } = string.Empty;

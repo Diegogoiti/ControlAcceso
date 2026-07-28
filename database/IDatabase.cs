@@ -6,22 +6,20 @@ namespace ControlAcceso.Database
 {
     public interface IDatabase
     {
-        // READ con Filtro
-        List<EmpleadoDto> ObtenerEmpleados(EmpleadoFilter? filtro = null);
+        // Métodos que faltaban en IDatabase:
+        bool AgregarEmpleado(EmpleadoSaveDto empleado);
+        bool ActualizarEmpleado(EmpleadoSaveDto empleado);
+        bool CambiarEstadoEmpleado(int id, bool activo);
 
-        // CRUD Empleados
-        void AgregarEmpleado(EmpleadoDto emp);
-        void ActualizarEmpleado(EmpleadoDto emp);
-        void CambiarEstadoEmpleado(int id, bool activo);
-        void ActualizarHuellaEmpleado(int id, byte[] nuevaHuellaBytes);
-        void EliminarEmpleado(int id);
+        // Corrige la firma de RegistrarAsistencia para incluir tipoAsistencia si aplica, o sus parámetros requeridos:
+        bool RegistrarAsistencia(AsistenciaDto asistencia);
 
-        // Asistencias
-        void RegistrarAsistencia(AsistenciaDto asistencia);
-        List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter? filtro = null);
-        // Configuración
-        (string password, TimeSpan entrada, TimeSpan salida) ObtenerConfiguracion();
-        void GuardarConfiguracion(TimeSpan entrada, TimeSpan salida, string passwordPlana);
+        bool GuardarConfiguracion(string adminPassword, TimeSpan horaEntrada, TimeSpan horaSalida);
+
+        // Asegúrate de que los métodos de consulta existentes usen las firmas correctas:
+        List<EmpleadoDto> ObtenerEmpleados(EmpleadoFilter filtro);
+        List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter filtro);
         List<HuellaEmpleadoDto> ObtenerHuellasActivas();
+        (string AdminPassword, TimeSpan HoraEntrada, TimeSpan HoraSalida)? ObtenerConfiguracion();
     }
 }
