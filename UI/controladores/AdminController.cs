@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ControlAcceso.Application;
+using ControlAcceso.DTOs;
 
 namespace ControlAcceso.UI.controladores
 {
@@ -36,6 +37,7 @@ namespace ControlAcceso.UI.controladores
 
         public async Task<bool> RegistrarEmpleadoAsync(string cedula, string nombre, string apellido, string cargo)
         {
+            Console.WriteLine("llamada a la fncion de registrar");
             if (string.IsNullOrWhiteSpace(cedula) || string.IsNullOrWhiteSpace(nombre))
             {
                 throw new ArgumentException("La cédula y el nombre son campos obligatorios.");
@@ -68,5 +70,51 @@ namespace ControlAcceso.UI.controladores
         }
 
         #endregion
+        public void ProcesarGuardadoEmpleado()
+        {
+            // 1. La Vista captura y entrega los datos
+            (string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) dto = _adminWindow.ObtenerDatosFormulario();
+
+            // 2. El Controlador valida la información
+            if (!EsFormularioValido(dto))
+            {
+                Console.WriteLine("Validación fallida.");
+                return; // Detiene el flujo si la validación falla
+            }
+            Console.WriteLine("Validación exitosa.");
+
+            // Hasta aquí llega tu alcance por ahora (falta llamar al servicio de guardado)
+        }
+
+        private bool EsFormularioValido((string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) datos)
+        {
+            if (string.IsNullOrWhiteSpace(datos.Cedula))
+            {
+                _adminWindow?.MostrarError("La cédula es obligatoria.");
+                return false;
+            }
+
+            if (!int.TryParse(datos.Cedula, out _))
+            {
+                _adminWindow?.MostrarError("La cédula debe ser un número válido.");
+                return false;
+            }
+
+            // Cambiar 'dto' por 'datos'
+            if (string.IsNullOrWhiteSpace(datos.NombreCompleto))
+            {
+                _adminWindow?.MostrarError("El nombre completo es obligatorio.");
+                return false;
+            }
+
+            // Cambiar 'dto' por 'datos'
+            if (!datos.FechaNacimiento.HasValue)
+            {
+                _adminWindow?.MostrarError("Debe seleccionar una fecha de nacimiento.");
+                return false;
+            }
+
+            return true;
+        }
     }
 }

@@ -172,7 +172,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Button x:Name="btnGuardarEmpleado" Content="Guardar Empleado" Height="45" Background="#16A34A" Foreground="White" FontSize="15" FontWeight="Bold" BorderThickness="0" Cursor="Hand">
+                        <Button x:Name="btnGuardarEmpleado" Content="Guardar Empleado" Height="45" Background="#16A34A" Foreground="White" FontSize="15" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="btnGuardarEmpleado_Click">
                             <Button.Resources>
                                 <Style TargetType="Border"><Setter Property="CornerRadius" Value="8"/></Style>
                             </Button.Resources>
