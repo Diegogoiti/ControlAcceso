@@ -262,6 +262,16 @@ private void RestaurarEstadoTodosLosBotones(int esperandoDedo)
         }
     }
 }
+
+public void CancelarCaptura()
+{
+    if (_ctsCaptura != null && !_ctsCaptura.IsCancellationRequested)
+    {
+        _ctsCaptura.Cancel();
+        _ctsCaptura.Dispose();
+        _ctsCaptura = null;
+    }
+}
     }
 
 }

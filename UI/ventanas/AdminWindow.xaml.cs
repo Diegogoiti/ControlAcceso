@@ -16,12 +16,15 @@ namespace ControlAcceso
         public AdminWindow()
         {
             InitializeComponent();
+            this.Closing += AdminWindow_Closing;
+            
         }
 
         // Constructor principal con inyección de controlador
         public AdminWindow(AdminController controller) : this()
                 {
                     _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+                    
                 }
 
         private void CambiarPestaña(UIElement panelActivo)
@@ -125,6 +128,12 @@ public void EstablecerEstadoEsperandoHuella(int numeroDedo)
             btnHuella3.Content = texto;
             break;
     }
+}
+
+private void AdminWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+{
+    // Si el controlador necesita liberar recursos (como el lector biométrico):
+    _controller?.CancelarCaptura();
 }
     }
 }
