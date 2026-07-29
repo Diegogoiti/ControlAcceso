@@ -20,9 +20,9 @@ namespace ControlAcceso
 
         // Constructor principal con inyección de controlador
         public AdminWindow(AdminController controller) : this()
-        {
-            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
-        }
+                {
+                    _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+                }
 
         private void CambiarPestaña(UIElement panelActivo)
         {
@@ -67,58 +67,64 @@ namespace ControlAcceso
         }
 
         private async void btnCapturarDedo_Click(object sender, RoutedEventArgs e)
+{
+    if (sender is Button btn && btn.Tag != null)
+    {
+        int numeroDedo = Convert.ToInt32(btn.Tag);
+        
+        // Llamamos al controlador pasándole el número de dedo seleccionado
+        if (_controller != null)
         {
-            if (sender is Button btn && btn.Tag != null)
-            {
-                int numeroDedo = Convert.ToInt32(btn.Tag);
-
-                // Llamamos al controlador pasándole el número de dedo seleccionado
-                if (_controller != null)
-                {
-                    await _controller.CapturarHuellaDedoAsync(numeroDedo);
-                }
-            }
+            await _controller.CapturarHuellaDedoAsync(numeroDedo);
         }
+    }
+}
 
-        // Método para actualizar visualmente la etiqueta de los botones según el estado
-        public void ActualizarEstadoHuella(int numeroDedo, bool registrada)
-        {
-            string estado = registrada ? "✅ Registrado" : "No registrado";
-            string texto = $"👍 Dedo {numeroDedo} ({estado})";
+// Método para actualizar visualmente la etiqueta de los botones según el estado
+public void ActualizarEstadoHuella(int numeroDedo, bool registrada)
+{
+    string estado = registrada ? "✅ Registrado" : "No registrado";
+    string texto = $"👍 Dedo {numeroDedo} ({estado})";
 
-            switch (numeroDedo)
-            {
-                case 1:
-                    btnHuella1.Content = texto;
-                    break;
-                case 2:
-                    btnHuella2.Content = texto;
-                    break;
-                case 3:
-                    btnHuella3.Content = texto;
-                    break;
-            }
-        }
+    switch (numeroDedo)
+    {
+        case 1:
+            btnHuella1.Content = texto;
+            btnHuella1.IsEnabled = true;
+            break;
+        case 2:
+            btnHuella2.Content = texto;
+            btnHuella2.IsEnabled = true;
+            break;
+        case 3:
+            btnHuella3.Content = texto;
+            btnHuella3.IsEnabled = true;
+            break;
+    }
+}
 
-        public void EstablecerEstadoEsperandoHuella(int numeroDedo)
-        {
-            string texto = $"⏳ Coloque el dedo {numeroDedo}...";
+public void EstablecerEstadoEsperandoHuella(int numeroDedo)
+{
+    string texto = $"⏳ Coloque el dedo {numeroDedo}...";
 
-            switch (numeroDedo)
-            {
-                case 1:
-                    btnHuella1.Content = texto;
-                    btnHuella1.IsEnabled = false; // Opcional: deshabilita para evitar múltiples clics
-                    break;
-                case 2:
-                    btnHuella2.Content = texto;
-                    btnHuella2.IsEnabled = false;
-                    break;
-                case 3:
-                    btnHuella3.Content = texto;
-                    btnHuella3.IsEnabled = false;
-                    break;
-            }
-        }
+    // 1. Mantenemos habilitados los botones para permitir cambiar entre ellos
+    btnHuella1.IsEnabled = true;
+    btnHuella2.IsEnabled = true;
+    btnHuella3.IsEnabled = true;
+
+    // 2. Aplicamos el texto de espera al dedo seleccionado
+    switch (numeroDedo)
+    {
+        case 1:
+            btnHuella1.Content = texto;
+            break;
+        case 2:
+            btnHuella2.Content = texto;
+            break;
+        case 3:
+            btnHuella3.Content = texto;
+            break;
+    }
+}
     }
 }
