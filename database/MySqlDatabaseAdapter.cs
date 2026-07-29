@@ -205,7 +205,7 @@ namespace ControlAcceso.Database
             return cmd.ExecuteNonQuery() > 0;
         }
 
-        public bool ActualizarEmpleado( EmpleadoSaveDto empleado)
+        public bool ActualizarEmpleado(EmpleadoSaveDto empleado)
         {
             using var conn = GetConnection();
             conn.Open();

@@ -76,9 +76,9 @@ namespace ControlAcceso.UI.controladores
         }
 
         public void AbrirRegistroEmpleado()
-                {
-                    // 3. El controlador principal simplemente delega la responsabilidad al controlador de Admin
-                    _adminController.MostrarVentanaAdmin();
-                }
+        {
+            // 3. El controlador principal simplemente delega la responsabilidad al controlador de Admin
+            _adminController.MostrarVentanaAdmin();
+        }
     }
 }

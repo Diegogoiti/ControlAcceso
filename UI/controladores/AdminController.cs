@@ -10,6 +10,9 @@ namespace ControlAcceso.UI.controladores
     {
         private readonly MyApp _app;
         private AdminWindow? _adminWindow;
+        private CancellationTokenSource? _ctsCaptura;
+
+
         private readonly Dictionary<int, byte[]> _huellasCapturadas = new();
 
         public AdminController(MyApp app)
@@ -74,10 +77,10 @@ namespace ControlAcceso.UI.controladores
         public void ProcesarGuardadoEmpleado()
         {
             if (_adminWindow == null)
-    {
-        Console.WriteLine("Error: La vista no está inicializada.");
-        return;
-    }
+            {
+                Console.WriteLine("Error: La vista no está inicializada.");
+                return;
+            }
             // 1. La Vista captura y entrega los datos
             (string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) dto = _adminWindow.ObtenerDatosFormulario();
 
@@ -94,115 +97,124 @@ namespace ControlAcceso.UI.controladores
         }
 
         private bool EsFormularioValido((string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) datos)
-{
-    // 1. Validar Cédula (no vacía y numérica)
-    if (string.IsNullOrWhiteSpace(datos.Cedula))
-    {
-        _adminWindow?.MostrarError("La cédula es obligatoria.");
-        return false;
-    }
-
-    if (!int.TryParse(datos.Cedula.Trim(), out int cedula) || cedula <= 0)
-    {
-        _adminWindow?.MostrarError("La cédula debe ser un número entero válido.");
-        return false;
-    }
-
-    // 2. Validar Nombre Completo
-    if (string.IsNullOrWhiteSpace(datos.NombreCompleto))
-    {
-        _adminWindow?.MostrarError("El nombre completo es obligatorio.");
-        return false;
-    }
-
-    // 3. Validar Fecha de Nacimiento
-    if (!datos.FechaNacimiento.HasValue)
-    {
-        _adminWindow?.MostrarError("Debe seleccionar una fecha de nacimiento.");
-        return false;
-    }
-
-    // 4. Validar Teléfono Principal (no vacío y formato numérico)
-    if (string.IsNullOrWhiteSpace(datos.Telefono))
-    {
-        _adminWindow?.MostrarError("El teléfono principal es obligatorio.");
-        return false;
-    }
-
-    string telefonoLimpio = datos.Telefono.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
-    if (!long.TryParse(telefonoLimpio, out _))
-    {
-        _adminWindow?.MostrarError("El teléfono principal debe contener un número válido.");
-        return false;
-    }
-
-    // 5. Validar Teléfono de Emergencia (no vacío y formato numérico)
-    if (string.IsNullOrWhiteSpace(datos.TelefonoEmergencia))
-    {
-        _adminWindow?.MostrarError("El teléfono de emergencia es obligatorio.");
-        return false;
-    }
-
-    string telefonoEmergenciaLimpio = datos.TelefonoEmergencia.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
-    if (!long.TryParse(telefonoEmergenciaLimpio, out _))
-    {
-        _adminWindow?.MostrarError("El teléfono de emergencia debe contener un número válido.");
-        return false;
-    }
-
-    // 6. Validar Dirección
-    if (string.IsNullOrWhiteSpace(datos.Direccion))
-    {
-        _adminWindow?.MostrarError("La dirección de habitación es obligatoria.");
-        return false;
-    }
-
-    if (_huellasCapturadas.Count < 3)
-    {
-        _adminWindow?.MostrarError("Debe registrar al menos tres huellas dactilares para el empleado.");
-        return false;
-    }
-
-
-
-    return true;
-}
-public async Task CapturarHuellaDedoAsync(int numeroDedo, CancellationToken cancellationToken = default)
-{
-    try
-    {
-        // 1. Capturar imagen raw desde el lector
-        byte[]? rawImage = await _app.IniciarCapturaAsync(cancellationToken);
-        if (rawImage == null || rawImage.Length == 0)
         {
-            _adminWindow?.MostrarError("No se logró capturar la imagen del sensor o la operación fue cancelada.");
-            return;
-        }
+            // 1. Validar Cédula (no vacía y numérica)
+            if (string.IsNullOrWhiteSpace(datos.Cedula))
+            {
+                _adminWindow?.MostrarError("La cédula es obligatoria.");
+                return false;
+            }
 
-        // 2. Extraer el template a partir de la imagen bruta
-        if (!_app.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string msgError))
+            if (!int.TryParse(datos.Cedula.Trim(), out int cedula) || cedula <= 0)
+            {
+                _adminWindow?.MostrarError("La cédula debe ser un número entero válido.");
+                return false;
+            }
+
+            // 2. Validar Nombre Completo
+            if (string.IsNullOrWhiteSpace(datos.NombreCompleto))
+            {
+                _adminWindow?.MostrarError("El nombre completo es obligatorio.");
+                return false;
+            }
+
+            // 3. Validar Fecha de Nacimiento
+            if (!datos.FechaNacimiento.HasValue)
+            {
+                _adminWindow?.MostrarError("Debe seleccionar una fecha de nacimiento.");
+                return false;
+            }
+
+            // 4. Validar Teléfono Principal (no vacío y formato numérico)
+            if (string.IsNullOrWhiteSpace(datos.Telefono))
+            {
+                _adminWindow?.MostrarError("El teléfono principal es obligatorio.");
+                return false;
+            }
+
+            string telefonoLimpio = datos.Telefono.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
+            if (!long.TryParse(telefonoLimpio, out _))
+            {
+                _adminWindow?.MostrarError("El teléfono principal debe contener un número válido.");
+                return false;
+            }
+
+            // 5. Validar Teléfono de Emergencia (no vacío y formato numérico)
+            if (string.IsNullOrWhiteSpace(datos.TelefonoEmergencia))
+            {
+                _adminWindow?.MostrarError("El teléfono de emergencia es obligatorio.");
+                return false;
+            }
+
+            string telefonoEmergenciaLimpio = datos.TelefonoEmergencia.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
+            if (!long.TryParse(telefonoEmergenciaLimpio, out _))
+            {
+                _adminWindow?.MostrarError("El teléfono de emergencia debe contener un número válido.");
+                return false;
+            }
+
+            // 6. Validar Dirección
+            if (string.IsNullOrWhiteSpace(datos.Direccion))
+            {
+                _adminWindow?.MostrarError("La dirección de habitación es obligatoria.");
+                return false;
+            }
+
+            if (_huellasCapturadas.Count < 3)
+            {
+                _adminWindow?.MostrarError("Debe registrar al menos tres huellas dactilares para el empleado.");
+                return false;
+            }
+
+
+
+            return true;
+        }
+        public async Task CapturarHuellaDedoAsync(int numeroDedo, CancellationToken cancellationToken = default)
         {
-            _adminWindow?.MostrarError(msgError);
-            return;
+            bool exitoCaptura = false;
+
+            try
+            {
+                // 1. Feedback inmediato al usuario
+                _adminWindow?.EstablecerEstadoEsperandoHuella(numeroDedo);
+
+                // 2. Capturar imagen raw desde el lector (esperando que el usuario ponga el dedo)
+                byte[]? rawImage = await _app.IniciarCapturaAsync(cancellationToken);
+                if (rawImage == null || rawImage.Length == 0)
+                {
+                    _adminWindow?.MostrarError("No se logró capturar la imagen del sensor o la operación fue cancelada.");
+                    return;
+                }
+
+                // 3. Extraer el template a partir de la imagen bruta
+                if (!_app.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string msgError))
+                {
+                    _adminWindow?.MostrarError(msgError);
+                    return;
+                }
+
+                if (templateCapturado == null)
+                {
+                    _adminWindow?.MostrarError("Ocurrió un error inesperado al procesar el template biométrico.");
+                    return;
+                }
+
+                // 4. Guardar template
+                _huellasCapturadas[numeroDedo] = templateCapturado;
+                exitoCaptura = true;
+            }
+            catch (Exception ex)
+            {
+                _adminWindow?.MostrarError($"Error en el proceso de captura: {ex.Message}");
+            }
+            finally
+            {
+                // 5. Restablecer el estado del botón según corresponda (ya sea registrado o si ya tenía una huella previa)
+                bool estaRegistradoActualmente = exitoCaptura || _huellasCapturadas.ContainsKey(numeroDedo);
+                _adminWindow?.ActualizarEstadoHuella(numeroDedo, registrada: estaRegistradoActualmente);
+            }
         }
-
-        if (templateCapturado == null)
-        {
-            _adminWindow?.MostrarError("Ocurrió un error inesperado al procesar el template biométrico.");
-            return;
-        }
-
-        // 3. Guardar o reemplazar el template en el diccionario asociado al dedo
-        _huellasCapturadas[numeroDedo] = templateCapturado;
-
-        // 4. Actualizar la interfaz para dar feedback visual
-        _adminWindow?.ActualizarEstadoHuella(numeroDedo, registrada: true);
-    }
-    catch (Exception ex)
-    {
-        _adminWindow?.MostrarError($"Error en el proceso de captura: {ex.Message}");
-    }
-}
     }
 
 }
