@@ -43,7 +43,7 @@ namespace ControlAcceso
         private void txtBuscarNombre_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
         private void cmbFiltroEstado_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) { }
 
-        public (string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) ObtenerDatosFormulario()
+        public EmpleadoSaveDto ObtenerDatosFormulario()
         {
             var datosCrudos = (
                     Cedula: txtCedula.Text,
@@ -54,8 +54,19 @@ namespace ControlAcceso
                     Direccion: txtDireccion.Text,
                     RolTexto: (cmbRol.SelectedItem as ComboBoxItem)?.Content?.ToString()
                 );
+            
+            var nuevoEmpleado = new EmpleadoSaveDto
+            {
+                Cedula = datosCrudos.Cedula,
+                NombreCompleto = datosCrudos.NombreCompleto,
+                FechaNacimiento = datosCrudos.FechaNacimiento.HasValue ? DateOnly.FromDateTime(datosCrudos.FechaNacimiento.Value) : default,
+                Telefono = datosCrudos.Telefono,
+                TelefonoEmergencia = datosCrudos.TelefonoEmergencia,
+                Direccion = datosCrudos.Direccion,
+                RolId = cmbRol.SelectedIndex // Asumiendo que el índice corresponde al ID del rol
+            };
 
-            return datosCrudos;
+            return nuevoEmpleado;
         }
 
         private void btnGuardarEmpleado_Click(object sender, RoutedEventArgs e)
@@ -134,6 +145,11 @@ private void AdminWindow_Closing(object? sender, System.ComponentModel.CancelEve
 {
     // Si el controlador necesita liberar recursos (como el lector biométrico):
     _controller?.CancelarCaptura();
+}
+
+public void MostrarMensaje(string mensaje, string titulo = "Información")
+{
+    MessageBox.Show(mensaje, titulo, MessageBoxButton.OK, MessageBoxImage.Information);
 }
     }
 }

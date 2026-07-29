@@ -5,7 +5,7 @@ namespace ControlAcceso.DTOs
         public int Id { get; set; }
 
         public string NombreCompleto { get; set; } = string.Empty;
-        public int Cedula { get; set; }
+        public string Cedula { get; set; } = string.Empty;
         public DateOnly FechaNacimiento { get; set; }
         public string Direccion { get; set; } = string.Empty;
         public string Telefono { get; set; } = string.Empty;

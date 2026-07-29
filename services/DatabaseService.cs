@@ -41,9 +41,9 @@ namespace ControlAcceso.Services
                 return false;
             }
 
-            if (empleado.Cedula <= 0)
+            if (empleado.Cedula.Length > 20)
             {
-                mensajeError = "La cédula ingresada no es válida.";
+                mensajeError = "La cédula ingresada excede el límite de 20 caracteres.";
                 return false;
             }
 

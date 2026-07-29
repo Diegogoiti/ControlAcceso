@@ -82,79 +82,84 @@ namespace ControlAcceso.UI.controladores
                 return;
             }
             // 1. La Vista captura y entrega los datos
-            (string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) dto = _adminWindow.ObtenerDatosFormulario();
+            EmpleadoSaveDto emp = _adminWindow.ObtenerDatosFormulario();
 
             // 2. El Controlador valida la información
-            if (!EsFormularioValido(dto))
+            if (!EsFormularioValido(emp))
             {
                 Console.WriteLine("Validación fallida.");
                 return; // Detiene el flujo si la validación falla
             }
             Console.WriteLine("Validación exitosa.");
-            //Console.WriteLine($"cargo: {dto.RolTexto}");
 
-            // Hasta aquí llega tu alcance por ahora (falta llamar al servicio de guardado)
+
+            int index = 0;
+    foreach (var kvp in _huellasCapturadas)
+    {
+        emp.Huellas[index] = new HuellaEmpleadoDto
+        {
+            Dedo = kvp.Key,      // 1, 2 o 3
+            TemplateHuella = kvp.Value   // byte[]
+        };
+        index++;
+    }
+
+            try{
+            _app.GuardarEmpleado(emp);
+            Console.WriteLine("Empleado guardado exitosamente.");
+            _adminWindow.MostrarMensaje("Empleado guardado exitosamente.");
+            }
+            catch(Exception ex)
+            {
+                _adminWindow.MostrarError($"Error al guardar el empleado: {ex.Message}");
+            }
+            
         }
 
-        private bool EsFormularioValido((string Cedula, string NombreCompleto, DateTime? FechaNacimiento, string Telefono, string TelefonoEmergencia, string Direccion, string? RolTexto) datos)
+        private bool EsFormularioValido(EmpleadoSaveDto emp)
         {
             // 1. Validar Cédula (no vacía y numérica)
-            if (string.IsNullOrWhiteSpace(datos.Cedula))
+            if (string.IsNullOrWhiteSpace(emp.Cedula))
             {
                 _adminWindow?.MostrarError("La cédula es obligatoria.");
                 return false;
             }
 
-            if (!int.TryParse(datos.Cedula.Trim(), out int cedula) || cedula <= 0)
-            {
-                _adminWindow?.MostrarError("La cédula debe ser un número entero válido.");
-                return false;
-            }
 
             // 2. Validar Nombre Completo
-            if (string.IsNullOrWhiteSpace(datos.NombreCompleto))
+            if (string.IsNullOrWhiteSpace(emp.NombreCompleto))
             {
                 _adminWindow?.MostrarError("El nombre completo es obligatorio.");
                 return false;
             }
 
+    //Console.WriteLine($"Fecha de Nacimiento: {emp.FechaNacimiento}"); // Debugging line
             // 3. Validar Fecha de Nacimiento
-            if (!datos.FechaNacimiento.HasValue)
+            if (/*!emp.FechaNacimiento.HasValue ||*/ emp.FechaNacimiento == default(DateOnly))
             {
                 _adminWindow?.MostrarError("Debe seleccionar una fecha de nacimiento.");
                 return false;
             }
 
             // 4. Validar Teléfono Principal (no vacío y formato numérico)
-            if (string.IsNullOrWhiteSpace(datos.Telefono))
+            if (string.IsNullOrWhiteSpace(emp.Telefono))
             {
                 _adminWindow?.MostrarError("El teléfono principal es obligatorio.");
                 return false;
             }
 
-            string telefonoLimpio = datos.Telefono.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
-            if (!long.TryParse(telefonoLimpio, out _))
-            {
-                _adminWindow?.MostrarError("El teléfono principal debe contener un número válido.");
-                return false;
-            }
 
             // 5. Validar Teléfono de Emergencia (no vacío y formato numérico)
-            if (string.IsNullOrWhiteSpace(datos.TelefonoEmergencia))
+            if (string.IsNullOrWhiteSpace(emp.TelefonoEmergencia))
             {
                 _adminWindow?.MostrarError("El teléfono de emergencia es obligatorio.");
                 return false;
             }
 
-            string telefonoEmergenciaLimpio = datos.TelefonoEmergencia.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
-            if (!long.TryParse(telefonoEmergenciaLimpio, out _))
-            {
-                _adminWindow?.MostrarError("El teléfono de emergencia debe contener un número válido.");
-                return false;
-            }
+            
 
             // 6. Validar Dirección
-            if (string.IsNullOrWhiteSpace(datos.Direccion))
+            if (string.IsNullOrWhiteSpace(emp.Direccion))
             {
                 _adminWindow?.MostrarError("La dirección de habitación es obligatoria.");
                 return false;
@@ -165,6 +170,8 @@ namespace ControlAcceso.UI.controladores
                 _adminWindow?.MostrarError("Debe registrar al menos tres huellas dactilares para el empleado.");
                 return false;
             }
+
+            
 
 
 

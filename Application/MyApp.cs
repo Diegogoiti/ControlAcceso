@@ -191,5 +191,12 @@ namespace ControlAcceso.Application
         {
             return BiometricService.ProcesarHuellaBruta(rawImage, out templateCapturado, out mensajeError);
         }
+
+        public (bool, string) GuardarEmpleado(EmpleadoSaveDto emp)
+        {
+            var mensajeError = string.Empty;
+            var exito = DatabaseService.RegistrarEmpleado(emp, out mensajeError);
+            return (exito, mensajeError);
+        }
     }
 }
