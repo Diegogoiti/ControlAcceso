@@ -9,13 +9,13 @@ namespace ControlAcceso.UI.controladores
     {
         private readonly MyApp _app;
         private MainWindow? _vista;
-        private readonly AdminController _adminController;
+        //private readonly AdminController _adminController;
         private CancellationTokenSource? _ctsCaptura;
 
         public MainController(MyApp app)
         {
             _app = app ?? throw new ArgumentNullException(nameof(app));
-            _adminController = new AdminController(_app);
+            //_adminController = new AdminController(_app);
         }
 
         public void IniciarAplicacion()
@@ -76,9 +76,9 @@ namespace ControlAcceso.UI.controladores
         }
 
         public void AbrirRegistroEmpleado()
-        {
-            // 3. El controlador principal simplemente delega la responsabilidad al controlador de Admin
-            _adminController.MostrarVentanaAdmin();
-        }
+{
+    var adminController = new AdminController(_app);
+    adminController.MostrarVentanaAdmin();
+}
     }
 }

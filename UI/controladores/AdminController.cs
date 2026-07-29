@@ -91,7 +91,7 @@ namespace ControlAcceso.UI.controladores
                 return; // Detiene el flujo si la validación falla
             }
             Console.WriteLine("Validación exitosa.");
-            Console.WriteLine($"cargo: {dto.RolTexto}");
+            //Console.WriteLine($"cargo: {dto.RolTexto}");
 
             // Hasta aquí llega tu alcance por ahora (falta llamar al servicio de guardado)
         }
