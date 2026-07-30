@@ -118,12 +118,23 @@ namespace ControlAcceso.UI.controladores
 
         private bool EsFormularioValido(EmpleadoSaveDto emp)
         {
+            emp.Cedula = emp.Cedula.Trim();
+            emp.Telefono = emp.Telefono.Trim();
+            emp.TelefonoEmergencia = emp.TelefonoEmergencia.Trim();
+
+
             // 1. Validar Cédula (no vacía y numérica)
             if (string.IsNullOrWhiteSpace(emp.Cedula))
             {
                 _adminWindow?.MostrarError("La cédula es obligatoria.");
                 return false;
             }
+
+            if (!emp.Cedula.All(char.IsDigit))
+{
+    _adminWindow?.MostrarError("La cédula debe contener solo números.");
+    return false;
+}
 
 
             // 2. Validar Nombre Completo
@@ -133,9 +144,8 @@ namespace ControlAcceso.UI.controladores
                 return false;
             }
 
-    //Console.WriteLine($"Fecha de Nacimiento: {emp.FechaNacimiento}"); // Debugging line
-            // 3. Validar Fecha de Nacimiento
-            if (/*!emp.FechaNacimiento.HasValue ||*/ emp.FechaNacimiento == default(DateOnly))
+
+            if (emp.FechaNacimiento == default(DateOnly))
             {
                 _adminWindow?.MostrarError("Debe seleccionar una fecha de nacimiento.");
                 return false;
@@ -148,6 +158,11 @@ namespace ControlAcceso.UI.controladores
                 return false;
             }
 
+             if (!emp.Telefono.All(char.IsDigit))
+            {
+                _adminWindow?.MostrarError("El teléfono principal debe contener solo números.");
+                return false;
+            }
 
             // 5. Validar Teléfono de Emergencia (no vacío y formato numérico)
             if (string.IsNullOrWhiteSpace(emp.TelefonoEmergencia))
@@ -156,7 +171,11 @@ namespace ControlAcceso.UI.controladores
                 return false;
             }
 
-            
+             if (!emp.TelefonoEmergencia.All(char.IsDigit))
+            {
+                _adminWindow?.MostrarError("El teléfono de emergencia debe contener solo números.");
+                return false;
+            }
 
             // 6. Validar Dirección
             if (string.IsNullOrWhiteSpace(emp.Direccion))
