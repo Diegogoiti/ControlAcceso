@@ -17,15 +17,15 @@ namespace ControlAcceso
         {
             InitializeComponent();
             this.Closing += AdminWindow_Closing;
-            
+
         }
 
         // Constructor principal con inyección de controlador
         public AdminWindow(AdminController controller) : this()
-                {
-                    _controller = controller ?? throw new ArgumentNullException(nameof(controller));
-                    
-                }
+        {
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+
+        }
 
         private void CambiarPestaña(UIElement panelActivo)
         {
@@ -54,7 +54,7 @@ namespace ControlAcceso
                     Direccion: txtDireccion.Text,
                     RolTexto: (cmbRol.SelectedItem as ComboBoxItem)?.Content?.ToString()
                 );
-            
+
             var nuevoEmpleado = new EmpleadoSaveDto
             {
                 Cedula = datosCrudos.Cedula,
@@ -81,75 +81,75 @@ namespace ControlAcceso
         }
 
         private async void btnCapturarDedo_Click(object sender, RoutedEventArgs e)
-{
-    if (sender is Button btn && btn.Tag != null)
-    {
-        int numeroDedo = Convert.ToInt32(btn.Tag);
-        
-        // Llamamos al controlador pasándole el número de dedo seleccionado
-        if (_controller != null)
         {
-            await _controller.CapturarHuellaDedoAsync(numeroDedo);
+            if (sender is Button btn && btn.Tag != null)
+            {
+                int numeroDedo = Convert.ToInt32(btn.Tag);
+
+                // Llamamos al controlador pasándole el número de dedo seleccionado
+                if (_controller != null)
+                {
+                    await _controller.CapturarHuellaDedoAsync(numeroDedo);
+                }
+            }
         }
-    }
-}
 
-// Método para actualizar visualmente la etiqueta de los botones según el estado
-public void ActualizarEstadoHuella(int numeroDedo, bool registrada)
-{
-    string estado = registrada ? "✅ Registrado" : "No registrado";
-    string texto = $"👍 Dedo {numeroDedo} ({estado})";
+        // Método para actualizar visualmente la etiqueta de los botones según el estado
+        public void ActualizarEstadoHuella(int numeroDedo, bool registrada)
+        {
+            string estado = registrada ? "✅ Registrado" : "No registrado";
+            string texto = $"👍 Dedo {numeroDedo} ({estado})";
 
-    switch (numeroDedo)
-    {
-        case 1:
-            btnHuella1.Content = texto;
+            switch (numeroDedo)
+            {
+                case 1:
+                    btnHuella1.Content = texto;
+                    btnHuella1.IsEnabled = true;
+                    break;
+                case 2:
+                    btnHuella2.Content = texto;
+                    btnHuella2.IsEnabled = true;
+                    break;
+                case 3:
+                    btnHuella3.Content = texto;
+                    btnHuella3.IsEnabled = true;
+                    break;
+            }
+        }
+
+        public void EstablecerEstadoEsperandoHuella(int numeroDedo)
+        {
+            string texto = $"⏳ Coloque el dedo {numeroDedo}...";
+
+            // 1. Mantenemos habilitados los botones para permitir cambiar entre ellos
             btnHuella1.IsEnabled = true;
-            break;
-        case 2:
-            btnHuella2.Content = texto;
             btnHuella2.IsEnabled = true;
-            break;
-        case 3:
-            btnHuella3.Content = texto;
             btnHuella3.IsEnabled = true;
-            break;
-    }
-}
 
-public void EstablecerEstadoEsperandoHuella(int numeroDedo)
-{
-    string texto = $"⏳ Coloque el dedo {numeroDedo}...";
+            // 2. Aplicamos el texto de espera al dedo seleccionado
+            switch (numeroDedo)
+            {
+                case 1:
+                    btnHuella1.Content = texto;
+                    break;
+                case 2:
+                    btnHuella2.Content = texto;
+                    break;
+                case 3:
+                    btnHuella3.Content = texto;
+                    break;
+            }
+        }
 
-    // 1. Mantenemos habilitados los botones para permitir cambiar entre ellos
-    btnHuella1.IsEnabled = true;
-    btnHuella2.IsEnabled = true;
-    btnHuella3.IsEnabled = true;
+        private void AdminWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // Si el controlador necesita liberar recursos (como el lector biométrico):
+            _controller?.CancelarCaptura();
+        }
 
-    // 2. Aplicamos el texto de espera al dedo seleccionado
-    switch (numeroDedo)
-    {
-        case 1:
-            btnHuella1.Content = texto;
-            break;
-        case 2:
-            btnHuella2.Content = texto;
-            break;
-        case 3:
-            btnHuella3.Content = texto;
-            break;
-    }
-}
-
-private void AdminWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
-{
-    // Si el controlador necesita liberar recursos (como el lector biométrico):
-    _controller?.CancelarCaptura();
-}
-
-public void MostrarMensaje(string mensaje, string titulo = "Información")
-{
-    MessageBox.Show(mensaje, titulo, MessageBoxButton.OK, MessageBoxImage.Information);
-}
+        public void MostrarMensaje(string mensaje, string titulo = "Información")
+        {
+            MessageBox.Show(mensaje, titulo, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 }

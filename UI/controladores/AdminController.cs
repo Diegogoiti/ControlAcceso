@@ -94,26 +94,27 @@ namespace ControlAcceso.UI.controladores
 
 
             int index = 0;
-    foreach (var kvp in _huellasCapturadas)
-    {
-        emp.Huellas[index] = new HuellaEmpleadoDto
-        {
-            Dedo = kvp.Key,      // 1, 2 o 3
-            TemplateHuella = kvp.Value   // byte[]
-        };
-        index++;
-    }
-
-            try{
-            _app.GuardarEmpleado(emp);
-            Console.WriteLine("Empleado guardado exitosamente.");
-            _adminWindow.MostrarMensaje("Empleado guardado exitosamente.");
+            foreach (var kvp in _huellasCapturadas)
+            {
+                emp.Huellas[index] = new HuellaEmpleadoDto
+                {
+                    Dedo = kvp.Key,      // 1, 2 o 3
+                    TemplateHuella = kvp.Value   // byte[]
+                };
+                index++;
             }
-            catch(Exception ex)
+
+            try
+            {
+                _app.GuardarEmpleado(emp);
+                Console.WriteLine("Empleado guardado exitosamente.");
+                _adminWindow.MostrarMensaje("Empleado guardado exitosamente.");
+            }
+            catch (Exception ex)
             {
                 _adminWindow.MostrarError($"Error al guardar el empleado: {ex.Message}");
             }
-            
+
         }
 
         private bool EsFormularioValido(EmpleadoSaveDto emp)
@@ -131,10 +132,10 @@ namespace ControlAcceso.UI.controladores
             }
 
             if (!emp.Cedula.All(char.IsDigit))
-{
-    _adminWindow?.MostrarError("La cédula debe contener solo números.");
-    return false;
-}
+            {
+                _adminWindow?.MostrarError("La cédula debe contener solo números.");
+                return false;
+            }
 
 
             // 2. Validar Nombre Completo
@@ -158,7 +159,7 @@ namespace ControlAcceso.UI.controladores
                 return false;
             }
 
-             if (!emp.Telefono.All(char.IsDigit))
+            if (!emp.Telefono.All(char.IsDigit))
             {
                 _adminWindow?.MostrarError("El teléfono principal debe contener solo números.");
                 return false;
@@ -171,7 +172,7 @@ namespace ControlAcceso.UI.controladores
                 return false;
             }
 
-             if (!emp.TelefonoEmergencia.All(char.IsDigit))
+            if (!emp.TelefonoEmergencia.All(char.IsDigit))
             {
                 _adminWindow?.MostrarError("El teléfono de emergencia debe contener solo números.");
                 return false;
@@ -190,114 +191,114 @@ namespace ControlAcceso.UI.controladores
                 return false;
             }
 
-            
+
 
 
 
             return true;
         }
         public async Task CapturarHuellaDedoAsync(int numeroDedo)
-{
-    // 1. Cancelar cualquier proceso de captura en curso
-    _ctsCaptura?.Cancel();
-    _ctsCaptura?.Dispose();
-
-    // 2. Crear un nuevo CTS para la solicitud actual
-    _ctsCaptura = new CancellationTokenSource();
-    var token = _ctsCaptura.Token;
-
-    bool exitoCaptura = false;
-
-    // 3. Restaurar los otros botones a su estado normal (efecto selector de radio)
-    RestaurarEstadoTodosLosBotones(esperandoDedo: numeroDedo);
-
-    try
-    {
-        // 4. Feedback inmediato al botón seleccionado
-        _adminWindow?.EstablecerEstadoEsperandoHuella(numeroDedo);
-
-        // 5. Capturar pasando el token de esta ejecución activa
-        byte[]? rawImage = await _app.IniciarCapturaAsync(token);
-        
-        if (rawImage == null || rawImage.Length == 0)
         {
-            if (token.IsCancellationRequested) return;
+            // 1. Cancelar cualquier proceso de captura en curso
+            _ctsCaptura?.Cancel();
+            _ctsCaptura?.Dispose();
 
-            _adminWindow?.MostrarError("No se logró capturar la imagen del sensor o la operación fue cancelada.");
-            return;
-        }
+            // 2. Crear un nuevo CTS para la solicitud actual
+            _ctsCaptura = new CancellationTokenSource();
+            var token = _ctsCaptura.Token;
 
-        if (token.IsCancellationRequested) return;
+            bool exitoCaptura = false;
 
-        // 6. Procesar el template
-        if (!_app.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string msgError))
-        {
-            if (!token.IsCancellationRequested)
+            // 3. Restaurar los otros botones a su estado normal (efecto selector de radio)
+            RestaurarEstadoTodosLosBotones(esperandoDedo: numeroDedo);
+
+            try
             {
-                _adminWindow?.MostrarError(msgError);
-            }
-            return;
-        }
+                // 4. Feedback inmediato al botón seleccionado
+                _adminWindow?.EstablecerEstadoEsperandoHuella(numeroDedo);
 
-        if (templateCapturado == null)
-        {
-            if (!token.IsCancellationRequested)
+                // 5. Capturar pasando el token de esta ejecución activa
+                byte[]? rawImage = await _app.IniciarCapturaAsync(token);
+
+                if (rawImage == null || rawImage.Length == 0)
+                {
+                    if (token.IsCancellationRequested) return;
+
+                    _adminWindow?.MostrarError("No se logró capturar la imagen del sensor o la operación fue cancelada.");
+                    return;
+                }
+
+                if (token.IsCancellationRequested) return;
+
+                // 6. Procesar el template
+                if (!_app.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string msgError))
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow?.MostrarError(msgError);
+                    }
+                    return;
+                }
+
+                if (templateCapturado == null)
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow?.MostrarError("Ocurrió un error inesperado al procesar el template biométrico.");
+                    }
+                    return;
+                }
+
+                // 7. Guardar template si esta tarea sigue siendo la activa
+                if (!token.IsCancellationRequested)
+                {
+                    _huellasCapturadas[numeroDedo] = templateCapturado;
+                    exitoCaptura = true;
+                }
+            }
+            catch (OperationCanceledException)
             {
-                _adminWindow?.MostrarError("Ocurrió un error inesperado al procesar el template biométrico.");
+                // Cancelación controlada al cambiar de botón
             }
-            return;
+            catch (Exception ex)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    _adminWindow?.MostrarError($"Error en el proceso de captura: {ex.Message}");
+                }
+            }
+            finally
+            {
+                // 8. Restablecer el estado del botón solo si la llamada no fue sobreescrita por otra nueva
+                if (!token.IsCancellationRequested)
+                {
+                    bool estaRegistradoActualmente = exitoCaptura || _huellasCapturadas.ContainsKey(numeroDedo);
+                    _adminWindow?.ActualizarEstadoHuella(numeroDedo, registrada: estaRegistradoActualmente);
+                }
+            }
         }
 
-        // 7. Guardar template si esta tarea sigue siendo la activa
-        if (!token.IsCancellationRequested)
+        private void RestaurarEstadoTodosLosBotones(int esperandoDedo)
         {
-            _huellasCapturadas[numeroDedo] = templateCapturado;
-            exitoCaptura = true;
+            for (int i = 1; i <= 3; i++)
+            {
+                if (i != esperandoDedo)
+                {
+                    bool registrada = _huellasCapturadas.ContainsKey(i);
+                    _adminWindow?.ActualizarEstadoHuella(i, registrada);
+                }
+            }
         }
-    }
-    catch (OperationCanceledException)
-    {
-        // Cancelación controlada al cambiar de botón
-    }
-    catch (Exception ex)
-    {
-        if (!token.IsCancellationRequested)
-        {
-            _adminWindow?.MostrarError($"Error en el proceso de captura: {ex.Message}");
-        }
-    }
-    finally
-    {
-        // 8. Restablecer el estado del botón solo si la llamada no fue sobreescrita por otra nueva
-        if (!token.IsCancellationRequested)
-        {
-            bool estaRegistradoActualmente = exitoCaptura || _huellasCapturadas.ContainsKey(numeroDedo);
-            _adminWindow?.ActualizarEstadoHuella(numeroDedo, registrada: estaRegistradoActualmente);
-        }
-    }
-}
 
-private void RestaurarEstadoTodosLosBotones(int esperandoDedo)
-{
-    for (int i = 1; i <= 3; i++)
-    {
-        if (i != esperandoDedo)
+        public void CancelarCaptura()
         {
-            bool registrada = _huellasCapturadas.ContainsKey(i);
-            _adminWindow?.ActualizarEstadoHuella(i, registrada);
+            if (_ctsCaptura != null && !_ctsCaptura.IsCancellationRequested)
+            {
+                _ctsCaptura.Cancel();
+                _ctsCaptura.Dispose();
+                _ctsCaptura = null;
+            }
         }
-    }
-}
-
-public void CancelarCaptura()
-{
-    if (_ctsCaptura != null && !_ctsCaptura.IsCancellationRequested)
-    {
-        _ctsCaptura.Cancel();
-        _ctsCaptura.Dispose();
-        _ctsCaptura = null;
-    }
-}
     }
 
 }
