@@ -60,9 +60,9 @@ namespace ControlAcceso.Database
                     Cedula = reader.GetInt32("cedula"),
                     NombreCompleto = reader.GetString("nombre_completo"),
                     FechaNacimiento = DateOnly.FromDateTime(reader.GetDateTime("fecha_nacimiento")),
-                    Direccion = reader.IsDBNull(reader.GetOrdinal("direccion")) ? null : reader.GetString("direccion"),
-                    Telefono = reader.IsDBNull(reader.GetOrdinal("telefono")) ? null : reader.GetString("telefono"),
-                    TelefonoEmergencia = reader.IsDBNull(reader.GetOrdinal("telefono_emergencia")) ? null : reader.GetString("telefono_emergencia"),
+                    Direccion = reader.GetString("direccion"),
+Telefono = reader.GetString("telefono"),
+TelefonoEmergencia = reader.GetString("telefono_emergencia"),
                     RolId = reader.GetInt32("rol_id"),
                     FechaIngreso = DateOnly.FromDateTime(reader.GetDateTime("fecha_ingreso")),
                     Activo = reader.GetBoolean("activo")
