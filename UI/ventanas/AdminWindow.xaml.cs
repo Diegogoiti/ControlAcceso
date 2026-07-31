@@ -1,10 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using ControlAcceso.UI.controladores;
 using ControlAcceso.DTOs;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
+using ControlAcceso.UI.controladores;
 
 namespace ControlAcceso
 {
@@ -17,14 +16,12 @@ namespace ControlAcceso
         {
             InitializeComponent();
             this.Closing += AdminWindow_Closing;
-
         }
 
         // Constructor principal con inyección de controlador
         public AdminWindow(AdminController controller) : this()
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
-
         }
 
         private void CambiarPestaña(UIElement panelActivo)
@@ -40,20 +37,17 @@ namespace ControlAcceso
         private void btnTabEmpleados_Click(object sender, RoutedEventArgs e) => CambiarPestaña(PanelEmpleados);
         private void btnTabConfig_Click(object sender, RoutedEventArgs e) => CambiarPestaña(PanelConfiguracion);
 
-        private void txtBuscarNombre_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
-        private void cmbFiltroEstado_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) { }
-
         public EmpleadoSaveDto ObtenerDatosFormulario()
         {
             var datosCrudos = (
-                    Cedula: txtCedula.Text,
-                    NombreCompleto: txtNombreCompleto.Text,
-                    FechaNacimiento: dpFechaNacimiento.SelectedDate,
-                    Telefono: txtTelefono.Text,
-                    TelefonoEmergencia: txtTelefonoEmergencia.Text,
-                    Direccion: txtDireccion.Text,
-                    RolTexto: (cmbRol.SelectedItem as ComboBoxItem)?.Content?.ToString()
-                );
+                Cedula: txtCedula.Text,
+                NombreCompleto: txtNombreCompleto.Text,
+                FechaNacimiento: dpFechaNacimiento.SelectedDate,
+                Telefono: txtTelefono.Text,
+                TelefonoEmergencia: txtTelefonoEmergencia.Text,
+                Direccion: txtDireccion.Text,
+                RolTexto: (cmbRol.SelectedItem as ComboBoxItem)?.Content?.ToString()
+            );
 
             var nuevoEmpleado = new EmpleadoSaveDto
             {
@@ -63,7 +57,7 @@ namespace ControlAcceso
                 Telefono = datosCrudos.Telefono,
                 TelefonoEmergencia = datosCrudos.TelefonoEmergencia,
                 Direccion = datosCrudos.Direccion,
-                RolId = cmbRol.SelectedIndex // Asumiendo que el índice corresponde al ID del rol
+                RolId = cmbRol.SelectedIndex
             };
 
             return nuevoEmpleado;
@@ -71,7 +65,6 @@ namespace ControlAcceso
 
         private void btnGuardarEmpleado_Click(object sender, RoutedEventArgs e)
         {
-            // Llama al controlador para que tome los datos y los valide
             _controller?.ProcesarGuardadoEmpleado();
         }
 
@@ -85,8 +78,6 @@ namespace ControlAcceso
             if (sender is Button btn && btn.Tag != null)
             {
                 int numeroDedo = Convert.ToInt32(btn.Tag);
-
-                // Llamamos al controlador pasándole el número de dedo seleccionado
                 if (_controller != null)
                 {
                     await _controller.CapturarHuellaDedoAsync(numeroDedo);
@@ -94,7 +85,6 @@ namespace ControlAcceso
             }
         }
 
-        // Método para actualizar visualmente la etiqueta de los botones según el estado
         public void ActualizarEstadoHuella(int numeroDedo, bool registrada)
         {
             string estado = registrada ? "✅ Registrado" : "No registrado";
@@ -121,12 +111,10 @@ namespace ControlAcceso
         {
             string texto = $"⏳ Coloque el dedo {numeroDedo}...";
 
-            // 1. Mantenemos habilitados los botones para permitir cambiar entre ellos
             btnHuella1.IsEnabled = true;
             btnHuella2.IsEnabled = true;
             btnHuella3.IsEnabled = true;
 
-            // 2. Aplicamos el texto de espera al dedo seleccionado
             switch (numeroDedo)
             {
                 case 1:
@@ -143,13 +131,37 @@ namespace ControlAcceso
 
         private void AdminWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            // Si el controlador necesita liberar recursos (como el lector biométrico):
             _controller?.CancelarCaptura();
         }
 
         public void MostrarMensaje(string mensaje, string titulo = "Información")
         {
             MessageBox.Show(mensaje, titulo, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        // --- Gestión de la Lista de Empleados y Filtros ---
+
+        public void MostrarListaEmpleados(IEnumerable<EmpleadoViewDto> lista)
+        {
+            dgEmpleados.ItemsSource = lista;
+        }
+
+        private void txtBuscarNombre_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            AplicarFiltros();
+        }
+
+        private void cmbFiltroEstado_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            AplicarFiltros();
+        }
+
+        private void AplicarFiltros()
+        {
+            string busqueda = txtBuscarNombre?.Text ?? "";
+            string estado = (cmbFiltroEstado?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Todos";
+
+            _controller?.CargarListaEmpleados(busqueda, estado);
         }
     }
 }

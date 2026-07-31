@@ -29,6 +29,8 @@ namespace ControlAcceso.UI.controladores
             if (_adminWindow == null || !_adminWindow.IsLoaded)
             {
                 _adminWindow = new AdminWindow(this); // Le pasamos este mismo controlador a la vista
+                _app.CargarEmpleadosViewCache();
+                CargarListaEmpleados();
                 _adminWindow.ShowDialog(); // O _adminWindow.ShowDialog() si quieres que sea modal
             }
             else
@@ -298,6 +300,31 @@ namespace ControlAcceso.UI.controladores
                 _ctsCaptura.Dispose();
                 _ctsCaptura = null;
             }
+        }
+
+        public void CargarListaEmpleados(string filtroNombre = "", string estado = "Todos")
+        {
+            if (_adminWindow == null) return;
+
+            // Aseguramos tener los datos frescos
+            var empleados = _app.EmpleadosViewCache.AsEnumerable();
+
+            // Filtro de búsqueda por nombre o cédula
+            if (!string.IsNullOrWhiteSpace(filtroNombre))
+            {
+                empleados = empleados.Where(e =>
+                    e.Nombre.Contains(filtroNombre, StringComparison.OrdinalIgnoreCase) ||
+                    e.Cedula.Contains(filtroNombre));
+            }
+
+            // Filtro por estado del marcaje (Presente, Inasistente, Retirado)
+            if (estado != "Todos" && !string.IsNullOrWhiteSpace(estado))
+            {
+                empleados = empleados.Where(e => e.Estado.Equals(estado, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Enviamos la lista final a la UI
+            _adminWindow.MostrarListaEmpleados(empleados.ToList());
         }
     }
 

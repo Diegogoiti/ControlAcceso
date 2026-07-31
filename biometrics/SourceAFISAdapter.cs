@@ -40,7 +40,7 @@ namespace ControlAcceso.Biometrics
             }
         }
 
-        public bool EsCoincidencia(byte[] templateBytes1, byte[] templateBytes2, double umbral = 40.0)
+        public bool EsCoincidencia(byte[] templateBytes1, byte[] templateBytes2, double umbral = 35.0)
         {
             double score = CalcularSimilitud(templateBytes1, templateBytes2);
             return score > umbral;

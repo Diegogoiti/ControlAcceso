@@ -230,14 +230,15 @@
                     </Grid>
 
                     <DataGrid Grid.Row="1" x:Name="dgEmpleados" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="Transparent" BorderThickness="0">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="120"/>
-                            <DataGridTextColumn Header="Nombre Completo" Binding="{Binding NombreCompleto}" Width="*"/>
-                            <DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="130"/>
-                            <DataGridTextColumn Header="Rol ID" Binding="{Binding RolId}" Width="80"/>
-                            <DataGridTextColumn Header="Estado" Binding="{Binding EstadoStr}" Width="100"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+    <DataGrid.Columns>
+        <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="100"/>
+        <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
+        <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="100"/>
+        <DataGridTextColumn Header="Entrada" Binding="{Binding HoraEntrada}" Width="100"/>
+        <DataGridTextColumn Header="Salida" Binding="{Binding HoraSalida}" Width="100"/>
+        <DataGridTextColumn Header="Laborado" Binding="{Binding TotalLaborado}" Width="100"/>
+    </DataGrid.Columns>
+</DataGrid>
 
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
                         <Button x:Name="btnEditarEmpleado" Content="✏️ Editar" Padding="16,8" Background="#F1F5F9" Foreground="#334155" FontWeight="SemiBold" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand">
