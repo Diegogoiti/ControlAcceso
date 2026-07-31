@@ -89,12 +89,10 @@
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <!-- Hover -->
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" TargetName="border" Value="#DBEAFE"/>
                                 <Setter Property="BorderBrush" TargetName="border" Value="#93C5FD"/>
                             </Trigger>
-                            <!-- Clic / Pressed -->
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Background" TargetName="border" Value="#BFDBFE"/>
                                 <Setter Property="BorderBrush" TargetName="border" Value="#60A5FA"/>
@@ -177,16 +175,16 @@
 
                         <!-- SECCIÓN MULTI-HUELLA BIOMÉTRICA -->
                         <Border Background="#F1F5F9" CornerRadius="8" Padding="16" Margin="0,5,0,20">
-    <StackPanel>
-        <TextBlock Text="Registro Biométrico" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                            <StackPanel>
+                                <TextBlock Text="Registro Biométrico" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="btnHuella1" Content="👍 Dedo 1 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="1"/>
-            <Button x:Name="btnHuella2" Content="👍 Dedo 2 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="2"/>
-            <Button x:Name="btnHuella3" Content="👍 Dedo 3 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="3"/>
-        </StackPanel>
-    </StackPanel>
-</Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button x:Name="btnHuella1" Content="👍 Dedo 1 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="1"/>
+                                    <Button x:Name="btnHuella2" Content="👍 Dedo 2 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="2"/>
+                                    <Button x:Name="btnHuella3" Content="👍 Dedo 3 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="3"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
 
                         <Button x:Name="btnGuardarEmpleado" Content="Guardar Empleado" Height="45" Background="#16A34A" Foreground="White" FontSize="15" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="btnGuardarEmpleado_Click">
                             <Button.Resources>
@@ -224,19 +222,85 @@
                         <TextBlock Grid.Column="2" Text="Estado:" VerticalAlignment="Center" Style="{StaticResource FieldLabel}" Margin="0,0,10,0"/>
                         <ComboBox Grid.Column="3" x:Name="cmbFiltroEstado" Width="140" Style="{StaticResource ModernComboBox}" Margin="0" SelectedIndex="0" SelectionChanged="cmbFiltroEstado_SelectionChanged">
                             <ComboBoxItem Content="Todos"/>
-                            <ComboBoxItem Content="Activos"/>
-                            <ComboBoxItem Content="Inactivos"/>
+                            <ComboBoxItem Content="Activo"/>
+                            <ComboBoxItem Content="Inactivo"/>
                         </ComboBox>
                     </Grid>
 
-                    <DataGrid Grid.Row="1" x:Name="dgEmpleados" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="Transparent" BorderThickness="0">
-    <DataGrid.Columns>
-        <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="100"/>
-        <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
-        <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="100"/>
-        <DataGridTextColumn Header="Entrada" Binding="{Binding HoraEntrada}" Width="100"/>
-        <DataGridTextColumn Header="Salida" Binding="{Binding HoraSalida}" Width="100"/>
-        <DataGridTextColumn Header="Laborado" Binding="{Binding TotalLaborado}" Width="100"/>
+                    <!-- DataGrid con Alto Contraste, Selección Clara y Anchos Consistentes -->
+                    <DataGrid Grid.Row="1" 
+                              x:Name="dgEmpleados" 
+                              AutoGenerateColumns="False" 
+                              CanUserAddRows="False"
+                              IsReadOnly="True" 
+                              GridLinesVisibility="All" 
+                              HorizontalGridLinesBrush="#94A3B8"
+                              VerticalGridLinesBrush="#CBD5E1"
+                              HeadersVisibility="Column" 
+                              Background="White"
+                              RowBackground="#FFFFFF"
+                              AlternatingRowBackground="#E2E8F0"
+                              BorderBrush="#64748B"
+                              BorderThickness="1"
+                              RowHeight="38"
+                              HorizontalScrollBarVisibility="Auto">
+
+                        <!-- Encabezados de Tabla -->
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#334155"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="10,8"/>
+                                <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                <Setter Property="BorderBrush" Value="#475569"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+
+                        <!-- Celdas y Estado de Selección Resaltado -->
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Padding" Value="10,6"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridCell">
+                                            <Border Padding="{TemplateBinding Padding}" 
+                                                    Background="{TemplateBinding Background}" 
+                                                    SnapsToDevicePixels="True">
+                                                <ContentPresenter VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#1E40AF"/>
+                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.CellStyle>
+
+                        <!-- Columnas con tamaños proporcionales uniformes -->
+                        <DataGrid.Columns>
+        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" MinWidth="60">
+            <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                </Style>
+            </DataGridTextColumn.ElementStyle>
+        </DataGridTextColumn>
+
+        <DataGridTextColumn Header="Cédula" Binding="{Binding Cedula}" Width="Auto" MinWidth="100"/>
+        <DataGridTextColumn Header="Nombre Completo" Binding="{Binding Nombre}" Width="Auto" MinWidth="180"/>
+        <DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="Auto" MinWidth="120"/>
+        <DataGridTextColumn Header="Tel. Emergencia" Binding="{Binding TelefonoEmergencia}" Width="Auto" MinWidth="130"/>
+        <DataGridTextColumn Header="F. Nacimiento" Binding="{Binding FechaNacimiento, StringFormat=dd/MM/yyyy}" Width="Auto" MinWidth="120"/>
+        <DataGridTextColumn Header="Dirección" Binding="{Binding Direccion}" Width="Auto" MinWidth="200"/>
+        <DataGridTextColumn Header="Rol" Binding="{Binding RolNombre}" Width="Auto" MinWidth="110"/>
+        <DataGridTextColumn Header="F. Ingreso" Binding="{Binding FechaIngreso, StringFormat=dd/MM/yyyy}" Width="Auto" MinWidth="110"/>
+        <DataGridTextColumn Header="Estado" Binding="{Binding EstadoTexto}" Width="Auto" MinWidth="90"/>
     </DataGrid.Columns>
 </DataGrid>
 
