@@ -209,5 +209,17 @@ namespace ControlAcceso
         }
 
         #endregion
+
+        private async void btnCambiarEstado_Click(object sender, RoutedEventArgs e)
+{
+    if (dgEmpleados.SelectedItem is EmpleadoViewDto emp)
+    {
+        await _controller.CambiarEstadoEmpleadoAsync(emp.Id);
+    }
+    else
+    {
+        MostrarError("Por favor, seleccione un empleado de la lista.");
+    }
+}
     }
 }

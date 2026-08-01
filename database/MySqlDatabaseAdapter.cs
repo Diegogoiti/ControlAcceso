@@ -366,5 +366,40 @@ namespace ControlAcceso.Database
 
             return null;
         }
+
+        public EmpleadoDto? ObtenerEmpleadoPorId(int id)
+{
+    using var conn = GetConnection();
+    conn.Open();
+
+    string query = @"
+        SELECT id, cedula, nombre_completo, fecha_nacimiento, direccion,
+               telefono, telefono_emergencia, rol_id, fecha_ingreso, activo
+        FROM empleados
+        WHERE id = @id LIMIT 1";
+
+    using var cmd = new MySqlCommand(query, conn);
+    cmd.Parameters.AddWithValue("@id", id);
+
+    using var reader = cmd.ExecuteReader();
+    if (reader.Read())
+    {
+        return new EmpleadoDto
+        {
+            Id = reader.GetInt32("id"),
+            Cedula = reader.GetInt32("cedula"),
+            NombreCompleto = reader.GetString("nombre_completo"),
+            FechaNacimiento = DateOnly.FromDateTime(reader.GetDateTime("fecha_nacimiento")),
+            Direccion = reader.IsDBNull(reader.GetOrdinal("direccion")) ? string.Empty : reader.GetString("direccion"),
+            Telefono = reader.IsDBNull(reader.GetOrdinal("telefono")) ? string.Empty : reader.GetString("telefono"),
+            TelefonoEmergencia = reader.IsDBNull(reader.GetOrdinal("telefono_emergencia")) ? string.Empty : reader.GetString("telefono_emergencia"),
+            RolId = reader.GetInt32("rol_id"),
+            FechaIngreso = DateOnly.FromDateTime(reader.GetDateTime("fecha_ingreso")),
+            Activo = reader.GetBoolean("activo")
+        };
+    }
+
+    return null;
+}
     }
 }

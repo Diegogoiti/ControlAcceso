@@ -173,5 +173,19 @@ namespace ControlAcceso.Application
             var exito = DatabaseService.RegistrarEmpleado(emp, out mensajeError);
             return (exito, mensajeError);
         }
+
+        public async Task<bool> CambiarEstadoEmpleadoAsync(int idEmpleado, bool activo)
+{
+    return await Task.Run(() =>
+    {
+        // Alternar el flag 'activo' (o ejecutar la consulta SQL UPDATE correspondiente en tu DatabaseService)
+        return DatabaseService.CambiarEstado(idEmpleado, activo);
+    });
+}
+
+public EmpleadoDto? ObtenerEmpleadoPorId(int id)
+{
+    return DatabaseService.ObtenerEmpleadoPorId(id);
+}
     }
 }

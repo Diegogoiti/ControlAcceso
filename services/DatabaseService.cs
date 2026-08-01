@@ -94,6 +94,11 @@ namespace ControlAcceso.Services
             }
         }
 
+        public EmpleadoDto? ObtenerEmpleadoPorId(int id)
+{
+    return _dbAdapter.ObtenerEmpleadoPorId(id);
+}
+
         #endregion
 
         #region --- Métodos de Asistencia y Configuración ---

@@ -21,5 +21,6 @@ namespace ControlAcceso.Database
         List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter filtro);
         List<HuellaEmpleadoDto> ObtenerHuellasActivas();
         (string AdminPassword, TimeSpan HoraEntrada, TimeSpan HoraSalida)? ObtenerConfiguracion();
+        EmpleadoDto? ObtenerEmpleadoPorId(int id);
     }
 }

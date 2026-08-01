@@ -305,7 +305,7 @@
                             <Button x:Name="btnEditarEmpleado" Content="✏️ Editar" Padding="16,8" Background="#F1F5F9" Foreground="#334155" FontWeight="SemiBold" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand" Click="btnEditarEmpleado_Click">
                                 <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
                             </Button>
-                            <Button x:Name="btnCambiarEstado" Content="🚫 Cambiar Estado" Padding="16,8" Background="#FEE2E2" Foreground="#DC2626" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand">
+                            <Button x:Name="btnCambiarEstado" Content="🚫 Cambiar Estado" Padding="16,8" Background="#FEE2E2" Foreground="#DC2626" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" Click="btnCambiarEstado_Click">
                                 <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
                             </Button>
                         </StackPanel>

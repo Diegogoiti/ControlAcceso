@@ -63,11 +63,18 @@ namespace ControlAcceso.UI.controladores
             return new List<object>();
         }
 
-        public async Task<bool> CambiarEstadoEmpleadoAsync(int empleadoId, bool activo)
-        {
-            await Task.Delay(100);
-            return true;
-        }
+        public async Task<bool> CambiarEstadoEmpleadoAsync(int empleadoId)
+{
+    // 1. Obtener el empleado actual
+    var empleado =  _app.ObtenerEmpleadoPorId(empleadoId);
+    if (empleado == null) return false;
+
+    // 2. Invertir su estado actual (si era true pasa a false, y viceversa)
+    bool nuevoEstado = !empleado.Activo; 
+
+    // 3. Persistir el cambio en la BD
+    return await _app.CambiarEstadoEmpleadoAsync(empleadoId, nuevoEstado);
+}
 
         #endregion
 
