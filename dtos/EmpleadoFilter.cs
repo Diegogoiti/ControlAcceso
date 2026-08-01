@@ -5,7 +5,7 @@ namespace ControlAcceso.DTOs
         public int? Id { get; set; }
         public int? Cedula { get; set; }
         public string? Nombre { get; set; }
-        public bool SoloActivos { get; set; } = true;
+        public bool SoloActivos { get; set; } = false;
         public string? NombreOCedula { get; set; }
     }
 }

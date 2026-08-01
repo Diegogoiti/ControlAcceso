@@ -8,16 +8,14 @@ namespace ControlAcceso.DTOs
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string Cedula { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty;
+        public DateOnly FechaNacimiento { get; set; }
+        public string Direccion { get; set; } = string.Empty;
+        public string Telefono { get; set; } = string.Empty;
+        public string TelefonoEmergencia { get; set; } = string.Empty;
+        public int RolNombre { get; set; }
+        public DateOnly FechaIngreso { get; set; }
 
-        public string Estado { get; set; } = "Inasistente";
 
-        // Propiedades de tiempo (pueden ser string o TimeSpan/TimeOnly según formatees en la consulta)
-        public string HoraEntrada { get; set; } = "No calculado";
-        public string HoraSalida { get; set; } = "No calculado";
-
-        // Métricas calculadas para la jornada
-        public string Retraso { get; set; } = "No calculado";
-        public string TiempoExtra { get; set; } = "No calculado"; // En la UI dice "T. Extra"
-        public string TotalLaborado { get; set; } = "Incompleto";  // En la UI dice "Total Lab."
     }
 }

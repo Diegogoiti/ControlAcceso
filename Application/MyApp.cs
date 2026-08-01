@@ -58,65 +58,40 @@ namespace ControlAcceso.Application
         }
 
         public void CargarEmpleadosViewCache()
+{
+    try
+    {
+        var empleadosActivos = DatabaseService.ObtenerEmpleados(new EmpleadoFilter { });
+
+        EmpleadosViewCache = empleadosActivos.Select(emp => new EmpleadoViewDto
         {
-            try
-            {
-                var hoy = DateTime.Today;
-
-                var empleadosActivos = DatabaseService.ObtenerEmpleados(new EmpleadoFilter { SoloActivos = true });
-                var asistenciasHoy = DatabaseService.ObtenerAsistencias(new AsistenciaFilter
-                {
-                    FechaInicio = hoy,
-                    FechaFin = hoy
-                });
-
-                var ultimasMarcasHoy = asistenciasHoy
-                    .GroupBy(a => a.EmpleadoID)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.OrderByDescending(a => a.Timestamp).FirstOrDefault()
-                    );
-
-                EmpleadosViewCache = empleadosActivos.Select(emp =>
-                {
-                    ultimasMarcasHoy.TryGetValue(emp.Id, out var ultimaMarca);
-
-                    string estadoCalculado = ultimaMarca switch
-                    {
-                        { Tipo: 1 } => "Presente",
-                        { Tipo: 2 } => "Retirado",
-                        _ => "Inasistente"
-                    };
-
-                    return new EmpleadoViewDto
-                    {
-                        Id = emp.Id,
-                        Nombre = emp.NombreCompleto,
-                        Cedula = emp.Cedula.ToString(),
-                        Estado = estadoCalculado,
-                        HoraEntrada = "No calculado",
-                        HoraSalida = "No calculado",
-                        Retraso = "No calculado",
-                        TiempoExtra = "No calculado",
-                        TotalLaborado = "Incompleto"
-                    };
-                }).ToList();
-            }
-            catch (MySql.Data.MySqlClient.MySqlException ex)
-            {
-                System.Windows.MessageBox.Show(
-                    $"Error de conexión a la Base de Datos:\n{ex.Message}\n\nVerifica que MySQL esté corriendo.",
-                    "Error de Conexión", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                EmpleadosViewCache = new List<EmpleadoViewDto>();
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(
-                    $"Ocurrió un error inesperado al cargar la vista de empleados:\n{ex.Message}",
-                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                EmpleadosViewCache = new List<EmpleadoViewDto>();
-            }
-        }
+            Id = emp.Id,
+            Nombre = emp.NombreCompleto,
+            Cedula = emp.Cedula.ToString(),
+            Estado = emp.Activo ? "Activo" : "Inactivo",
+            FechaNacimiento = emp.FechaNacimiento,
+            Direccion = emp.Direccion,
+            Telefono = emp.Telefono,
+            TelefonoEmergencia = emp.TelefonoEmergencia,
+            RolNombre = emp.RolId,
+            FechaIngreso = emp.FechaIngreso
+        }).ToList();
+    }
+    catch (MySql.Data.MySqlClient.MySqlException ex)
+    {
+        System.Windows.MessageBox.Show(
+            $"Error de conexión a la Base de Datos:\n{ex.Message}\n\nVerifica que MySQL esté corriendo.",
+            "Error de Conexión", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        EmpleadosViewCache = new List<EmpleadoViewDto>();
+    }
+    catch (Exception ex)
+    {
+        System.Windows.MessageBox.Show(
+            $"Ocurrió un error inesperado al cargar la vista de empleados:\n{ex.Message}",
+            "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        EmpleadosViewCache = new List<EmpleadoViewDto>();
+    }
+}
 
         #endregion
 

@@ -297,7 +297,7 @@
                                 <DataGridTextColumn Header="Dirección" Binding="{Binding Direccion}" Width="Auto" MinWidth="200"/>
                                 <DataGridTextColumn Header="Rol" Binding="{Binding RolNombre}" Width="Auto" MinWidth="110"/>
                                 <DataGridTextColumn Header="F. Ingreso" Binding="{Binding FechaIngreso, StringFormat=dd/MM/yyyy}" Width="Auto" MinWidth="110"/>
-                                <DataGridTextColumn Header="Estado" Binding="{Binding EstadoTexto}" Width="Auto" MinWidth="90"/>
+                                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="Auto" MinWidth="90"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
