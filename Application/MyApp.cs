@@ -176,11 +176,13 @@ namespace ControlAcceso.Application
 
         public async Task<bool> CambiarEstadoEmpleadoAsync(int idEmpleado, bool activo)
 {
-    return await Task.Run(() =>
+    bool exito = await Task.Run(() => DatabaseService.CambiarEstado(idEmpleado, activo));
+    if (exito)
     {
-        // Alternar el flag 'activo' (o ejecutar la consulta SQL UPDATE correspondiente en tu DatabaseService)
-        return DatabaseService.CambiarEstado(idEmpleado, activo);
-    });
+        // Actualiza la lista en memoria (EmpleadosViewCache)
+        CargarEmpleadosViewCache(); 
+    }
+    return exito;
 }
 
 public EmpleadoDto? ObtenerEmpleadoPorId(int id)

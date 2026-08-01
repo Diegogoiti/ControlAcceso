@@ -65,15 +65,19 @@ namespace ControlAcceso.UI.controladores
 
         public async Task<bool> CambiarEstadoEmpleadoAsync(int empleadoId)
 {
-    // 1. Obtener el empleado actual
-    var empleado =  _app.ObtenerEmpleadoPorId(empleadoId);
+    var empleado = _app.ObtenerEmpleadoPorId(empleadoId);
     if (empleado == null) return false;
 
-    // 2. Invertir su estado actual (si era true pasa a false, y viceversa)
-    bool nuevoEstado = !empleado.Activo; 
+    bool nuevoEstado = !empleado.Activo;
+    bool exito = await _app.CambiarEstadoEmpleadoAsync(empleadoId, nuevoEstado);
 
-    // 3. Persistir el cambio en la BD
-    return await _app.CambiarEstadoEmpleadoAsync(empleadoId, nuevoEstado);
+    if (exito)
+    {
+        // Re-sincroniza el DataGrid con el estado actualizado
+        CargarListaEmpleados(); 
+    }
+
+    return exito;
 }
 
         #endregion
@@ -333,13 +337,20 @@ namespace ControlAcceso.UI.controladores
         }
 
         public void AbrirEdicionEmpleado(int idEmpleado)
-        {
-            if (_adminWindow == null) return;
+{
+    if (_adminWindow == null) return;
 
-            Console.WriteLine($"AbrirEdicionEmpleado: ID del empleado a editar: {idEmpleado}");
+    // Obtener los datos completos de la base de datos o servicios
+    var empleado = _app.ObtenerEmpleadoPorId(idEmpleado);
 
-            // Muestra la UI inmediatamente pasando el ID
-            _adminWindow.MostrarModalEdicion(idEmpleado);
-        }
+    if (empleado == null)
+    {
+        _adminWindow.MostrarError("No se pudieron obtener los datos del empleado seleccionado.");
+        return;
+    }
+
+    // Pasar el objeto completo para llenar la modal
+    _adminWindow.MostrarModalEdicion(empleado);
+}
     }
 }

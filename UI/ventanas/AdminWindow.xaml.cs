@@ -179,12 +179,16 @@ namespace ControlAcceso
             }
         }
 
-        public void MostrarModalEdicion(int idEmpleado)
-        {
-            EmpleadoEditandoId = idEmpleado;
-            _controller.LimpiarHuellasEnMemoria();
-            OverlayEditarEmpleado.Visibility = Visibility.Visible;
-        }
+        public void MostrarModalEdicion(EmpleadoDto emp)
+{
+    EmpleadoEditandoId = emp.Id;
+    _controller.LimpiarHuellasEnMemoria();
+
+    // Llenar los campos de la interfaz
+    CargarDatosFormularioEdicion(emp);
+
+    OverlayEditarEmpleado.Visibility = Visibility.Visible;
+}
 
         public void OcultarModalEdicion()
         {
@@ -214,12 +218,32 @@ namespace ControlAcceso
 {
     if (dgEmpleados.SelectedItem is EmpleadoViewDto emp)
     {
-        await _controller.CambiarEstadoEmpleadoAsync(emp.Id);
+        bool exito = await _controller.CambiarEstadoEmpleadoAsync(emp.Id);
+        if (!exito)
+        {
+            MostrarError("No se pudo cambiar el estado del empleado.");
+        }
     }
     else
     {
         MostrarError("Por favor, seleccione un empleado de la lista.");
     }
+}
+
+public void CargarDatosFormularioEdicion(EmpleadoDto emp)
+{
+    txtEditCedula.Text = emp.Cedula.ToString();
+    txtEditNombreCompleto.Text = emp.NombreCompleto;
+    
+    // Asignar la fecha de nacimiento convertida de DateOnly a DateTime?
+    dpEditFechaNacimiento.SelectedDate = emp.FechaNacimiento.ToDateTime(TimeOnly.MinValue);
+    
+    txtEditTelefono.Text = emp.Telefono;
+    txtEditTelefonoEmergencia.Text = emp.TelefonoEmergencia;
+    txtEditDireccion.Text = emp.Direccion;
+    
+    // Asignar la selección del ComboBox según el RolId (restando 1 por índice base 0)
+    cmbEditRol.SelectedIndex = Math.Max(0, emp.RolId - 1);
 }
     }
 }
