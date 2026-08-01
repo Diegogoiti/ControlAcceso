@@ -260,34 +260,77 @@ namespace ControlAcceso.Database
             }
         }
 
-        public bool ActualizarEmpleado(EmpleadoSaveDto empleado)
+       public bool ActualizarEmpleado(EmpleadoSaveDto empleado)
+{
+    using var conn = GetConnection();
+    conn.Open();
+
+    using var transaction = conn.BeginTransaction();
+
+    try
+    {
+        // 1. Actualizar los datos básicos del empleado
+        string queryEmpleado = @"
+            UPDATE empleados
+            SET cedula = @cedula,
+                nombre_completo = @nombre,
+                fecha_nacimiento = @fechaNac,
+                direccion = @direccion,
+                telefono = @telefono,
+                telefono_emergencia = @telEmergencia,
+                rol_id = @rolId
+            WHERE id = @id;";
+
+        using var cmdEmp = new MySqlCommand(queryEmpleado, conn, transaction);
+
+        int.TryParse(empleado.Cedula, out int cedulaNum);
+
+        cmdEmp.Parameters.AddWithValue("@id", empleado.Id);
+        cmdEmp.Parameters.AddWithValue("@cedula", cedulaNum);
+        cmdEmp.Parameters.AddWithValue("@nombre", empleado.NombreCompleto);
+        cmdEmp.Parameters.AddWithValue("@fechaNac", empleado.FechaNacimiento.ToString("yyyy-MM-dd"));
+        cmdEmp.Parameters.AddWithValue("@direccion", (object?)empleado.Direccion ?? DBNull.Value);
+        cmdEmp.Parameters.AddWithValue("@telefono", (object?)empleado.Telefono ?? DBNull.Value);
+        cmdEmp.Parameters.AddWithValue("@telEmergencia", (object?)empleado.TelefonoEmergencia ?? DBNull.Value);
+        cmdEmp.Parameters.AddWithValue("@rolId", empleado.RolId <= 0 ? 1 : empleado.RolId);
+
+        cmdEmp.ExecuteNonQuery();
+
+        // 2. Insertar o actualizar huellas re-capturadas (si las hay)
+        if (empleado.Huellas != null && empleado.Huellas.Any(h => h?.TemplateHuella?.Length > 0))
         {
-            using var conn = GetConnection();
-            conn.Open();
+            string queryHuella = @"
+                INSERT INTO huellas (empleado_id, dedo, template)
+                VALUES (@empleadoId, @dedo, @template)
+                ON DUPLICATE KEY UPDATE template = VALUES(template);";
 
-            string query = @"
-                UPDATE empleados
-                SET cedula = @cedula,
-                    nombre_completo = @nombre,
-                    fecha_nacimiento = @fechaNac,
-                    direccion = @direccion,
-                    telefono = @telefono,
-                    telefono_emergencia = @telEmergencia,
-                    rol_id = @rolId
-                WHERE id = @id";
+            using var cmdHuella = new MySqlCommand(queryHuella, conn, transaction);
+            cmdHuella.Parameters.Add("@empleadoId", MySqlDbType.Int32);
+            cmdHuella.Parameters.Add("@dedo", MySqlDbType.Int32);
+            cmdHuella.Parameters.Add("@template", MySqlDbType.LongBlob);
 
-            using var cmd = new MySqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@id", empleado.Id);
-            cmd.Parameters.AddWithValue("@cedula", empleado.Cedula);
-            cmd.Parameters.AddWithValue("@nombre", empleado.NombreCompleto);
-            cmd.Parameters.AddWithValue("@fechaNac", empleado.FechaNacimiento);
-            cmd.Parameters.AddWithValue("@direccion", (object?)empleado.Direccion ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@telefono", (object?)empleado.Telefono ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@telEmergencia", (object?)empleado.TelefonoEmergencia ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@rolId", empleado.RolId <= 0 ? 1 : empleado.RolId);
+            foreach (var huella in empleado.Huellas)
+            {
+                if (huella == null || huella.TemplateHuella == null || huella.TemplateHuella.Length == 0)
+                    continue;
 
-            return cmd.ExecuteNonQuery() > 0;
+                cmdHuella.Parameters["@empleadoId"].Value = empleado.Id;
+                cmdHuella.Parameters["@dedo"].Value = huella.Dedo;
+                cmdHuella.Parameters["@template"].Value = huella.TemplateHuella;
+
+                cmdHuella.ExecuteNonQuery();
+            }
         }
+
+        transaction.Commit();
+        return true;
+    }
+    catch
+    {
+        transaction.Rollback();
+        return false;
+    }
+}
 
         public bool InsertarHuella(int empleadoId, int dedo, byte[] template)
         {

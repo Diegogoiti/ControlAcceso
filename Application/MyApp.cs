@@ -189,5 +189,16 @@ public EmpleadoDto? ObtenerEmpleadoPorId(int id)
 {
     return DatabaseService.ObtenerEmpleadoPorId(id);
 }
+
+public (bool Exito, string Mensaje) EditarEmpleado(EmpleadoSaveDto emp)
+{
+    var exito = DatabaseService.ActualizarEmpleado(emp, out string mensajeError);
+    if (exito)
+    {
+        // Refrescar el caché en memoria tras editar[cite: 9]
+        CargarEmpleadosViewCache();
+    }
+    return (exito, mensajeError);
+}
     }
 }

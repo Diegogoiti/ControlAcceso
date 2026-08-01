@@ -128,30 +128,37 @@ namespace ControlAcceso.UI.controladores
         }
 
         public void ProcesarEdicionEmpleado()
+{
+    if (_adminWindow == null || !_adminWindow.EmpleadoEditandoId.HasValue) return; //
+
+    EmpleadoSaveDto emp = _adminWindow.ObtenerDatosEdicionFormulario(); //[cite: 13]
+
+    if (!EsFormularioValido(emp, requiereHuellas: false)) //[cite: 13]
+    {
+        return;
+    }
+
+    try
+    {
+        // Se llama al nuevo método en MyApp para actualización
+        var (exito, mensaje) = _app.EditarEmpleado(emp);
+
+        if (!exito)
         {
-            if (_adminWindow == null || !_adminWindow.EmpleadoEditandoId.HasValue) return;
-
-            EmpleadoSaveDto emp = _adminWindow.ObtenerDatosEdicionFormulario();
-
-            if (!EsFormularioValido(emp, requiereHuellas: false))
-            {
-                return;
-            }
-
-            try
-            {
-                // Guarda la actualización a través de la aplicación
-                _app.GuardarEmpleado(emp);
-                _adminWindow.MostrarMensaje("Empleado actualizado correctamente.");
-                _adminWindow.OcultarModalEdicion();
-                _app.CargarEmpleadosViewCache();
-                CargarListaEmpleados();
-            }
-            catch (Exception ex)
-            {
-                _adminWindow.MostrarError($"Error al actualizar el empleado: {ex.Message}");
-            }
+            _adminWindow.MostrarError($"Error al actualizar: {mensaje}");
+            return;
         }
+
+        _adminWindow.MostrarMensaje("Empleado actualizado correctamente."); //[cite: 13]
+        _adminWindow.OcultarModalEdicion(); //[cite: 13]
+        _app.CargarEmpleadosViewCache(); //[cite: 13]
+        CargarListaEmpleados(); //[cite: 13]
+    }
+    catch (Exception ex)
+    {
+        _adminWindow.MostrarError($"Error al actualizar el empleado: {ex.Message}"); //[cite: 13]
+    }
+}
 
         private bool EsFormularioValido(EmpleadoSaveDto emp, bool requiereHuellas = true)
         {
