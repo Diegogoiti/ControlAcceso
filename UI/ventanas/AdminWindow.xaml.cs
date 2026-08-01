@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -41,6 +42,7 @@ namespace ControlAcceso
             PanelRegistrar.Visibility = Visibility.Collapsed;
             PanelEmpleados.Visibility = Visibility.Collapsed;
             PanelConfiguracion.Visibility = Visibility.Visible;
+            _controller.CargarConfiguracion();
         }
 
         #endregion
@@ -123,6 +125,19 @@ namespace ControlAcceso
             _controller.ProcesarEdicionEmpleado();
         }
 
+        private void btnGuardarConfig_Click(object sender, RoutedEventArgs e)
+        {
+            _controller.ProcesarGuardadoConfiguracion();
+        }
+
+        private async void btnCapturarAdminHuella_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int numeroDedo))
+            {
+                await _controller.CapturarHuellaAdminAsync(numeroDedo);
+            }
+        }
+
         private void btnCancelarEdicion_Click(object sender, RoutedEventArgs e)
         {
             OcultarModalEdicion();
@@ -189,6 +204,34 @@ namespace ControlAcceso
 
     OverlayEditarEmpleado.Visibility = Visibility.Visible;
 }
+
+        public string ObtenerPasswordConfiguracion() => pwdAdminPassword.Password;
+
+        public string ObtenerHoraEntrada() => txtHoraEntrada.Text;
+
+        public string ObtenerHoraLimite() => txtHoraLimite.Text;
+
+        public void CargarConfiguracion(string password, string horaEntrada, string horaLimite)
+        {
+            pwdAdminPassword.Password = password ?? string.Empty;
+            txtHoraEntrada.Text = horaEntrada ?? string.Empty;
+            txtHoraLimite.Text = horaLimite ?? string.Empty;
+        }
+
+        public void EstablecerEstadoEsperandoHuellaAdmin(int dedo)
+        {
+            Button? btn = dedo switch { 1 => btnAdminHuella1, 2 => btnAdminHuella2, 3 => btnAdminHuella3, _ => null };
+            if (btn != null) btn.Content = $"⏳ Huella {dedo}...";
+        }
+
+        public void ActualizarEstadoHuellaAdmin(int dedo, bool registrada)
+        {
+            Button? btn = dedo switch { 1 => btnAdminHuella1, 2 => btnAdminHuella2, 3 => btnAdminHuella3, _ => null };
+            if (btn != null)
+            {
+                btn.Content = registrada ? $"✅ Huella {dedo}" : $"📷 Huella {dedo}";
+            }
+        }
 
         public void OcultarModalEdicion()
         {

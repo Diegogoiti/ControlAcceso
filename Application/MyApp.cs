@@ -200,5 +200,15 @@ public (bool Exito, string Mensaje) EditarEmpleado(EmpleadoSaveDto emp)
     }
     return (exito, mensajeError);
 }
+
+public bool GuardarConfiguracion(string password, TimeSpan horaEntrada, TimeSpan horaLimite, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin)
+{
+    return DatabaseService.GuardarConfiguracion(horaEntrada, horaLimite, password, huellasAdmin);
+}
+
+public (string? Password, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion()
+{
+    return DatabaseService.ObtenerConfiguracion();
+}
     }
 }

@@ -15,6 +15,7 @@ namespace ControlAcceso.UI.controladores
         private CancellationTokenSource? _ctsCaptura;
 
         private readonly Dictionary<int, byte[]> _huellasCapturadas = new();
+        private readonly Dictionary<int, byte[]> _huellasAdminCapturadas = new();
 
         public AdminController(MyApp app)
         {
@@ -28,6 +29,7 @@ namespace ControlAcceso.UI.controladores
                 _adminWindow = new AdminWindow(this);
                 _app.CargarEmpleadosViewCache();
                 CargarListaEmpleados();
+                CargarConfiguracion();
                 _adminWindow.ShowDialog();
             }
             else
@@ -41,6 +43,12 @@ namespace ControlAcceso.UI.controladores
         {
             CancelarCaptura();
             _huellasCapturadas.Clear();
+        }
+
+        public void LimpiarHuellasAdminEnMemoria()
+        {
+            CancelarCaptura();
+            _huellasAdminCapturadas.Clear();
         }
         #endregion
 
@@ -84,10 +92,73 @@ namespace ControlAcceso.UI.controladores
 
         #region Métodos de Configuración
 
-        public async Task<bool> GuardarConfiguracionAsync(string parametro, string valor)
+        public void ProcesarGuardadoConfiguracion()
         {
-            await Task.Delay(100);
-            return true;
+            if (_adminWindow == null) return;
+
+            string password = _adminWindow.ObtenerPasswordConfiguracion();
+            string horaEntradaTexto = _adminWindow.ObtenerHoraEntrada();
+            string horaLimiteTexto = _adminWindow.ObtenerHoraLimite();
+
+            if (!TimeSpan.TryParse(horaEntradaTexto, out TimeSpan horaEntrada))
+            {
+                _adminWindow.MostrarError("La hora de entrada debe tener formato HH:mm.");
+                return;
+            }
+
+            if (!TimeSpan.TryParse(horaLimiteTexto, out TimeSpan horaLimite))
+            {
+                _adminWindow.MostrarError("La hora límite de ingreso debe tener formato HH:mm.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                _adminWindow.MostrarError("La contraseña de administrador es obligatoria.");
+                return;
+            }
+
+            if (_huellasAdminCapturadas.Count < 3)
+            {
+                _adminWindow.MostrarError("Debe registrar las 3 huellas de administrador.");
+                return;
+            }
+
+            var huellasAdmin = _huellasAdminCapturadas
+                .OrderBy(h => h.Key)
+                .Select(h => new HuellaEmpleadoDto
+                {
+                    Dedo = h.Key,
+                    TemplateHuella = h.Value
+                })
+                .ToList();
+
+            bool exito = _app.GuardarConfiguracion(password, horaEntrada, horaLimite, huellasAdmin);
+            if (exito)
+            {
+                _adminWindow.MostrarMensaje("Configuración guardada correctamente.");
+                LimpiarHuellasAdminEnMemoria();
+            }
+            else
+            {
+                _adminWindow.MostrarError("No se pudo guardar la configuración.");
+            }
+        }
+
+        public void CargarConfiguracion()
+        {
+            if (_adminWindow == null) return;
+
+            var config = _app.ObtenerConfiguracion();
+            if (config.HasValue)
+            {
+                var (password, horaEntrada, horaLimite) = config.Value;
+                _adminWindow.CargarConfiguracion(password ?? string.Empty, horaEntrada.ToString("hh\\:mm"), horaLimite.ToString("hh\\:mm"));
+            }
+            else
+            {
+                _adminWindow.CargarConfiguracion(string.Empty, "08:00", "08:30");
+            }
         }
 
         #endregion
@@ -305,6 +376,72 @@ namespace ControlAcceso.UI.controladores
                     {
                         _adminWindow?.ActualizarEstadoHuella(numeroDedo, registrada: estaRegistradoActualmente);
                     }
+                }
+            }
+        }
+
+        public async Task CapturarHuellaAdminAsync(int numeroDedo)
+        {
+            _ctsCaptura?.Cancel();
+            _ctsCaptura?.Dispose();
+
+            _ctsCaptura = new CancellationTokenSource();
+            var token = _ctsCaptura.Token;
+
+            try
+            {
+                _adminWindow?.EstablecerEstadoEsperandoHuellaAdmin(numeroDedo);
+
+                byte[]? rawImage = await _app.IniciarCapturaAsync(token);
+
+                if (rawImage == null || rawImage.Length == 0)
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow?.MostrarError("No se logró capturar la imagen del sensor o la operación fue cancelada.");
+                    }
+                    return;
+                }
+
+                if (token.IsCancellationRequested) return;
+
+                if (!_app.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string msgError))
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow?.MostrarError(msgError);
+                    }
+                    return;
+                }
+
+                if (templateCapturado == null)
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow?.MostrarError("Ocurrió un error inesperado al procesar el template biométrico.");
+                    }
+                    return;
+                }
+
+                if (!token.IsCancellationRequested)
+                {
+                    _huellasAdminCapturadas[numeroDedo] = templateCapturado;
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    _adminWindow?.MostrarError($"Error en la captura de huella de administrador: {ex.Message}");
+                }
+            }
+            finally
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    bool registrada = _huellasAdminCapturadas.ContainsKey(numeroDedo);
+                    _adminWindow?.ActualizarEstadoHuellaAdmin(numeroDedo, registrada);
                 }
             }
         }

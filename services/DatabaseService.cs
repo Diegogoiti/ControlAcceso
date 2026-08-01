@@ -134,21 +134,36 @@ namespace ControlAcceso.Services
             return _dbAdapter.ObtenerAsistencias(filtro);
         }
 
-        public (string password, TimeSpan entrada, TimeSpan salida)? ObtenerConfiguracion()
+        public bool GuardarConfiguracion(TimeSpan entrada, TimeSpan limite, string password)
         {
-            return _dbAdapter.ObtenerConfiguracion();
+            return GuardarConfiguracion(entrada, limite, password, Array.Empty<HuellaEmpleadoDto>());
         }
 
-        public bool GuardarConfiguracion(TimeSpan entrada, TimeSpan salida, string password)
+        public bool GuardarConfiguracion(TimeSpan entrada, TimeSpan limite, string password, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin)
         {
             try
             {
-                _dbAdapter.GuardarConfiguracion(password, entrada, salida);
-                return true;
+                return _dbAdapter.GuardarConfiguracion(password, entrada, limite, huellasAdmin);
             }
             catch
             {
                 return false;
+            }
+        }
+
+        public (string? Password, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion()
+        {
+            try
+            {
+                var config = _dbAdapter.ObtenerConfiguracion();
+                if (config == null) return null;
+
+                var (password, horaEntrada, horaLimite) = config.Value;
+                return (password, horaEntrada, horaLimite);
+            }
+            catch
+            {
+                return null;
             }
         }
 

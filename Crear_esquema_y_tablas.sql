@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS asistencia;
 DROP TABLE IF EXISTS huellas;
 DROP TABLE IF EXISTS empleados;
 DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS admin_huellas;
 DROP TABLE IF EXISTS configuracion;
 
 -- 3. Tabla: roles
@@ -74,15 +75,30 @@ CREATE TABLE configuracion (
     id INT NOT NULL AUTO_INCREMENT,
     admin_password VARCHAR(255) NOT NULL,
     hora_entrada TIME NOT NULL,
-    hora_salida TIME NOT NULL,
+    hora_limite TIME NOT NULL,
     activo TINYINT(1) NOT NULL DEFAULT 1,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 8. Datos iniciales mínimos requeridos
+-- 8. Tabla: admin_huellas (3 huellas máximo para el administrador)
+CREATE TABLE admin_huellas (
+    id INT NOT NULL AUTO_INCREMENT,
+    configuracion_id INT NOT NULL,
+    dedo INT NOT NULL,
+    template LONGBLOB NOT NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1,
+    PRIMARY KEY (id),
+    UNIQUE (configuracion_id, dedo),
+    CONSTRAINT fk_admin_huellas_configuracion
+        FOREIGN KEY (configuracion_id) REFERENCES configuracion(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 9. Datos iniciales mínimos requeridos
 -- Insertar un rol básico por defecto
 INSERT INTO roles (nombre_rol, activo) VALUES ('General', 1);
 
 -- Insertar fila única de configuración
-INSERT INTO configuracion (id, admin_password, hora_entrada, hora_salida, activo)
-VALUES (1, 'YWRtaW4=', '08:00:00', '17:00:00', 1);
+INSERT INTO configuracion (id, admin_password, hora_entrada, hora_limite, activo)
+VALUES (1, 'YWRtaW4=', '08:00:00', '08:30:00', 1);

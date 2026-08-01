@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using ControlAcceso.DTOs;
 using MySql.Data.MySqlClient;
 
@@ -388,45 +389,116 @@ namespace ControlAcceso.Database
             return cmd.ExecuteNonQuery() > 0;
         }
 
-        public bool GuardarConfiguracion(string adminPassword, TimeSpan horaEntrada, TimeSpan horaSalida)
+        public bool GuardarConfiguracion(string adminPassword, TimeSpan horaEntrada, TimeSpan horaLimite, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin)
         {
             using var conn = GetConnection();
             conn.Open();
+            using var transaction = conn.BeginTransaction();
 
-            string query = @"
-                INSERT INTO configuracion (id, admin_password, hora_entrada, hora_salida)
-                VALUES (1, @adminPassword, @horaEntrada, @horaSalida)
-                ON DUPLICATE KEY UPDATE
-                    admin_password = @adminPassword,
-                    hora_entrada = @horaEntrada,
-                    hora_salida = @horaSalida;";
+            try
+            {
+                string passwordGuardado = Convert.ToBase64String(Encoding.UTF8.GetBytes(adminPassword));
 
-            using var cmd = new MySqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@adminPassword", adminPassword);
-            cmd.Parameters.AddWithValue("@horaEntrada", horaEntrada);
-            cmd.Parameters.AddWithValue("@horaSalida", horaSalida);
+                string query = @"
+                    INSERT INTO configuracion (id, admin_password, hora_entrada, hora_limite)
+                    VALUES (1, @adminPassword, @horaEntrada, @horaLimite)
+                    ON DUPLICATE KEY UPDATE
+                        admin_password = @adminPassword,
+                        hora_entrada = @horaEntrada,
+                        hora_limite = @horaLimite;";
 
-            return cmd.ExecuteNonQuery() > 0;
+                using var cmd = new MySqlCommand(query, conn, transaction);
+                cmd.Parameters.AddWithValue("@adminPassword", passwordGuardado);
+                cmd.Parameters.AddWithValue("@horaEntrada", horaEntrada);
+                cmd.Parameters.AddWithValue("@horaLimite", horaLimite);
+                cmd.ExecuteNonQuery();
+
+                try
+                {
+                    string createTable = @"
+                        CREATE TABLE IF NOT EXISTS admin_huellas (
+                            id INT NOT NULL AUTO_INCREMENT,
+                            configuracion_id INT NOT NULL,
+                            dedo INT NOT NULL,
+                            template LONGBLOB NOT NULL,
+                            activo TINYINT(1) NOT NULL DEFAULT 1,
+                            PRIMARY KEY (id),
+                            UNIQUE (configuracion_id, dedo)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+                    using var createCmd = new MySqlCommand(createTable, conn, transaction);
+                    createCmd.ExecuteNonQuery();
+
+                    string deleteHuellas = "DELETE FROM admin_huellas WHERE configuracion_id = 1;";
+                    using var deleteCmd = new MySqlCommand(deleteHuellas, conn, transaction);
+                    deleteCmd.ExecuteNonQuery();
+
+                    if (huellasAdmin != null)
+                    {
+                        string insertHuella = @"
+                            INSERT INTO admin_huellas (configuracion_id, dedo, template)
+                            VALUES (@configuracionId, @dedo, @template);";
+
+                        using var cmdHuella = new MySqlCommand(insertHuella, conn, transaction);
+                        cmdHuella.Parameters.Add("@configuracionId", MySqlDbType.Int32);
+                        cmdHuella.Parameters.Add("@dedo", MySqlDbType.Int32);
+                        cmdHuella.Parameters.Add("@template", MySqlDbType.LongBlob);
+
+                        foreach (var huella in huellasAdmin)
+                        {
+                            if (huella == null || huella.TemplateHuella == null || huella.TemplateHuella.Length == 0)
+                                continue;
+
+                            cmdHuella.Parameters["@configuracionId"].Value = 1;
+                            cmdHuella.Parameters["@dedo"].Value = huella.Dedo;
+                            cmdHuella.Parameters["@template"].Value = huella.TemplateHuella;
+                            cmdHuella.ExecuteNonQuery();
+                        }
+                    }
+                }
+                catch
+                {
+                    // Si la tabla no está disponible, se ignora para no bloquear la configuración base.
+                }
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                return false;
+            }
         }
 
         #endregion
 
-        public (string AdminPassword, TimeSpan HoraEntrada, TimeSpan HoraSalida)? ObtenerConfiguracion()
+        public (string AdminPassword, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion()
         {
             using var connection = new MySqlConnection(_connectionString);
             connection.Open();
 
-            string query = "SELECT admin_password, hora_entrada, hora_salida FROM configuracion LIMIT 1;";
+            string query = "SELECT admin_password, hora_entrada, hora_limite FROM configuracion LIMIT 1;";
             using var command = new MySqlCommand(query, connection);
             using var reader = command.ExecuteReader();
 
             if (reader.Read())
             {
-                string password = reader.GetString("admin_password");
+                string passwordStored = reader.GetString("admin_password");
                 TimeSpan entrada = reader.GetTimeSpan("hora_entrada");
-                TimeSpan salida = reader.GetTimeSpan("hora_salida");
+                TimeSpan limite = reader.GetTimeSpan("hora_limite");
 
-                return (password, entrada, salida);
+                string password = passwordStored;
+                try
+                {
+                    password = Encoding.UTF8.GetString(Convert.FromBase64String(passwordStored));
+                }
+                catch
+                {
+                    password = passwordStored;
+                }
+
+                return (password, entrada, limite);
             }
 
             return null;
