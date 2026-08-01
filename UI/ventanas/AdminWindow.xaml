@@ -318,47 +318,55 @@
                         <DropShadowEffect BlurRadius="12" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
                     </Border.Effect>
                     <Border Background="#F8FAFC" CornerRadius="18" Padding="24" BorderBrush="#E2E8F0" BorderThickness="1">
-                        <StackPanel>
-                            <TextBlock Text="⚙️ Configuración del sistema" FontSize="22" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,6"/>
-                            <TextBlock Text="Ajusta la contraseña, los horarios de acceso y las huellas del administrador." FontSize="13" Foreground="#64748B" Margin="0,0,0,18"/>
+                        <StackPanel HorizontalAlignment="Center" Width="620">
+                            <TextBlock Text="⚙️ Configuración del sistema" FontSize="22" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Ajusta la contraseña, los horarios de acceso y las huellas del administrador." FontSize="13" Foreground="#64748B" Margin="0,0,0,18" TextAlignment="Center"/>
 
-                            <Border Background="White" CornerRadius="14" Padding="18" BorderBrush="#E2E8F0" BorderThickness="1">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="20"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="Acceso administrativo" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="Acceso administrativo" Style="{StaticResource FieldLabel}" Margin="0,0,0,8" HorizontalAlignment="Center"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Contraseña" Style="{StaticResource FieldLabel}"/>
-                                    <PasswordBox x:Name="pwdAdminPassword" Grid.Row="2" Grid.Column="0" Height="40" Padding="10,0" Margin="0,0,0,12" VerticalContentAlignment="Center" BorderBrush="#CBD5E1" BorderThickness="1"/>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Hora de entrada" Style="{StaticResource FieldLabel}"/>
-                                    <TextBox x:Name="txtHoraEntrada" Grid.Row="2" Grid.Column="2" Text="08:00" Style="{StaticResource ModernTextBox}" Margin="0,0,0,12"/>
-
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Hora límite de ingreso" Style="{StaticResource FieldLabel}"/>
-                                    <TextBox x:Name="txtHoraLimite" Grid.Row="4" Grid.Column="0" Text="08:30" Style="{StaticResource ModernTextBox}" Margin="0,0,0,12"/>
-
-                                    <StackPanel Grid.Row="3" Grid.Column="2" Grid.RowSpan="3" Margin="0,0,0,6">
-                                        <TextBlock Text="Huellas de administrador (3)" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,0,0,8">
-                                            <Button x:Name="btnAdminHuella1" Content="📷 Huella 1" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnCapturarAdminHuella_Click"/>
-                                            <Button x:Name="btnAdminHuella2" Content="📷 Huella 2" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnCapturarAdminHuella_Click"/>
-                                            <Button x:Name="btnAdminHuella3" Content="📷 Huella 3" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnCapturarAdminHuella_Click"/>
-                                        </WrapPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12" HorizontalAlignment="Center">
+                                    <TextBlock Text="Hora de entrada" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ComboBox x:Name="cmbHoraEntrada" Width="90" Height="40" Margin="0,0,8,0" SelectedIndex="8"/>
+                                        <ComboBox x:Name="cmbMinutoEntrada" Width="90" Height="40" SelectedIndex="0"/>
                                     </StackPanel>
-                                </Grid>
-                            </Border>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,12" HorizontalAlignment="Center">
+                                    <TextBlock Text="Hora límite de ingreso" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ComboBox x:Name="cmbHoraLimite" Width="90" Height="40" Margin="0,0,8,0" SelectedIndex="8"/>
+                                        <ComboBox x:Name="cmbMinutoLimite" Width="90" Height="40" SelectedIndex="30"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,12" HorizontalAlignment="Center" Width="320">
+                                    <TextBlock Text="Contraseña" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                                    <PasswordBox x:Name="pwdAdminPassword" Height="40" Padding="10,0" VerticalContentAlignment="Center" BorderBrush="#CBD5E1" BorderThickness="1"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,6" HorizontalAlignment="Center">
+                                    <TextBlock Text="Huellas de administrador (3)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                                    <WrapPanel Margin="0,8,0,0" HorizontalAlignment="Center">
+                                        <Button x:Name="btnAdminHuella1" Content="📷 Huella 1" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnCapturarAdminHuella_Click"/>
+                                        <Button x:Name="btnAdminHuella2" Content="📷 Huella 2" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnCapturarAdminHuella_Click"/>
+                                        <Button x:Name="btnAdminHuella3" Content="📷 Huella 3" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnCapturarAdminHuella_Click"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Grid>
 
                             <Button x:Name="btnGuardarConfig" Content="Guardar configuración" Height="46" Margin="0,16,0,0" Background="#2563EB" Foreground="White" FontSize="15" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="btnGuardarConfig_Click">
                                 <Button.Resources>

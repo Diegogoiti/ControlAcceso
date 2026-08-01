@@ -17,6 +17,27 @@ namespace ControlAcceso
         {
             InitializeComponent();
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            InicializarCombosHora();
+        }
+
+        private void InicializarCombosHora()
+        {
+            for (int hora = 0; hora <= 23; hora++)
+            {
+                cmbHoraEntrada.Items.Add(hora.ToString("D2"));
+                cmbHoraLimite.Items.Add(hora.ToString("D2"));
+            }
+
+            for (int minuto = 0; minuto <= 59; minuto++)
+            {
+                cmbMinutoEntrada.Items.Add(minuto.ToString("D2"));
+                cmbMinutoLimite.Items.Add(minuto.ToString("D2"));
+            }
+
+            cmbHoraEntrada.SelectedIndex = 8;
+            cmbMinutoEntrada.SelectedIndex = 0;
+            cmbHoraLimite.SelectedIndex = 8;
+            cmbMinutoLimite.SelectedIndex = 30;
         }
 
         #region Navegación entre Pestañas
@@ -207,15 +228,31 @@ namespace ControlAcceso
 
         public string ObtenerPasswordConfiguracion() => pwdAdminPassword.Password;
 
-        public string ObtenerHoraEntrada() => txtHoraEntrada.Text;
+        public string ObtenerHoraEntrada()
+        {
+            return $"{cmbHoraEntrada.SelectedItem ?? "08"}:{cmbMinutoEntrada.SelectedItem ?? "00"}";
+        }
 
-        public string ObtenerHoraLimite() => txtHoraLimite.Text;
+        public string ObtenerHoraLimite()
+        {
+            return $"{cmbHoraLimite.SelectedItem ?? "08"}:{cmbMinutoLimite.SelectedItem ?? "30"}";
+        }
 
         public void CargarConfiguracion(string password, string horaEntrada, string horaLimite)
         {
             pwdAdminPassword.Password = password ?? string.Empty;
-            txtHoraEntrada.Text = horaEntrada ?? string.Empty;
-            txtHoraLimite.Text = horaLimite ?? string.Empty;
+
+            if (TimeSpan.TryParse(horaEntrada, out TimeSpan entrada))
+            {
+                cmbHoraEntrada.SelectedItem = entrada.Hours.ToString("D2");
+                cmbMinutoEntrada.SelectedItem = entrada.Minutes.ToString("D2");
+            }
+
+            if (TimeSpan.TryParse(horaLimite, out TimeSpan limite))
+            {
+                cmbHoraLimite.SelectedItem = limite.Hours.ToString("D2");
+                cmbMinutoLimite.SelectedItem = limite.Minutes.ToString("D2");
+            }
         }
 
         public void EstablecerEstadoEsperandoHuellaAdmin(int dedo)
