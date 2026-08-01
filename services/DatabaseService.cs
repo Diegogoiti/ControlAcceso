@@ -49,8 +49,7 @@ namespace ControlAcceso.Services
 
             try
             {
-                _dbAdapter.AgregarEmpleado(empleado);
-                return true;
+                return _dbAdapter.AgregarEmpleado(empleado);
             }
             catch (Exception ex)
             {
@@ -71,8 +70,7 @@ namespace ControlAcceso.Services
 
             try
             {
-                _dbAdapter.ActualizarEmpleado(empleado);
-                return true;
+                return _dbAdapter.ActualizarEmpleado(empleado);
             }
             catch (Exception ex)
             {

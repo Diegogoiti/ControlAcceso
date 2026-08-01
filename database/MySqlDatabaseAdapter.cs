@@ -297,28 +297,50 @@ namespace ControlAcceso.Database
         cmdEmp.ExecuteNonQuery();
 
         // 2. Insertar o actualizar huellas re-capturadas (si las hay)
-        if (empleado.Huellas != null && empleado.Huellas.Any(h => h?.TemplateHuella?.Length > 0))
+        if (empleado.Huellas != null)
         {
-            string queryHuella = @"
-                INSERT INTO huellas (empleado_id, dedo, template)
-                VALUES (@empleadoId, @dedo, @template)
-                ON DUPLICATE KEY UPDATE template = VALUES(template);";
-
-            using var cmdHuella = new MySqlCommand(queryHuella, conn, transaction);
-            cmdHuella.Parameters.Add("@empleadoId", MySqlDbType.Int32);
-            cmdHuella.Parameters.Add("@dedo", MySqlDbType.Int32);
-            cmdHuella.Parameters.Add("@template", MySqlDbType.LongBlob);
-
             foreach (var huella in empleado.Huellas)
             {
                 if (huella == null || huella.TemplateHuella == null || huella.TemplateHuella.Length == 0)
                     continue;
 
-                cmdHuella.Parameters["@empleadoId"].Value = empleado.Id;
-                cmdHuella.Parameters["@dedo"].Value = huella.Dedo;
-                cmdHuella.Parameters["@template"].Value = huella.TemplateHuella;
+                string queryExisteHuella = @"
+                    SELECT id
+                    FROM huellas
+                    WHERE empleado_id = @empleadoId AND dedo = @dedo
+                    LIMIT 1;";
 
-                cmdHuella.ExecuteNonQuery();
+                using var cmdExisteHuella = new MySqlCommand(queryExisteHuella, conn, transaction);
+                cmdExisteHuella.Parameters.AddWithValue("@empleadoId", empleado.Id);
+                cmdExisteHuella.Parameters.AddWithValue("@dedo", huella.Dedo);
+
+                object? huellaIdResult = cmdExisteHuella.ExecuteScalar();
+
+                if (huellaIdResult != null && huellaIdResult != DBNull.Value)
+                {
+                    int huellaId = Convert.ToInt32(huellaIdResult);
+                    string queryActualizarHuella = @"
+                        UPDATE huellas
+                        SET template = @template
+                        WHERE id = @id;";
+
+                    using var cmdActualizarHuella = new MySqlCommand(queryActualizarHuella, conn, transaction);
+                    cmdActualizarHuella.Parameters.AddWithValue("@template", huella.TemplateHuella);
+                    cmdActualizarHuella.Parameters.AddWithValue("@id", huellaId);
+                    cmdActualizarHuella.ExecuteNonQuery();
+                }
+                else
+                {
+                    string queryInsertarHuella = @"
+                        INSERT INTO huellas (empleado_id, dedo, template)
+                        VALUES (@empleadoId, @dedo, @template);";
+
+                    using var cmdInsertarHuella = new MySqlCommand(queryInsertarHuella, conn, transaction);
+                    cmdInsertarHuella.Parameters.AddWithValue("@empleadoId", empleado.Id);
+                    cmdInsertarHuella.Parameters.AddWithValue("@dedo", huella.Dedo);
+                    cmdInsertarHuella.Parameters.AddWithValue("@template", huella.TemplateHuella);
+                    cmdInsertarHuella.ExecuteNonQuery();
+                }
             }
         }
 

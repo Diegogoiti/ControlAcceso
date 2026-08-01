@@ -140,6 +140,22 @@ namespace ControlAcceso.UI.controladores
 
     try
     {
+        emp.Huellas = new HuellaEmpleadoDto[3];
+
+        if (_huellasCapturadas.Count > 0)
+        {
+            int index = 0;
+            foreach (var huella in _huellasCapturadas.OrderBy(h => h.Key))
+            {
+                emp.Huellas[index] = new HuellaEmpleadoDto
+                {
+                    Dedo = huella.Key,
+                    TemplateHuella = huella.Value
+                };
+                index++;
+            }
+        }
+
         // Se llama al nuevo método en MyApp para actualización
         var (exito, mensaje) = _app.EditarEmpleado(emp);
 
