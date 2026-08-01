@@ -266,7 +266,7 @@ namespace ControlAcceso
             Button? btn = dedo switch { 1 => btnAdminHuella1, 2 => btnAdminHuella2, 3 => btnAdminHuella3, _ => null };
             if (btn != null)
             {
-                btn.Content = registrada ? $"✅ Huella {dedo}" : $"📷 Huella {dedo}";
+                btn.Content = registrada ? $"✅ Modificar huella {dedo}" : $"📷 Registrar huella {dedo}";
             }
         }
 

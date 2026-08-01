@@ -15,6 +15,7 @@ namespace ControlAcceso.Database
         bool RegistrarAsistencia(AsistenciaDto asistencia);
 
         bool GuardarConfiguracion(string adminPassword, TimeSpan horaEntrada, TimeSpan horaLimite, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin);
+        List<HuellaEmpleadoDto> ObtenerHuellasAdmin();
 
         // Asegúrate de que los métodos de consulta existentes usen las firmas correctas:
         List<EmpleadoDto> ObtenerEmpleados(EmpleadoFilter filtro);

@@ -118,12 +118,6 @@ namespace ControlAcceso.UI.controladores
                 return;
             }
 
-            if (_huellasAdminCapturadas.Count < 3)
-            {
-                _adminWindow.MostrarError("Debe registrar las 3 huellas de administrador.");
-                return;
-            }
-
             var huellasAdmin = _huellasAdminCapturadas
                 .OrderBy(h => h.Key)
                 .Select(h => new HuellaEmpleadoDto
@@ -132,6 +126,20 @@ namespace ControlAcceso.UI.controladores
                     TemplateHuella = h.Value
                 })
                 .ToList();
+
+            if (huellasAdmin.Count == 0)
+            {
+                var huellasExistentes = _app.ObtenerHuellasAdmin();
+                huellasAdmin = huellasExistentes
+                    .Where(h => h.TemplateHuella != null && h.TemplateHuella.Length > 0)
+                    .OrderBy(h => h.Dedo)
+                    .Select(h => new HuellaEmpleadoDto
+                    {
+                        Dedo = h.Dedo,
+                        TemplateHuella = h.TemplateHuella
+                    })
+                    .ToList();
+            }
 
             bool exito = _app.GuardarConfiguracion(password, horaEntrada, horaLimite, huellasAdmin);
             if (exito)
@@ -149,6 +157,17 @@ namespace ControlAcceso.UI.controladores
         {
             if (_adminWindow == null) return;
 
+            _huellasAdminCapturadas.Clear();
+
+            var huellasAdmin = _app.ObtenerHuellasAdmin();
+            foreach (var huella in huellasAdmin)
+            {
+                if (huella.TemplateHuella != null && huella.TemplateHuella.Length > 0 && huella.Dedo >= 1 && huella.Dedo <= 3)
+                {
+                    _huellasAdminCapturadas[huella.Dedo] = huella.TemplateHuella;
+                }
+            }
+
             var config = _app.ObtenerConfiguracion();
             if (config.HasValue)
             {
@@ -158,6 +177,11 @@ namespace ControlAcceso.UI.controladores
             else
             {
                 _adminWindow.CargarConfiguracion(string.Empty, "08:00", "08:30");
+            }
+
+            for (int dedo = 1; dedo <= 3; dedo++)
+            {
+                _adminWindow.ActualizarEstadoHuellaAdmin(dedo, _huellasAdminCapturadas.ContainsKey(dedo));
             }
         }
 

@@ -77,8 +77,8 @@ namespace ControlAcceso.UI.controladores
 
         public void AbrirRegistroEmpleado()
         {
-            var adminController = new AdminController(_app);
-            adminController.MostrarVentanaAdmin();
+            var authController = new AuthController(_app);
+            authController.MostrarVentanaAutenticacion();
         }
     }
 }

@@ -103,6 +103,36 @@ namespace ControlAcceso.Database
             return huellas;
         }
 
+        public List<HuellaEmpleadoDto> ObtenerHuellasAdmin()
+        {
+            var huellas = new List<HuellaEmpleadoDto>();
+
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"
+                SELECT id, configuracion_id, dedo, template
+                FROM admin_huellas
+                WHERE activo = 1
+                ORDER BY dedo ASC";
+
+            using var cmd = new MySqlCommand(query, conn);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                huellas.Add(new HuellaEmpleadoDto
+                {
+                    Id = reader.GetInt32("id"),
+                    EmpleadoId = reader.GetInt32("configuracion_id"),
+                    Dedo = reader.GetInt32("dedo"),
+                    TemplateHuella = (byte[])reader["template"]
+                });
+            }
+
+            return huellas;
+        }
+
         public List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter filtro)
         {
             var asistencias = new List<AsistenciaDto>();

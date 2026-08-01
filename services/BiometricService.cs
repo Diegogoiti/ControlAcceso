@@ -83,7 +83,7 @@ namespace ControlAcceso.Services
         /// <summary>
         /// Caso de Uso: Verificación 1:1. Compara si la huella dada pertenece a un empleado específico.
         /// </summary>
-        /*public bool VerificarEmpleado(byte[] templateCapturado, byte[] templateAlmacenado, double umbral = 50.0)
+        public bool VerificarCoincidencia(byte[] templateCapturado, byte[] templateAlmacenado, double umbral = 50.0)
         {
             if (templateCapturado == null || templateAlmacenado == null)
                 return false;
@@ -96,7 +96,7 @@ namespace ControlAcceso.Services
             {
                 return false;
             }
-        }*/
+        }
 
         /// <summary>
         /// Caso de Uso: Valida si la nueva huella que se va a registrar ya pertenece a otro empleado existente.

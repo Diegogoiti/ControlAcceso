@@ -1,0 +1,39 @@
+<Window x:Class="ControlAcceso.AuthWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Autenticación Administrador"
+        Height="360"
+        Width="480"
+        WindowStartupLocation="CenterScreen"
+        Background="#F8FAFC"
+        ResizeMode="NoResize">
+    <Grid>
+        <Border Background="White" CornerRadius="16" Padding="24" Margin="24" BorderBrush="#E2E8F0" BorderThickness="1">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="🔐 Acceso administrativo" FontSize="22" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                <TextBlock Text="Ingresa tu contraseña o usa la huella registrada para entrar al panel de administración." FontSize="13" Foreground="#64748B" Margin="0,0,0,20" TextAlignment="Center" TextWrapping="Wrap"/>
+
+                <TextBlock Text="Contraseña" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,6"/>
+                <PasswordBox x:Name="pwdPassword" Height="42" Padding="10,0" VerticalContentAlignment="Center" BorderBrush="#CBD5E1" BorderThickness="1" Margin="0,0,0,12"/>
+
+                <Button x:Name="btnEntrar" Content="Entrar" Height="42" Background="#2563EB" Foreground="White" FontSize="14" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="btnEntrar_Click" Margin="0,0,0,10">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button x:Name="btnUsarHuella" Content="Usar huella de administrador" Height="42" Background="#F8FAFC" Foreground="#334155" BorderBrush="#CBD5E1" BorderThickness="1" Cursor="Hand" Click="btnUsarHuella_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <TextBlock x:Name="txtEstado" Text="" FontSize="12" Foreground="#64748B" Margin="0,14,0,0" TextWrapping="Wrap" TextAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

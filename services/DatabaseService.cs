@@ -179,6 +179,18 @@ namespace ControlAcceso.Services
             }
         }
 
+        public List<HuellaEmpleadoDto> ObtenerHuellasAdmin()
+        {
+            try
+            {
+                return _dbAdapter.ObtenerHuellasAdmin();
+            }
+            catch (Exception)
+            {
+                return new List<HuellaEmpleadoDto>();
+            }
+        }
+
         #endregion
     }
 }

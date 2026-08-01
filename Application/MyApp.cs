@@ -206,6 +206,47 @@ public bool GuardarConfiguracion(string password, TimeSpan horaEntrada, TimeSpan
     return DatabaseService.GuardarConfiguracion(horaEntrada, horaLimite, password, huellasAdmin);
 }
 
+public List<HuellaEmpleadoDto> ObtenerHuellasAdmin()
+{
+    return DatabaseService.ObtenerHuellasAdmin();
+}
+
+public bool ValidarPasswordAdmin(string password)
+{
+    var config = ObtenerConfiguracion();
+    if (config == null) return false;
+
+    return string.Equals(password ?? string.Empty, config.Value.Password ?? string.Empty, StringComparison.Ordinal);
+}
+
+public async Task<(bool Exito, string Mensaje)> AutenticarAdministradorPorHuellaAsync(System.Threading.CancellationToken cancellationToken = default)
+{
+    byte[]? rawImage = await CaptahuellasService.IniciarCapturaAsync(cancellationToken);
+    if (rawImage == null || rawImage.Length == 0)
+    {
+        return (false, "No se pudo capturar la huella del administrador.");
+    }
+
+    if (!BiometricService.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string mensajeError))
+    {
+        return (false, mensajeError);
+    }
+
+    var huellasAdmin = DatabaseService.ObtenerHuellasAdmin();
+    foreach (var huella in huellasAdmin)
+    {
+        if (huella.TemplateHuella == null || huella.TemplateHuella.Length == 0)
+            continue;
+
+        if (BiometricService.VerificarCoincidencia(templateCapturado!, huella.TemplateHuella, 50.0))
+        {
+            return (true, "Huella de administrador reconocida.");
+        }
+    }
+
+    return (false, "La huella no coincide con la registrada para el administrador.");
+}
+
 public (string? Password, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion()
 {
     return DatabaseService.ObtenerConfiguracion();
