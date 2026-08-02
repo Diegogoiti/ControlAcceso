@@ -1,0 +1,58 @@
+<Window x:Class="ControlAcceso.ReportesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Centro de Reportes" Height="400" Width="550"
+        WindowStartupLocation="CenterOwner"
+        Background="#F8FAFC"
+        ResizeMode="NoResize">
+    <Border Background="White" CornerRadius="12" Padding="25" Margin="20">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Color="#000000" Opacity="0.1"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="📊 Centro de Reportes" FontSize="22" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,5"/>
+            <TextBlock Grid.Row="1" Text="Genera un reporte en PDF con la asistencia semanal de todos los empleados. Las inasistencias y llegadas tardías se calculan automáticamente." 
+                       FontSize="13" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,25"/>
+
+            <Border Grid.Row="2" Background="#F1F5F9" CornerRadius="8" Padding="20">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Seleccione cualquier día de la semana a reportar:" FontSize="14" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,10"/>
+                    <DatePicker x:Name="dpFechaReporte" Height="35" FontSize="14"/>
+                    
+                    <TextBlock x:Name="txtMensaje" Text="" Foreground="#DC2626" Margin="0,10,0,0" Visibility="Collapsed" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="3" Margin="0,25,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnCerrar" Grid.Column="0" Content="Cerrar" Height="40" Background="#E2E8F0" Foreground="#475569" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="btnCerrar_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Button x:Name="btnGenerarPDF" Grid.Column="2" Content="📄 Generar PDF" Height="40" Background="#10B981" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="btnGenerarPDF_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
