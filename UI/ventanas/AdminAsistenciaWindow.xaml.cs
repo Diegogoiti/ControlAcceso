@@ -16,7 +16,7 @@ namespace ControlAcceso
 
         private void btnAceptar_Click(object sender, RoutedEventArgs e)
         {
-            TipoAsistencia = rbEntrada.IsChecked == true ? 1 : 0;
+            TipoAsistencia = 1;
             Observacion = txtObservacion.Text?.Trim() ?? string.Empty;
             DialogResult = true;
             Close();

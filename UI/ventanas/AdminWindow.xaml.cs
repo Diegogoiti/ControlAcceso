@@ -282,6 +282,16 @@ namespace ControlAcceso
             dgEmpleados.ItemsSource = lista;
         }
 
+        public EmpleadoViewDto? ObtenerEmpleadoSeleccionado()
+        {
+            return dgEmpleados.SelectedItem as EmpleadoViewDto;
+        }
+
+        private void btnRegistrarAsistencia_Click(object sender, RoutedEventArgs e)
+        {
+            _controller?.AbrirRegistroAsistenciaEmpleado();
+        }
+
         public void MostrarMensaje(string mensaje)
         {
             MessageBox.Show(mensaje, "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
