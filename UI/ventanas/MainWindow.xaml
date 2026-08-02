@@ -115,6 +115,23 @@
                    HorizontalAlignment="Center"/>
     </StackPanel>
 
+    <!-- 4. PANEL DE ACCESO DENEGADO (Se activa por hora límite) -->
+    <StackPanel x:Name="PanelDenegado" Visibility="Collapsed" MaxWidth="650">
+        <TextBlock Text="ACCESO DENEGADO"
+                   FontSize="28"
+                   FontWeight="Bold"
+                   Foreground="#D84315"
+                   HorizontalAlignment="Center"/>
+        <TextBlock x:Name="TxtMensajeDenegado"
+                   Text="Mensaje de acceso denegado"
+                   FontSize="18"
+                   Foreground="#475569"
+                   Margin="0,15,0,0"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"/>
+    </StackPanel>
+
         </Grid>
 
         <!-- ACCESO A ADMINISTRACIÓN -->

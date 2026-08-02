@@ -128,31 +128,46 @@ namespace ControlAcceso.Application
             return (true, empleado, "Empleado identificado con éxito.");
         }
 
-        public async Task<(bool Exito, string Mensaje, string NombreEmpleado, DateTime Hora)> MarcarAsistenciaAsync(int tipoAsistencia, CancellationToken cancellationToken = default)
+        public async Task<(bool Exito, bool Denegado, string Mensaje, string NombreEmpleado, DateTime Hora)> MarcarAsistenciaAsync(int tipoAsistencia, CancellationToken cancellationToken = default)
         {
             var resultado = await IdentificarEmpleadoPorHuellaAsync(cancellationToken);
 
             // 1. Fallo en la lectura/identificación biométrica
             if (!resultado.Exito || resultado.EmpleadoEncontrado == null)
             {
-                return (false, "Intenta de nuevo o llama a tu supervisor", string.Empty, DateTime.Now);
+                return (false, false, "Intenta de nuevo o llama a tu supervisor", string.Empty, DateTime.Now);
             }
 
-            // 2. Intento de registro en la base de datos
+            DateTime horaActual = DateTime.Now;
+
+            // 2. Validación de hora límite (solo para entradas)
+            if (tipoAsistencia == 1)
+            {
+                var config = DatabaseService.ObtenerConfiguracion();
+                if (config.HasValue)
+                {
+                    TimeSpan horaLimite = config.Value.HoraLimite;
+                    if (horaActual.TimeOfDay > horaLimite)
+                    {
+                        return (false, true, "Acceso denegado: Se ha excedido la hora límite de entrada configurada. El registro se encuentra bloqueado. Contacte a su supervisor para autorizar una excepción.", string.Empty, horaActual);
+                    }
+                }
+            }
+
+            // 3. Intento de registro en la base de datos
             bool guardado = DatabaseService.RegistrarAsistencia(resultado.EmpleadoEncontrado.Id, tipoAsistencia);
             if (!guardado)
             {
-                return (false, "Error al registrar el marcado de asistencia en la base de datos.", string.Empty, DateTime.Now);
+                return (false, false, "Error al registrar el marcado de asistencia en la base de datos.", string.Empty, horaActual);
             }
 
             CargarEmpleadosViewCache();
 
-            // 3. Éxito: retornamos la hora exacta y el nombre limpio para la vista
-            DateTime horaActual = DateTime.Now;
+            // 4. Éxito: retornamos la hora exacta y el nombre limpio para la vista
             string tipoTexto = tipoAsistencia == 1 ? "Entrada" : "Salida";
             string mensajeExito = $"¡Marcado de {tipoTexto} exitoso!";
 
-            return (true, mensajeExito, resultado.EmpleadoEncontrado.NombreCompleto, horaActual);
+            return (true, false, mensajeExito, resultado.EmpleadoEncontrado.NombreCompleto, horaActual);
         }
 
         #endregion
@@ -180,7 +195,7 @@ namespace ControlAcceso.Application
     if (exito)
     {
         // Actualiza la lista en memoria (EmpleadosViewCache)
-        CargarEmpleadosViewCache(); 
+        CargarEmpleadosViewCache();
     }
     return exito;
 }

@@ -35,18 +35,22 @@ namespace ControlAcceso.UI.controladores
         {
             if (_vista == null) return;
 
+            // Prevenir doble ejecución si ya hay una captura en curso
+            if (_ctsCaptura != null && !_ctsCaptura.IsCancellationRequested)
+                return;
+
             _ctsCaptura = new CancellationTokenSource();
             _vista.ModoEsperaHuella(true);
 
             try
             {
-                // Desempaquetamos los 4 valores retornados por tu nuevo método en MyApp
-                var (exito, mensaje, nombreEmpleado, hora) = await _app.MarcarAsistenciaAsync(tipoAsistencia, _ctsCaptura.Token);
+                // Desempaquetamos los valores retornados por el método en MyApp
+                var (exito, denegado, mensaje, nombreEmpleado, hora) = await _app.MarcarAsistenciaAsync(tipoAsistencia, _ctsCaptura.Token);
 
                 _vista.ModoEsperaHuella(false);
 
                 // Le pasamos los datos a la Vista para que ella maneje los paneles, textos y el temporizador
-                _vista.MostrarResultadoMarcaje(exito, mensaje, nombreEmpleado, hora);
+                _vista.MostrarResultadoMarcaje(exito, denegado, mensaje, nombreEmpleado, hora);
 
                 if (exito)
                 {

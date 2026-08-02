@@ -10,6 +10,7 @@ namespace ControlAcceso
         private readonly MainController? _controller;
         private readonly DispatcherTimer _relojTimer;
         private readonly DispatcherTimer _animacionTimer;
+        private readonly DispatcherTimer _reinicioTimer;
         private int _contadorPuntos = 0;
 
         public MainWindow()
@@ -22,6 +23,9 @@ namespace ControlAcceso
 
             _animacionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
             _animacionTimer.Tick += AnimacionTimer_Tick;
+
+            _reinicioTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+            _reinicioTimer.Tick += ReinicioTimer_Tick;
 
             ActualizarHoraUI();
         }
@@ -43,6 +47,18 @@ namespace ControlAcceso
             lblMensajeSensor.Text = $"Coloque su dedo en el sensor\n{puntos}";
         }
 
+        private void ReinicioTimer_Tick(object? sender, EventArgs e)
+        {
+            _reinicioTimer.Stop();
+            PanelExito.Visibility = Visibility.Collapsed;
+            PanelFallo.Visibility = Visibility.Collapsed;
+            PanelDenegado.Visibility = Visibility.Collapsed;
+            panelCaptahuellas.Visibility = Visibility.Collapsed;
+            panelReloj.Visibility = Visibility.Visible;
+            btnMarcarEntrada.IsEnabled = true;
+            btnAdministrar.IsEnabled = true;
+        }
+
         private void ActualizarHoraUI()
         {
             var ahora = DateTime.Now;
@@ -54,9 +70,11 @@ namespace ControlAcceso
         {
             if (esperando)
             {
+                _reinicioTimer.Stop(); // Detener cualquier reinicio pendiente
                 panelReloj.Visibility = Visibility.Collapsed;
                 PanelFallo.Visibility = Visibility.Collapsed;
                 PanelExito.Visibility = Visibility.Collapsed;
+                PanelDenegado.Visibility = Visibility.Collapsed;
                 panelCaptahuellas.Visibility = Visibility.Visible;
                 btnMarcarEntrada.IsEnabled = false;
                 btnAdministrar.IsEnabled = false;
@@ -67,9 +85,7 @@ namespace ControlAcceso
             {
                 _animacionTimer.Stop();
                 panelCaptahuellas.Visibility = Visibility.Collapsed;
-                panelReloj.Visibility = Visibility.Visible;
-                btnMarcarEntrada.IsEnabled = true;
-                btnAdministrar.IsEnabled = true;
+                // No mostramos el reloj aquí directamente, se manejará en MostrarResultadoMarcaje o al cancelar
             }
         }
 
@@ -90,6 +106,8 @@ namespace ControlAcceso
         {
             if (_controller != null)
             {
+                btnMarcarEntrada.IsEnabled = false;
+                btnAdministrar.IsEnabled = false;
                 await _controller.ProcesarMarcajeAsistenciaAsync(tipoAsistencia: 1);
             }
         }
@@ -97,6 +115,11 @@ namespace ControlAcceso
         private void btnCancelarCaptura_Click(object sender, RoutedEventArgs e)
         {
             _controller?.CancelarCapturaHuella();
+            // Restaurar estado visual inmediatamente al cancelar
+            ModoEsperaHuella(false);
+            panelReloj.Visibility = Visibility.Visible;
+            btnMarcarEntrada.IsEnabled = true;
+            btnAdministrar.IsEnabled = true;
         }
 
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
@@ -104,20 +127,29 @@ namespace ControlAcceso
             _controller?.AbrirRegistroEmpleado();
         }
 
-        public void MostrarResultadoMarcaje(bool exito, string mensaje, string nombreEmpleado, DateTime hora)
+        public void MostrarResultadoMarcaje(bool exito, bool denegado, string mensaje, string nombreEmpleado, DateTime hora)
         {
+            _reinicioTimer.Stop(); // Por si acaso
+            panelCaptahuellas.Visibility = Visibility.Collapsed;
+            panelReloj.Visibility = Visibility.Collapsed;
+            PanelExito.Visibility = Visibility.Collapsed;
+            PanelFallo.Visibility = Visibility.Collapsed;
+            PanelDenegado.Visibility = Visibility.Collapsed;
+
             if (exito)
             {
                 TxtNombreEmpleado.Text = $"¡Bienvenido/a, {nombreEmpleado}!";
                 TxtHoraEntrada.Text = $"Hora: {hora:hh:mm:ss tt}";
-                panelReloj.Visibility = Visibility.Collapsed;
                 PanelExito.Visibility = Visibility.Visible;
+            }
+            else if (denegado)
+            {
+                TxtMensajeDenegado.Text = mensaje;
+                PanelDenegado.Visibility = Visibility.Visible;
             }
             else
             {
-                // En caso de fallo, muestras el mensaje ("Intenta de nuevo o llama a tu supervisor")
                 TxtMensajeError.Text = mensaje;
-                panelReloj.Visibility = Visibility.Collapsed;
                 PanelFallo.Visibility = Visibility.Visible;
             }
 
@@ -126,16 +158,8 @@ namespace ControlAcceso
 
         private void ReiniciarVistaTemporal()
         {
-            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
-            timer.Tick += (s, e) =>
-            {
-                timer.Stop();
-                PanelExito.Visibility = Visibility.Collapsed;
-                PanelFallo.Visibility = Visibility.Collapsed;
-                panelCaptahuellas.Visibility = Visibility.Collapsed;
-                panelReloj.Visibility = Visibility.Visible;
-            };
-            timer.Start();
+            _reinicioTimer.Stop(); // Reinicia el temporizador si ya estaba corriendo
+            _reinicioTimer.Start();
         }
     }
 }
