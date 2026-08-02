@@ -59,8 +59,10 @@ namespace ControlAcceso.UI.controladores
             }
             catch (OperationCanceledException)
             {
+                // No mostrar mensaje, simplemente restaurar la vista al reloj en silencio
                 _vista.ModoEsperaHuella(false);
-                _vista.MostrarMensaje("Operación de lectura cancelada por el usuario.", false);
+                // Si tienes un método específico para volver a la normalidad en la vista, llámalo aquí,
+                // de lo contrario, la vista en su botón "Cancelar" ya restauró el reloj.
             }
             catch (Exception ex)
             {

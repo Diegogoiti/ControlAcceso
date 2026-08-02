@@ -132,6 +132,10 @@ namespace ControlAcceso.Application
         {
             var resultado = await IdentificarEmpleadoPorHuellaAsync(cancellationToken);
 
+            // Si el token fue cancelado antes o durante la lectura, lanzamos la excepción
+            // para que el controlador lo atrape en el catch (OperationCanceledException)
+            cancellationToken.ThrowIfCancellationRequested();
+
             // 1. Fallo en la lectura/identificación biométrica
             if (!resultado.Exito || resultado.EmpleadoEncontrado == null)
             {
