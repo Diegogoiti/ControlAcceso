@@ -19,15 +19,7 @@ namespace ControlAcceso.Services
 
         public List<EmpleadoDto> ObtenerEmpleados(EmpleadoFilter? filtro = null)
         {
-            try
-            {
-                return _dbAdapter.ObtenerEmpleados(filtro ?? new EmpleadoFilter());
-            }
-            catch (Exception)
-            {
-                // Aquí puedes registrar el error en log
-                return new List<EmpleadoDto>();
-            }
+            return _dbAdapter.ObtenerEmpleados(filtro ?? new EmpleadoFilter());
         }
 
         public bool RegistrarEmpleado(EmpleadoSaveDto empleado, out string mensajeError)
@@ -47,15 +39,7 @@ namespace ControlAcceso.Services
                 return false;
             }
 
-            try
-            {
-                return _dbAdapter.AgregarEmpleado(empleado);
-            }
-            catch (Exception ex)
-            {
-                mensajeError = $"Error al guardar en la base de datos: {ex.Message}";
-                return false;
-            }
+            return _dbAdapter.AgregarEmpleado(empleado);
         }
 
         public bool ActualizarEmpleado(EmpleadoSaveDto empleado, out string mensajeError)
@@ -68,28 +52,12 @@ namespace ControlAcceso.Services
                 return false;
             }
 
-            try
-            {
-                return _dbAdapter.ActualizarEmpleado(empleado);
-            }
-            catch (Exception ex)
-            {
-                mensajeError = $"Error al actualizar empleado: {ex.Message}";
-                return false;
-            }
+            return _dbAdapter.ActualizarEmpleado(empleado);
         }
 
         public bool CambiarEstado(int id, bool activo)
         {
-            try
-            {
-                _dbAdapter.CambiarEstadoEmpleado(id, activo);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return _dbAdapter.CambiarEstadoEmpleado(id, activo);
         }
 
         public EmpleadoDto? ObtenerEmpleadoPorId(int id)
@@ -103,19 +71,12 @@ namespace ControlAcceso.Services
 
         public bool RegistrarAsistencia(int empleadoId, int tipoAsistencia)
         {
-            try
+            _dbAdapter.RegistrarAsistencia(new AsistenciaDto
             {
-                _dbAdapter.RegistrarAsistencia(new AsistenciaDto
-                {
-                    EmpleadoID = empleadoId,
-                    Tipo = tipoAsistencia
-                });
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+                EmpleadoID = empleadoId,
+                Tipo = tipoAsistencia
+            });
+            return true;
         }
 
         public List<AsistenciaDto> ObtenerAsistenciasDelDia(DateTime fecha)
@@ -141,54 +102,26 @@ namespace ControlAcceso.Services
 
         public bool GuardarConfiguracion(TimeSpan entrada, TimeSpan limite, string password, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin)
         {
-            try
-            {
-                return _dbAdapter.GuardarConfiguracion(password, entrada, limite, huellasAdmin);
-            }
-            catch
-            {
-                return false;
-            }
+            return _dbAdapter.GuardarConfiguracion(password, entrada, limite, huellasAdmin);
         }
 
         public (string? Password, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion()
         {
-            try
-            {
-                var config = _dbAdapter.ObtenerConfiguracion();
-                if (config == null) return null;
+            var config = _dbAdapter.ObtenerConfiguracion();
+            if (config == null) return null;
 
-                var (password, horaEntrada, horaLimite) = config.Value;
-                return (password, horaEntrada, horaLimite);
-            }
-            catch
-            {
-                return null;
-            }
+            var (password, horaEntrada, horaLimite) = config.Value;
+            return (password, horaEntrada, horaLimite);
         }
 
         public List<HuellaEmpleadoDto> ObtenerHuellasActivas()
         {
-            try
-            {
-                return _dbAdapter.ObtenerHuellasActivas();
-            }
-            catch (Exception)
-            {
-                return new List<HuellaEmpleadoDto>();
-            }
+            return _dbAdapter.ObtenerHuellasActivas();
         }
 
         public List<HuellaEmpleadoDto> ObtenerHuellasAdmin()
         {
-            try
-            {
-                return _dbAdapter.ObtenerHuellasAdmin();
-            }
-            catch (Exception)
-            {
-                return new List<HuellaEmpleadoDto>();
-            }
+            return _dbAdapter.ObtenerHuellasAdmin();
         }
 
         #endregion
