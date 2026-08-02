@@ -118,28 +118,34 @@ namespace ControlAcceso.UI.controladores
                 return;
             }
 
-            var huellasAdmin = _huellasAdminCapturadas
-                .OrderBy(h => h.Key)
-                .Select(h => new HuellaEmpleadoDto
-                {
-                    Dedo = h.Key,
-                    TemplateHuella = h.Value
-                })
-                .ToList();
+            var huellasExistentes = _app.ObtenerHuellasAdmin()
+                .Where(h => h.TemplateHuella != null && h.TemplateHuella.Length > 0)
+                .ToDictionary(h => h.Dedo, h => h.TemplateHuella);
 
-            if (huellasAdmin.Count == 0)
+            var huellasAdmin = new List<HuellaEmpleadoDto>();
+            for (int dedo = 1; dedo <= 3; dedo++)
             {
-                var huellasExistentes = _app.ObtenerHuellasAdmin();
-                huellasAdmin = huellasExistentes
-                    .Where(h => h.TemplateHuella != null && h.TemplateHuella.Length > 0)
-                    .OrderBy(h => h.Dedo)
-                    .Select(h => new HuellaEmpleadoDto
+                if (_huellasAdminCapturadas.TryGetValue(dedo, out byte[]? templateNuevo))
+                {
+                    huellasAdmin.Add(new HuellaEmpleadoDto
                     {
-                        Dedo = h.Dedo,
-                        TemplateHuella = h.TemplateHuella
-                    })
-                    .ToList();
+                        Dedo = dedo,
+                        TemplateHuella = templateNuevo
+                    });
+                }
+                else if (huellasExistentes.TryGetValue(dedo, out byte[]? templateExistente))
+                {
+                    huellasAdmin.Add(new HuellaEmpleadoDto
+                    {
+                        Dedo = dedo,
+                        TemplateHuella = templateExistente
+                    });
+                }
             }
+
+            huellasAdmin = huellasAdmin
+                .OrderBy(h => h.Dedo)
+                .ToList();
 
             bool exito = _app.GuardarConfiguracion(password, horaEntrada, horaLimite, huellasAdmin);
             if (exito)
