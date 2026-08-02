@@ -86,5 +86,14 @@ namespace ControlAcceso.UI.controladores
             var authController = new AuthController(_app);
             authController.MostrarVentanaAutenticacion();
         }
+
+        public void AbrirCentroDeReportes()
+        {
+            if (_vista != null)
+            {
+                var reportesController = new ReportesController(_app);
+                reportesController.MostrarVentanaReportes(_vista);
+            }
+        }
     }
 }

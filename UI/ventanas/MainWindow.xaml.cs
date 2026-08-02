@@ -7,7 +7,7 @@ namespace ControlAcceso
 {
     public partial class MainWindow : Window
     {
-        private readonly MainController? _controller;
+        public readonly MainController? _controller;
         private readonly DispatcherTimer _relojTimer;
         private readonly DispatcherTimer _animacionTimer;
         private readonly DispatcherTimer _reinicioTimer;
@@ -125,6 +125,11 @@ namespace ControlAcceso
         private void btnAdministrar_Click(object sender, RoutedEventArgs e)
         {
             _controller?.AbrirRegistroEmpleado();
+        }
+
+        private void btnReportes_Click(object sender, RoutedEventArgs e)
+        {
+            _controller?.AbrirCentroDeReportes();
         }
 
         public void MostrarResultadoMarcaje(bool exito, bool denegado, string mensaje, string nombreEmpleado, DateTime hora)

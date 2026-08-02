@@ -19,6 +19,8 @@ namespace ControlAcceso.Application
         public IReadOnlyList<HuellaEmpleadoDto> HuellasCache { get; private set; } = new List<HuellaEmpleadoDto>();
         public IReadOnlyList<EmpleadoViewDto> EmpleadosViewCache { get; private set; } = new List<EmpleadoViewDto>();
 
+        public DatabaseService Db => DatabaseService;
+
         public MyApp(
             DatabaseService databaseService,
             BiometricService biometricService,

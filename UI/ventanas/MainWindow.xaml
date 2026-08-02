@@ -136,17 +136,30 @@
 
         </Grid>
 
-        <!-- ACCESO A ADMINISTRACIÓN -->
-        <Button x:Name="btnAdministrar"
-                Grid.Row="2"
-                Content="⚙️ Panel de Administración"
-                Click="btnAdministrar_Click"
-                HorizontalAlignment="Right"
-                Padding="16,8"
-                FontSize="14"
-                Foreground="#475569"
-                Background="Transparent"
-                BorderThickness="0"
-                Cursor="Hand"/>
+        <Grid Grid.Row="2">
+            <!-- ACCESO A REPORTES -->
+            <Button x:Name="btnReportes"
+                    Content="📊 Reportes"
+                    Click="btnReportes_Click"
+                    HorizontalAlignment="Left"
+                    Padding="16,8"
+                    FontSize="14"
+                    Foreground="#475569"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+
+            <!-- ACCESO A ADMINISTRACIÓN -->
+            <Button x:Name="btnAdministrar"
+                    Content="⚙️ Panel de Administración"
+                    Click="btnAdministrar_Click"
+                    HorizontalAlignment="Right"
+                    Padding="16,8"
+                    FontSize="14"
+                    Foreground="#475569"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+        </Grid>
     </Grid>
 </Window>
