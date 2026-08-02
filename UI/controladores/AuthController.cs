@@ -8,12 +8,12 @@ namespace ControlAcceso.UI.controladores
     {
         private readonly MyApp _app;
         private AuthWindow? _authWindow;
-        private readonly AdminController _adminController;
+        private readonly Action _onAuthenticated;
 
-        public AuthController(MyApp app)
+        public AuthController(MyApp app, Action onAuthenticated)
         {
             _app = app ?? throw new ArgumentNullException(nameof(app));
-            _adminController = new AdminController(app);
+            _onAuthenticated = onAuthenticated ?? throw new ArgumentNullException(nameof(onAuthenticated));
         }
 
         public void MostrarVentanaAutenticacion()
@@ -41,7 +41,7 @@ namespace ControlAcceso.UI.controladores
             _authWindow?.MostrarMensaje("Acceso correcto.", true);
             await Task.Delay(250);
             _authWindow?.Close();
-            _adminController.MostrarVentanaAdmin();
+            _onAuthenticated.Invoke();
             return true;
         }
 
@@ -57,7 +57,7 @@ namespace ControlAcceso.UI.controladores
             _authWindow?.MostrarMensaje("Acceso correcto.", true);
             await Task.Delay(250);
             _authWindow?.Close();
-            _adminController.MostrarVentanaAdmin();
+            _onAuthenticated.Invoke();
             return true;
         }
     }

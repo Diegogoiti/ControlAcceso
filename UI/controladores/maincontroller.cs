@@ -83,7 +83,11 @@ namespace ControlAcceso.UI.controladores
 
         public void AbrirRegistroEmpleado()
         {
-            var authController = new AuthController(_app);
+            var authController = new AuthController(_app, () => 
+            {
+                var adminController = new AdminController(_app);
+                adminController.MostrarVentanaAdmin();
+            });
             authController.MostrarVentanaAutenticacion();
         }
 
@@ -91,8 +95,12 @@ namespace ControlAcceso.UI.controladores
         {
             if (_vista != null)
             {
-                var reportesController = new ReportesController(_app);
-                reportesController.MostrarVentanaReportes(_vista);
+                var authController = new AuthController(_app, () => 
+                {
+                    var reportesController = new ReportesController(_app);
+                    reportesController.MostrarVentanaReportes(_vista);
+                });
+                authController.MostrarVentanaAutenticacion();
             }
         }
     }
