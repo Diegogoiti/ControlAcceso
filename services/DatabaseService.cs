@@ -71,12 +71,18 @@ namespace ControlAcceso.Services
 
         public bool RegistrarAsistencia(int empleadoId, int tipoAsistencia)
         {
-            _dbAdapter.RegistrarAsistencia(new AsistenciaDto
+            return _dbAdapter.RegistrarAsistencia(new AsistenciaDto
             {
                 EmpleadoID = empleadoId,
-                Tipo = tipoAsistencia
+                Tipo = tipoAsistencia,
+                PorAdministrador = false,
+                Observacion = null
             });
-            return true;
+        }
+
+        public bool RegistrarAsistencia(AsistenciaDto asistencia)
+        {
+            return _dbAdapter.RegistrarAsistencia(asistencia);
         }
 
         public List<AsistenciaDto> ObtenerAsistenciasDelDia(DateTime fecha)

@@ -526,6 +526,47 @@ namespace ControlAcceso.UI.controladores
             _adminWindow.MostrarListaEmpleados(empleados.ToList());
         }
 
+        public void AbrirRegistroAsistenciaEmpleado()
+        {
+            if (_adminWindow == null) return;
+
+            var empleado = _adminWindow.ObtenerEmpleadoSeleccionado();
+            if (empleado == null)
+            {
+                _adminWindow.MostrarError("Por favor, seleccione un empleado de la lista.");
+                return;
+            }
+
+            var dialog = new AdminAsistenciaWindow(empleado)
+            {
+                Owner = _adminWindow
+            };
+
+            bool? dialogResult = dialog.ShowDialog();
+            if (dialogResult != true)
+            {
+                return;
+            }
+
+            try
+            {
+                bool exito = _app.RegistrarAsistenciaAdministrador(empleado.Id, dialog.TipoAsistencia, dialog.Observacion);
+                if (exito)
+                {
+                    _adminWindow.MostrarMensaje("Asistencia registrada correctamente.");
+                    CargarListaEmpleados();
+                }
+                else
+                {
+                    _adminWindow.MostrarError("No se pudo registrar la asistencia.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _adminWindow.MostrarError($"Error al registrar la asistencia: {ex.Message}");
+            }
+        }
+
         public void AbrirEdicionEmpleado(int idEmpleado)
 {
     if (_adminWindow == null) return;

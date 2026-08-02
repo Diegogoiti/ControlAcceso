@@ -211,6 +211,25 @@ public List<HuellaEmpleadoDto> ObtenerHuellasAdmin()
     return DatabaseService.ObtenerHuellasAdmin();
 }
 
+public bool RegistrarAsistenciaAdministrador(int empleadoId, int tipoAsistencia, string observacion)
+{
+    var asistencia = new AsistenciaDto
+    {
+        EmpleadoID = empleadoId,
+        Tipo = tipoAsistencia,
+        PorAdministrador = true,
+        Observacion = observacion?.Trim()
+    };
+
+    bool exito = DatabaseService.RegistrarAsistencia(asistencia);
+    if (exito)
+    {
+        CargarEmpleadosViewCache();
+    }
+
+    return exito;
+}
+
 public bool ValidarPasswordAdmin(string password)
 {
     var config = ObtenerConfiguracion();
