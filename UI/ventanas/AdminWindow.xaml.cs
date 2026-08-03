@@ -42,17 +42,8 @@ namespace ControlAcceso
 
         #region Navegación entre Pestañas
 
-        private void btnTabRegistrar_Click(object sender, RoutedEventArgs e)
-        {
-            PanelRegistrar.Visibility = Visibility.Visible;
-            PanelEmpleados.Visibility = Visibility.Collapsed;
-            PanelConfiguracion.Visibility = Visibility.Collapsed;
-            _controller.LimpiarHuellasEnMemoria();
-        }
-
         private void btnTabEmpleados_Click(object sender, RoutedEventArgs e)
         {
-            PanelRegistrar.Visibility = Visibility.Collapsed;
             PanelEmpleados.Visibility = Visibility.Visible;
             PanelConfiguracion.Visibility = Visibility.Collapsed;
             _controller.CargarListaEmpleados();
@@ -60,7 +51,6 @@ namespace ControlAcceso
 
         private void btnTabConfig_Click(object sender, RoutedEventArgs e)
         {
-            PanelRegistrar.Visibility = Visibility.Collapsed;
             PanelEmpleados.Visibility = Visibility.Collapsed;
             PanelConfiguracion.Visibility = Visibility.Visible;
             _controller.CargarConfiguracion();
@@ -76,8 +66,8 @@ namespace ControlAcceso
             {
                 Cedula = txtCedula.Text,
                 NombreCompleto = txtNombreCompleto.Text,
-                FechaNacimiento = dpFechaNacimiento.SelectedDate.HasValue 
-                    ? DateOnly.FromDateTime(dpFechaNacimiento.SelectedDate.Value) 
+                FechaNacimiento = dpFechaNacimiento.SelectedDate.HasValue
+                    ? DateOnly.FromDateTime(dpFechaNacimiento.SelectedDate.Value)
                     : default,
                 Telefono = txtTelefono.Text,
                 TelefonoEmergencia = txtTelefonoEmergencia.Text,
@@ -94,8 +84,8 @@ namespace ControlAcceso
                 Id = EmpleadoEditandoId ?? 0,
                 Cedula = txtEditCedula.Text,
                 NombreCompleto = txtEditNombreCompleto.Text,
-                FechaNacimiento = dpEditFechaNacimiento.SelectedDate.HasValue 
-                    ? DateOnly.FromDateTime(dpEditFechaNacimiento.SelectedDate.Value) 
+                FechaNacimiento = dpEditFechaNacimiento.SelectedDate.HasValue
+                    ? DateOnly.FromDateTime(dpEditFechaNacimiento.SelectedDate.Value)
                     : default,
                 Telefono = txtEditTelefono.Text,
                 TelefonoEmergencia = txtEditTelefonoEmergencia.Text,
@@ -108,9 +98,19 @@ namespace ControlAcceso
 
         #region Eventos de Botones
 
+        private void btnNuevoEmpleado_Click(object sender, RoutedEventArgs e)
+        {
+            MostrarModalRegistro();
+        }
+
         private void btnGuardarEmpleado_Click(object sender, RoutedEventArgs e)
         {
             _controller.ProcesarGuardadoEmpleado();
+        }
+
+        private void btnCancelarRegistro_Click(object sender, RoutedEventArgs e)
+        {
+            OcultarModalRegistro();
         }
 
         private async void btnCapturarDedo_Click(object sender, RoutedEventArgs e)
@@ -165,21 +165,21 @@ namespace ControlAcceso
         }
 
         private void txtBuscarNombre_TextChanged(object sender, TextChangedEventArgs e)
-{
-    _controller?.CargarListaEmpleados(
-        txtBuscarNombre.Text, 
-        (cmbFiltroEstado.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Todos"
-    );
-}
+        {
+            _controller?.CargarListaEmpleados(
+                txtBuscarNombre.Text,
+                (cmbFiltroEstado.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Todos"
+            );
+        }
 
         private void cmbFiltroEstado_SelectionChanged(object sender, SelectionChangedEventArgs e)
-{
-    // Usar _controller? previene la excepción durante el InitializeComponent()
-    _controller?.CargarListaEmpleados(
-        txtBuscarNombre?.Text ?? string.Empty, 
-        (cmbFiltroEstado.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Todos"
-    );
-}
+        {
+            // Usar _controller? previene la excepción durante el InitializeComponent()
+            _controller?.CargarListaEmpleados(
+                txtBuscarNombre?.Text ?? string.Empty,
+                (cmbFiltroEstado.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Todos"
+            );
+        }
 
         #endregion
 
@@ -215,16 +215,49 @@ namespace ControlAcceso
             }
         }
 
+        public void MostrarModalRegistro()
+        {
+            EmpleadoEditandoId = null;
+            _controller.LimpiarHuellasEnMemoria();
+
+            LimpiarFormularioRegistro();
+            OverlayEditarEmpleado.Visibility = Visibility.Collapsed;
+            OverlayRegistrarEmpleado.Visibility = Visibility.Visible;
+        }
+
+        public void OcultarModalRegistro()
+        {
+            _controller.LimpiarHuellasEnMemoria();
+            OverlayRegistrarEmpleado.Visibility = Visibility.Collapsed;
+        }
+
+        private void LimpiarFormularioRegistro()
+        {
+            txtCedula.Text = string.Empty;
+            txtNombreCompleto.Text = string.Empty;
+            dpFechaNacimiento.SelectedDate = null;
+            txtTelefono.Text = string.Empty;
+            txtTelefonoEmergencia.Text = string.Empty;
+            txtDireccion.Text = string.Empty;
+            cmbRol.SelectedIndex = 0;
+
+            for (int dedo = 1; dedo <= 3; dedo++)
+            {
+                ActualizarEstadoHuella(dedo, registrada: false);
+            }
+        }
+
         public void MostrarModalEdicion(EmpleadoDto emp)
-{
-    EmpleadoEditandoId = emp.Id;
-    _controller.LimpiarHuellasEnMemoria();
+        {
+            EmpleadoEditandoId = emp.Id;
+            _controller.LimpiarHuellasEnMemoria();
 
-    // Llenar los campos de la interfaz
-    CargarDatosFormularioEdicion(emp);
+            // Llenar los campos de la interfaz
+            CargarDatosFormularioEdicion(emp);
 
-    OverlayEditarEmpleado.Visibility = Visibility.Visible;
-}
+            OverlayRegistrarEmpleado.Visibility = Visibility.Collapsed;
+            OverlayEditarEmpleado.Visibility = Visibility.Visible;
+        }
 
         public string ObtenerPasswordConfiguracion() => pwdAdminPassword.Password;
 
@@ -305,35 +338,35 @@ namespace ControlAcceso
         #endregion
 
         private async void btnCambiarEstado_Click(object sender, RoutedEventArgs e)
-{
-    if (dgEmpleados.SelectedItem is EmpleadoViewDto emp)
-    {
-        bool exito = await _controller.CambiarEstadoEmpleadoAsync(emp.Id);
-        if (!exito)
         {
-            MostrarError("No se pudo cambiar el estado del empleado.");
+            if (dgEmpleados.SelectedItem is EmpleadoViewDto emp)
+            {
+                bool exito = await _controller.CambiarEstadoEmpleadoAsync(emp.Id);
+                if (!exito)
+                {
+                    MostrarError("No se pudo cambiar el estado del empleado.");
+                }
+            }
+            else
+            {
+                MostrarError("Por favor, seleccione un empleado de la lista.");
+            }
         }
-    }
-    else
-    {
-        MostrarError("Por favor, seleccione un empleado de la lista.");
-    }
-}
 
-public void CargarDatosFormularioEdicion(EmpleadoDto emp)
-{
-    txtEditCedula.Text = emp.Cedula.ToString();
-    txtEditNombreCompleto.Text = emp.NombreCompleto;
-    
-    // Asignar la fecha de nacimiento convertida de DateOnly a DateTime?
-    dpEditFechaNacimiento.SelectedDate = emp.FechaNacimiento.ToDateTime(TimeOnly.MinValue);
-    
-    txtEditTelefono.Text = emp.Telefono;
-    txtEditTelefonoEmergencia.Text = emp.TelefonoEmergencia;
-    txtEditDireccion.Text = emp.Direccion;
-    
-    // Asignar la selección del ComboBox según el RolId (restando 1 por índice base 0)
-    cmbEditRol.SelectedIndex = Math.Max(0, emp.RolId - 1);
-}
+        public void CargarDatosFormularioEdicion(EmpleadoDto emp)
+        {
+            txtEditCedula.Text = emp.Cedula.ToString();
+            txtEditNombreCompleto.Text = emp.NombreCompleto;
+
+            // Asignar la fecha de nacimiento convertida de DateOnly a DateTime?
+            dpEditFechaNacimiento.SelectedDate = emp.FechaNacimiento.ToDateTime(TimeOnly.MinValue);
+
+            txtEditTelefono.Text = emp.Telefono;
+            txtEditTelefonoEmergencia.Text = emp.TelefonoEmergencia;
+            txtEditDireccion.Text = emp.Direccion;
+
+            // Asignar la selección del ComboBox según el RolId (restando 1 por índice base 0)
+            cmbEditRol.SelectedIndex = Math.Max(0, emp.RolId - 1);
+        }
     }
 }
