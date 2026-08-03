@@ -49,21 +49,70 @@
             <Setter Property="Foreground" Value="#475569"/>
         </Style>
 
-        <!-- Botones de Pestaña -->
+        <!-- Botones de Pestaña (barra superior) -->
         <Style x:Key="TabNavButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="#F1F5F9"/>
             <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="16,10"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Style.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="8"/>
-                </Style>
-            </Style.Resources>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" TargetName="border" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" TargetName="border" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Botones de acción (barra sobre la lista de empleados) -->
+        <Style x:Key="ActionPillButton" TargetType="Button">
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" TargetName="border" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" TargetName="border" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Botones secundarios de Huella -->
@@ -118,7 +167,7 @@
                     <DropShadowEffect BlurRadius="10" ShadowDepth="1" Color="#000000" Opacity="0.05"/>
                 </Border.Effect>
                 <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btnTabEmpleados" Content="👥 Lista de Empleados" Style="{StaticResource TabNavButton}" Foreground="#2563EB" Click="btnTabEmpleados_Click"/>
+                    <Button x:Name="btnTabEmpleados" Content="👥 Lista de Empleados" Style="{StaticResource TabNavButton}" Click="btnTabEmpleados_Click"/>
                     <Button x:Name="btnTabConfig" Content="⚙️ Configuración" Style="{StaticResource TabNavButton}" Click="btnTabConfig_Click"/>
                 </StackPanel>
             </Border>
@@ -232,18 +281,10 @@
                         </DataGrid>
 
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-                            <Button x:Name="btnNuevoEmpleado" Content="➕ Nuevo Empleado" Padding="16,8" Background="#DCFCE7" Foreground="#166534" FontWeight="SemiBold" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand" Click="btnNuevoEmpleado_Click">
-                                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
-                            </Button>
-                            <Button x:Name="btnRegistrarAsistencia" Content="🕒 Registrar Asistencia" Padding="16,8" Background="#E0F2FE" Foreground="#0C4A6E" FontWeight="SemiBold" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand" Click="btnRegistrarAsistencia_Click">
-                                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
-                            </Button>
-                            <Button x:Name="btnEditarEmpleado" Content="✏️ Editar" Padding="16,8" Background="#F1F5F9" Foreground="#334155" FontWeight="SemiBold" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand" Click="btnEditarEmpleado_Click">
-                                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
-                            </Button>
-                            <Button x:Name="btnCambiarEstado" Content="🚫 Cambiar Estado" Padding="16,8" Background="#FEE2E2" Foreground="#DC2626" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" Click="btnCambiarEstado_Click">
-                                <Button.Resources><Style TargetType="Border"><Setter Property="CornerRadius" Value="6"/></Style></Button.Resources>
-                            </Button>
+                            <Button x:Name="btnRegistrarAsistencia" Content="🕒 Registrar Asistencia" Style="{StaticResource ActionPillButton}" Background="#E0F2FE" Foreground="#0C4A6E" BorderBrush="#7DD3FC" Click="btnRegistrarAsistencia_Click"/>
+                            <Button x:Name="btnNuevoEmpleado" Content="➕ Nuevo Empleado" Style="{StaticResource ActionPillButton}" Background="#DCFCE7" Foreground="#166534" BorderBrush="#86EFAC" Click="btnNuevoEmpleado_Click"/>
+                            <Button x:Name="btnEditarEmpleado" Content="✏️ Editar" Style="{StaticResource ActionPillButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" Click="btnEditarEmpleado_Click"/>
+                            <Button x:Name="btnCambiarEstado" Content="🚫 Cambiar Estado" Style="{StaticResource ActionPillButton}" Background="#FEE2E2" Foreground="#DC2626" BorderBrush="#FCA5A5" Margin="0" Click="btnCambiarEstado_Click"/>
                         </StackPanel>
                     </Grid>
                 </Border>
