@@ -34,7 +34,7 @@ namespace ControlAcceso.Services
                 FechaInicio = fechaInicioSemana,
                 FechaFin = fechaFinSemana
             };
-            
+
             var todasAsistencias = _databaseService.ObtenerAsistencias(asistenciasFiltro);
             var reportes = new List<ReporteEmpleadoDto>();
 
@@ -44,25 +44,42 @@ namespace ControlAcceso.Services
                 {
                     Cedula = emp.Cedula.ToString(),
                     Nombre = emp.NombreCompleto,
-                    Posicion = emp.RolId == 1 ? "ADMINISTRADOR" : "EMPLEADO",
+                    Posicion = emp.RolId == 1 ? "EMPLEADO" : "ADMINISTRADOR",
                     DiasAsistidos = 0,
                     DiasFaltados = 0,
-                    Tardanzas = 0
+                    Tardanzas = 0,
+                    PorAdministrador = 0
                 };
 
                 // Asistencias de este empleado específico
                 var asistenciasEmpleado = todasAsistencias.Where(a => a.EmpleadoID == emp.Id).ToList();
+                int diasEvaluados = 0;
 
                 for (int i = 0; i < 6; i++) // Lunes a Sábado
                 {
                     DateTime diaActual = fechaInicioSemana.AddDays(i);
                     int diaDeLaSemana = (int)diaActual.DayOfWeek; // 1 = Lunes ... 6 = Sabado
 
+                    // Si el día actual que estamos evaluando es mayor al día de hoy (futuro),
+                    // lo dejamos en blanco y no evaluamos faltas.
+                    if (diaActual.Date > DateTime.Today)
+                    {
+                        reporte.DiasAsistencia[diaDeLaSemana] = "";
+                        continue;
+                    }
+
+                    diasEvaluados++;
+
                     // Buscamos si hay alguna entrada (Tipo == 1) o si es por administrador
                     var asistenciaDia = asistenciasEmpleado.FirstOrDefault(a => a.Timestamp.Date == diaActual.Date && (a.Tipo == 1 || a.PorAdministrador));
 
                     if (asistenciaDia != null)
                     {
+                        if (asistenciaDia.PorAdministrador)
+                        {
+                            reporte.PorAdministrador++;
+                        }
+
                         // Vino
                         if (!asistenciaDia.PorAdministrador && asistenciaDia.Timestamp.TimeOfDay > horaLimite)
                         {
@@ -84,9 +101,16 @@ namespace ControlAcceso.Services
                     }
                 }
 
-                // Cálculo del porcentaje (en base a 6 días laborales)
-                reporte.PorcentajeAsistencia = Math.Round((double)reporte.DiasAsistidos / 6.0 * 100.0, 0);
-                
+                // Cálculo del porcentaje (en base a los días reales transcurridos de esa semana)
+                if (diasEvaluados > 0)
+                {
+                    reporte.PorcentajeAsistencia = Math.Round((double)reporte.DiasAsistidos / (double)diasEvaluados * 100.0, 0);
+                }
+                else
+                {
+                    reporte.PorcentajeAsistencia = 0;
+                }
+
                 reportes.Add(reporte);
             }
 

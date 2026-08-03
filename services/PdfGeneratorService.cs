@@ -78,13 +78,14 @@ namespace ControlAcceso.Services
                     columns.ConstantColumn(70);  // Cedula
                     columns.RelativeColumn();    // Empleado (toma el espacio sobrante)
                     columns.ConstantColumn(90);  // Posicion
-                    
+
                     // Dias de la semana (L a S)
                     for(int i = 0; i < 6; i++) columns.ConstantColumn(40);
-                    
+
                     columns.ConstantColumn(55); // Dias Asist.
                     columns.ConstantColumn(55); // Dias Falt.
                     columns.ConstantColumn(55); // Tardanzas
+                    columns.ConstantColumn(55); // Excusa (Por Admin)
                     columns.ConstantColumn(70); // % Asist
                 });
 
@@ -94,17 +95,18 @@ namespace ControlAcceso.Services
                     header.Cell().Element(BlockHeader).Text("CEDULA");
                     header.Cell().Element(BlockHeader).Text("Empleado");
                     header.Cell().Element(BlockHeader).Text("POSICION");
-                    
+
                     header.Cell().Element(BlockHeader).Text("Lunes");
                     header.Cell().Element(BlockHeader).Text("Martes");
                     header.Cell().Element(BlockHeader).Text("Miércoles");
                     header.Cell().Element(BlockHeader).Text("Jueves");
                     header.Cell().Element(BlockHeader).Text("Viernes");
                     header.Cell().Element(BlockHeader).Text("Sábado");
-                    
+
                     header.Cell().Element(BlockHeader).Text("Días\nAsistidos");
                     header.Cell().Element(BlockHeader).Text("Días\nFaltados");
                     header.Cell().Element(BlockHeader).Text("Tardanzas");
+                    header.Cell().Element(BlockHeader).Text("Exepciones");
                     header.Cell().Element(BlockHeader).Text("% Asistencia");
                 });
 
@@ -113,32 +115,42 @@ namespace ControlAcceso.Services
                 {
                     table.Cell().Element(BlockCell).Text(emp.Cedula);
                     table.Cell().Element(BlockCell).Text(emp.Nombre);
-                    
+
                     // Posicion con fondo rojo/texto blanco
-                    table.Cell().Background(Colors.Red.Medium).Padding(2).AlignCenter().AlignMiddle()
-                         .Text(emp.Posicion).FontColor(Colors.White).FontSize(9).Bold();
+                    table.Cell().Background(Colors.White).Padding(2).AlignCenter().AlignMiddle()
+                         .Text(emp.Posicion).FontColor(Colors.Black).FontSize(9).Bold();
 
                     // Días de la semana (Lunes a Sábado -> enum 1 a 6)
                     for (int dia = 1; dia <= 6; dia++)
                     {
-                        string estado = emp.DiasAsistencia.ContainsKey(dia) ? emp.DiasAsistencia[dia] : "F";
-                        string colorFondo = estado == "A" ? Colors.Green.Lighten4 : (estado == "T" ? Colors.Yellow.Lighten3 : Colors.Red.Lighten4);
-                        string colorTexto = estado == "A" ? Colors.Green.Darken2 : (estado == "T" ? Colors.Orange.Darken2 : Colors.Red.Darken2);
+                        string estado = emp.DiasAsistencia.ContainsKey(dia) ? emp.DiasAsistencia[dia] : "";
 
-                        table.Cell().Background(colorFondo).Border(1).BorderColor(Colors.Grey.Lighten3)
-                             .AlignCenter().AlignMiddle()
-                             .Text(estado).FontColor(colorTexto).Bold();
+                        if (string.IsNullOrEmpty(estado))
+                        {
+                            // Día futuro (en blanco)
+                            table.Cell().Background(Colors.White).Border(1).BorderColor(Colors.Grey.Lighten3);
+                        }
+                        else
+                        {
+                            string colorFondo = estado == "A" ? Colors.Green.Lighten4 : (estado == "T" ? Colors.Yellow.Lighten3 : Colors.Red.Lighten4);
+                            string colorTexto = estado == "A" ? Colors.Green.Darken2 : (estado == "T" ? Colors.Orange.Darken2 : Colors.Red.Darken2);
+
+                            table.Cell().Background(colorFondo).Border(1).BorderColor(Colors.Grey.Lighten3)
+                                 .AlignCenter().AlignMiddle()
+                                 .Text(estado).FontColor(colorTexto).Bold();
+                        }
                     }
 
                     // Resúmenes numéricos
                     table.Cell().Element(BlockNumCell).Text(emp.DiasAsistidos.ToString());
                     table.Cell().Element(BlockNumCell).Text(emp.DiasFaltados.ToString());
                     table.Cell().Element(BlockNumCell).Text(emp.Tardanzas.ToString());
-                    
+                    table.Cell().Element(BlockNumCell).Text(emp.PorAdministrador.ToString());
+
                     // Barra de progreso visual para el porcentaje (similar a la imagen)
                     table.Cell().Border(1).BorderColor(Colors.Grey.Lighten3).Padding(2).AlignMiddle().Row(row =>
                     {
-                        row.AutoItem().Width(40).Height(12).Background(Colors.Grey.Lighten3).Row(bar => 
+                        row.AutoItem().Width(40).Height(12).Background(Colors.Grey.Lighten3).Row(bar =>
                         {
                             bar.AutoItem().Width((float)(40 * emp.PorcentajeAsistencia / 100.0)).Height(12).Background(Colors.Blue.Darken1);
                         });
@@ -164,7 +176,7 @@ namespace ControlAcceso.Services
                 .Padding(2).AlignMiddle()
                 .DefaultTextStyle(x => x.FontSize(9));
         }
-        
+
         static IContainer BlockNumCell(IContainer container)
         {
             return container.Border(1).BorderColor(Colors.Grey.Lighten3)

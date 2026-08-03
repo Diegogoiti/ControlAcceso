@@ -16,6 +16,7 @@ namespace ControlAcceso.DTOs
         public int DiasAsistidos { get; set; }
         public int DiasFaltados { get; set; }
         public int Tardanzas { get; set; }
+        public int PorAdministrador { get; set; }
         public double PorcentajeAsistencia { get; set; }
     }
 }
