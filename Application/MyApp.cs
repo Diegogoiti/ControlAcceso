@@ -152,11 +152,11 @@ namespace ControlAcceso.Application
                 var config = DatabaseService.ObtenerConfiguracion();
                 if (config.HasValue)
                 {
-                    TimeSpan horaLimite = config.Value.HoraLimite;
+                    /*TimeSpan horaLimite = config.Value.HoraLimite;
                     if (horaActual.TimeOfDay > horaLimite)
                     {
                         return (false, true, "Acceso denegado: Se ha excedido la hora límite de entrada configurada. El registro se encuentra bloqueado. Contacte a su supervisor para autorizar una excepción.", string.Empty, horaActual);
-                    }
+                    }*/
                 }
             }
 

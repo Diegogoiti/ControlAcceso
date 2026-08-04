@@ -82,7 +82,8 @@ namespace ControlAcceso.UI.controladores
     if (exito)
     {
         // Re-sincroniza el DataGrid con el estado actualizado
-        CargarListaEmpleados(); 
+        _app.CargarHuellasActivas();
+        CargarListaEmpleados();
     }
 
     return exito;
@@ -220,6 +221,7 @@ namespace ControlAcceso.UI.controladores
                 _app.GuardarEmpleado(emp);
                 _adminWindow.MostrarMensaje("Empleado guardado exitosamente.");
                 _app.CargarEmpleadosViewCache();
+                _app.CargarHuellasActivas();
                 CargarListaEmpleados();
             }
             catch (Exception ex)
@@ -268,7 +270,8 @@ namespace ControlAcceso.UI.controladores
 
         _adminWindow.MostrarMensaje("Empleado actualizado correctamente."); //[cite: 13]
         _adminWindow.OcultarModalEdicion(); //[cite: 13]
-        _app.CargarEmpleadosViewCache(); //[cite: 13]
+        _app.CargarEmpleadosViewCache();
+        _app.CargarHuellasActivas();  //[cite: 13]
         CargarListaEmpleados(); //[cite: 13]
     }
     catch (Exception ex)

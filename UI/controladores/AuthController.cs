@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using ControlAcceso.Application;
 
@@ -9,6 +10,7 @@ namespace ControlAcceso.UI.controladores
         private readonly MyApp _app;
         private AuthWindow? _authWindow;
         private readonly Action _onAuthenticated;
+        private CancellationTokenSource? _ctsCaptura;
 
         public AuthController(MyApp app, Action onAuthenticated)
         {
@@ -47,18 +49,47 @@ namespace ControlAcceso.UI.controladores
 
         public async Task<bool> AutenticarConHuellaAsync()
         {
-            var (exito, mensaje) = await _app.AutenticarAdministradorPorHuellaAsync();
-            if (!exito)
+            _ctsCaptura?.Cancel();
+            _ctsCaptura?.Dispose();
+            _ctsCaptura = new CancellationTokenSource();
+            var token = _ctsCaptura.Token;
+
+            try
             {
-                _authWindow?.MostrarMensaje(mensaje, false);
+                var (exito, mensaje) = await _app.AutenticarAdministradorPorHuellaAsync(token);
+
+                if (token.IsCancellationRequested)
+                {
+                    // La ventana se cerró a medio escaneo; no toques la UI.
+                    return false;
+                }
+
+                if (!exito)
+                {
+                    _authWindow?.MostrarMensaje(mensaje, false);
+                    return false;
+                }
+
+                //_authWindow?.MostrarMensaje("Acceso correcto.", true);
+                //await Task.Delay(250);
+                _authWindow?.Close();
+                _onAuthenticated.Invoke();
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
                 return false;
             }
+        }
 
-            _authWindow?.MostrarMensaje("Acceso correcto.", true);
-            await Task.Delay(250);
-            _authWindow?.Close();
-            _onAuthenticated.Invoke();
-            return true;
+        public void CancelarCaptura()
+        {
+            if (_ctsCaptura != null && !_ctsCaptura.IsCancellationRequested)
+            {
+                _ctsCaptura.Cancel();
+                _ctsCaptura.Dispose();
+                _ctsCaptura = null;
+            }
         }
     }
 }

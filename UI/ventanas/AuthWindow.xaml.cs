@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 
@@ -52,6 +53,14 @@ namespace ControlAcceso
                 btnEntrar.IsEnabled = true;
                 btnUsarHuella.IsEnabled = true;
             }
+        }
+
+        private void AuthWindow_Closing(object sender, CancelEventArgs e)
+        {
+            // Si el sensor está escaneando cuando se cierra la ventana, cancela
+            // la captura para liberar el dispositivo (ftrScanCloseDevice se
+            // dispara en el finally del adaptador al cancelarse el token).
+            _controller.CancelarCaptura();
         }
 
         public void MostrarMensaje(string mensaje, bool esExito)
