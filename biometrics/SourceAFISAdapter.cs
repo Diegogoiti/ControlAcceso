@@ -5,16 +5,24 @@ namespace ControlAcceso.Biometrics
 {
     public class SourceAFISAdapter : IBiometricAdapter
     {
+        // FS88H: sensor óptico CMOS, 500 DPI nativos (confirmado en la hoja de
+        // especificaciones de Futronic). SourceAFIS ignora cualquier DPI embebido
+        // en la imagen misma, así que hay que pasarlo explícito o asume 500 por
+        // defecto de todas formas — esto solo blinda el código para no depender
+        // de esa coincidencia si algún día cambian de modelo de lector.
+        private static readonly FingerprintImageOptions _opcionesImagen = new FingerprintImageOptions
+        {
+            Dpi = 500
+        };
+
         public byte[] GenerarTemplateBytes(byte[] rawImageData, int width = 320, int height = 480)
         {
             if (rawImageData == null || rawImageData.Length == 0)
                 throw new ArgumentException("Los datos crudos de la imagen no pueden estar vacíos.");
 
-            // Reutiliza la lógica de tu 'Comparador.GenerarTemplate'
-            var image = new FingerprintImage(width, height, rawImageData);
+            var image = new FingerprintImage(width, height, rawImageData, _opcionesImagen);
             var template = new FingerprintTemplate(image);
 
-            // Exportamos los bytes para mantener el desacoplamiento fuera de esta clase
             return template.ToByteArray();
         }
 
@@ -25,17 +33,14 @@ namespace ControlAcceso.Biometrics
 
             try
             {
-                // Reutiliza la deserialización que tenías en 'CargarDesdeBytes'
                 var t1 = new FingerprintTemplate(templateBytes1);
                 var t2 = new FingerprintTemplate(templateBytes2);
 
-                // Reutiliza tu 'FingerprintMatcher'
                 var matcher = new FingerprintMatcher(t1);
                 return matcher.Match(t2);
             }
             catch
             {
-                // Si ocurre una falla en el parseo binario del template
                 return 0.0;
             }
         }
