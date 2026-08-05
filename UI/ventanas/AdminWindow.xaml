@@ -168,6 +168,7 @@
                 </Border.Effect>
                 <StackPanel Orientation="Horizontal">
                     <Button x:Name="btnTabEmpleados" Content="👥 Lista de Empleados" Style="{StaticResource TabNavButton}" Click="btnTabEmpleados_Click"/>
+                    <Button x:Name="btnTabCargos" Content="💼 Cargos" Style="{StaticResource TabNavButton}" Click="btnTabCargos_Click"/>
                     <Button x:Name="btnTabConfig" Content="⚙️ Configuración" Style="{StaticResource TabNavButton}" Click="btnTabConfig_Click"/>
                 </StackPanel>
             </Border>
@@ -288,6 +289,151 @@
                         </StackPanel>
                     </Grid>
                 </Border>
+
+                <!-- VISTA CARGOS -->
+<Border x:Name="PanelCargos" Visibility="Collapsed" Background="White" CornerRadius="12" Padding="20">
+    <Border.Effect>
+        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
+    </Border.Effect>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Filtros y botón agregar -->
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Mostrar:" VerticalAlignment="Center" Style="{StaticResource FieldLabel}" Margin="0,0,10,0"/>
+            <ComboBox Grid.Column="1" x:Name="cmbFiltroEstadoCargo" Width="140" Style="{StaticResource ModernComboBox}" Margin="0" SelectedIndex="0" SelectionChanged="cmbFiltroEstadoCargo_SelectionChanged">
+                <ComboBoxItem Content="Todos"/>
+                <ComboBoxItem Content="Activo"/>
+                <ComboBoxItem Content="Inactivo"/>
+            </ComboBox>
+
+            <Button Grid.Column="3" x:Name="btnAgregarCargo" Content="➕ Agregar Cargo" Style="{StaticResource ActionPillButton}" Background="#DCFCE7" Foreground="#166534" BorderBrush="#86EFAC" Click="btnAgregarCargo_Click"/>
+        </Grid>
+
+        <DataGrid Grid.Row="1"
+                  x:Name="dgCargos"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  GridLinesVisibility="All"
+                  HorizontalGridLinesBrush="#94A3B8"
+                  VerticalGridLinesBrush="#CBD5E1"
+                  HeadersVisibility="Column"
+                  Background="White"
+                  RowBackground="#FFFFFF"
+                  AlternatingRowBackground="#E2E8F0"
+                  BorderBrush="#64748B"
+                  BorderThickness="1"
+                  RowHeight="38"
+                  HorizontalScrollBarVisibility="Auto">
+
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#334155"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                    <Setter Property="BorderBrush" Value="#475569"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Padding" Value="10,6"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="DataGridCell">
+                                <Border Padding="{TemplateBinding Padding}"
+                                        Background="{TemplateBinding Background}"
+                                        SnapsToDevicePixels="True">
+                                    <ContentPresenter VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#1E40AF"/>
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" MinWidth="60"/>
+                <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*" MinWidth="200"/>
+                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="Auto" MinWidth="100"/>
+                <DataGridTemplateColumn Header="Acciones" Width="180">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="✏️ Editar" Click="btnEditarCargo_Click" Tag="{Binding Id}"
+                                        Margin="0,0,5,0" Padding="8,4" FontSize="12" FontWeight="SemiBold"
+                                        Background="#E2E8F0" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand">
+                                    <Button.Resources>
+                                        <Style TargetType="Border">
+                                            <Setter Property="CornerRadius" Value="6"/>
+                                        </Style>
+                                    </Button.Resources>
+                                </Button>
+                                <Button x:Name="btnToggleEstadoCargo" Click="btnCambiarEstadoCargo_Click" Tag="{Binding Id}"
+                                        Padding="8,4" FontSize="12" FontWeight="SemiBold" Cursor="Hand" BorderThickness="1">
+                                    <Button.Resources>
+                                        <Style TargetType="Border">
+                                            <Setter Property="CornerRadius" Value="6"/>
+                                        </Style>
+                                    </Button.Resources>
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Content" Value="Activar"/>
+                                            <Setter Property="Background" Value="#DCFCE7"/>
+                                            <Setter Property="Foreground" Value="#166534"/>
+                                            <Setter Property="BorderBrush" Value="#86EFAC"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Estado}" Value="Activo">
+                                                    <Setter Property="Content" Value="Desactivar"/>
+                                                    <Setter Property="Background" Value="#FEE2E2"/>
+                                                    <Setter Property="Foreground" Value="#DC2626"/>
+                                                    <Setter Property="BorderBrush" Value="#FCA5A5"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Panel de edición/agregado de cargo (oculto por defecto) -->
+        <Border x:Name="PanelEdicionCargo" Grid.Row="2" Background="#F1F5F9" CornerRadius="8" Padding="16" Margin="0,15,0,0" Visibility="Collapsed">
+            <StackPanel>
+                <TextBlock x:Name="lblModoCargo" Text="Nuevo Cargo" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,8"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox x:Name="txtNombreCargo" Width="250" Style="{StaticResource ModernTextBox}" Margin="0,0,10,0"/>
+                    <Button x:Name="btnGuardarCargo" Content="Guardar" Style="{StaticResource ActionPillButton}" Background="#2563EB" Foreground="White" BorderBrush="#2563EB" Click="btnGuardarCargo_Click" Margin="0,0,5,0"/>
+                    <Button x:Name="btnCancelarEdicionCargo" Content="Cancelar" Style="{StaticResource ActionPillButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" Click="btnCancelarEdicionCargo_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Border>
 
                 <!-- VISTA 2: CONFIGURACIÓN -->
                 <Border x:Name="PanelConfiguracion" Visibility="Collapsed" Background="White" CornerRadius="16" Padding="24" MaxWidth="760" HorizontalAlignment="Stretch">

@@ -13,6 +13,7 @@ namespace ControlAcceso.UI.controladores
         private readonly MyApp _app;
         private AdminWindow? _adminWindow;
         private CancellationTokenSource? _ctsCaptura;
+        //private int? _cargoEditandoId = null;
 
         private readonly Dictionary<int, byte[]> _huellasCapturadas = new();
         private readonly Dictionary<int, byte[]> _huellasAdminCapturadas = new();
@@ -571,6 +572,61 @@ namespace ControlAcceso.UI.controladores
             _adminWindow.MostrarModalEdicion(empleado);
         }
 
-public List<CargoDto> ObtenerCargos(bool soloActivos) => _app.Db.ObtenerCargos(soloActivos);
+        public List<CargoDto> ObtenerCargos(bool soloActivos) => _app.Db.ObtenerCargos(soloActivos);
+
+        // Al inicio de la clase:
+        private string _filtroEstadoCargo = "Todos";
+
+        // Nuevos métodos:
+        public void CargarListaCargos()
+        {
+            if (_adminWindow == null) return;
+            var cargos = _app.ObtenerTodosLosCargos().Select(c => new CargoViewDto
+            {
+                Id = c.Id,
+                Nombre = c.Nombre,
+                Estado = c.Activo ? "Activo" : "Inactivo"
+            }).ToList();
+
+            if (_filtroEstadoCargo == "Activo")
+                cargos = cargos.Where(c => c.Estado == "Activo").ToList();
+            else if (_filtroEstadoCargo == "Inactivo")
+                cargos = cargos.Where(c => c.Estado == "Inactivo").ToList();
+
+            _adminWindow.MostrarListaCargos(cargos);
+        }
+
+        public void CambiarFiltroCargo(string filtro)
+        {
+            _filtroEstadoCargo = filtro;
+            CargarListaCargos();
+        }
+
+        public bool AgregarCargo(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) return false;
+            bool exito = _app.CrearCargo(nombre);
+            if (exito) CargarListaCargos();
+            return exito;
+        }
+
+        public bool EditarCargo(int id, string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) return false;
+            bool exito = _app.ActualizarCargo(id, nombre);
+            if (exito) CargarListaCargos();
+            return exito;
+        }
+
+        public bool CambiarEstadoCargo(int id)
+        {
+            var cargo = _app.ObtenerTodosLosCargos().FirstOrDefault(c => c.Id == id);
+            if (cargo == null) return false;
+            bool nuevoEstado = !cargo.Activo;
+            bool exito = _app.CambiarEstadoCargo(id, nuevoEstado);
+            if (exito) CargarListaCargos();
+            return exito;
+        }
+
     }
 }

@@ -146,5 +146,8 @@ namespace ControlAcceso.Services
         {
             return _dbAdapter.CambiarEstadoCargo(id, activo);
         }
+
+        // Dentro de DatabaseService:
+        public bool ActualizarCargo(int id, string nombre) => _dbAdapter.ActualizarCargo(id, nombre);
     }
 }

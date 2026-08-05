@@ -673,5 +673,29 @@ namespace ControlAcceso.Database
         }
 
         #endregion
+
+        // Dentro de la clase MySqlDatabaseAdapter, agrega este método:
+        public bool ActualizarCargo(int id, string nuevoNombre)
+        {
+            return RunDb(() =>
+            {
+                using var conn = GetConnection();
+                conn.Open();
+                // Verificar duplicados excluyendo el mismo id
+                string checkQuery = "SELECT COUNT(*) FROM roles WHERE LOWER(nombre_rol) = LOWER(@nombre) AND id != @id";
+                using var checkCmd = new MySqlCommand(checkQuery, conn);
+                checkCmd.Parameters.AddWithValue("@nombre", nuevoNombre);
+                checkCmd.Parameters.AddWithValue("@id", id);
+                int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+                if (count > 0)
+                    throw new DatabaseException("Ya existe otro cargo con ese nombre.");
+
+                string query = "UPDATE roles SET nombre_rol = @nombre WHERE id = @id";
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@nombre", nuevoNombre);
+                cmd.Parameters.AddWithValue("@id", id);
+                return cmd.ExecuteNonQuery() > 0;
+            }, "Error actualizando cargo");
+        }
     }
 }

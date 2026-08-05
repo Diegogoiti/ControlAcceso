@@ -12,6 +12,7 @@ namespace ControlAcceso
     {
         private readonly UI.controladores.AdminController _controller;
         public int? EmpleadoEditandoId { get; private set; }
+        private int? _cargoEditandoId = null;
 
         public AdminWindow(UI.controladores.AdminController controller)
         {
@@ -40,18 +41,40 @@ namespace ControlAcceso
             cmbMinutoLimite.SelectedIndex = 30;
         }
 
-        #region Navegación entre Pestañas
+        #region Navegación entre Pestañas (CORREGIDO)
 
         private void btnTabEmpleados_Click(object sender, RoutedEventArgs e)
         {
-            PanelEmpleados.Visibility = Visibility.Visible;
+            // Ocultar todos los paneles
+            PanelEmpleados.Visibility = Visibility.Collapsed;
+            PanelCargos.Visibility = Visibility.Collapsed;
             PanelConfiguracion.Visibility = Visibility.Collapsed;
+
+            // Mostrar solo el de empleados
+            PanelEmpleados.Visibility = Visibility.Visible;
             _controller.CargarListaEmpleados();
+        }
+
+        private void btnTabCargos_Click(object sender, RoutedEventArgs e)
+        {
+            // Ocultar todos los paneles
+            PanelEmpleados.Visibility = Visibility.Collapsed;
+            PanelCargos.Visibility = Visibility.Collapsed;
+            PanelConfiguracion.Visibility = Visibility.Collapsed;
+
+            // Mostrar solo el de cargos
+            PanelCargos.Visibility = Visibility.Visible;
+            _controller.CargarListaCargos();
         }
 
         private void btnTabConfig_Click(object sender, RoutedEventArgs e)
         {
+            // Ocultar todos los paneles
             PanelEmpleados.Visibility = Visibility.Collapsed;
+            PanelCargos.Visibility = Visibility.Collapsed;
+            PanelConfiguracion.Visibility = Visibility.Collapsed;
+
+            // Mostrar solo el de configuración
             PanelConfiguracion.Visibility = Visibility.Visible;
             _controller.CargarConfiguracion();
         }
@@ -73,7 +96,6 @@ namespace ControlAcceso
                 TelefonoEmergencia = txtTelefonoEmergencia.Text,
                 Direccion = txtDireccion.Text,
                 RolId = cmbRol.SelectedValue is int id ? id : 1,
-                //FechaIngreso = DateOnly.FromDateTime(DateTime.Today)
             };
         }
 
@@ -174,7 +196,6 @@ namespace ControlAcceso
 
         private void cmbFiltroEstado_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Usar _controller? previene la excepción durante el InitializeComponent()
             _controller?.CargarListaEmpleados(
                 txtBuscarNombre?.Text ?? string.Empty,
                 (cmbFiltroEstado.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Todos"
@@ -253,7 +274,6 @@ namespace ControlAcceso
             EmpleadoEditandoId = emp.Id;
             _controller.LimpiarHuellasEnMemoria();
 
-            // Llenar los campos de la interfaz
             CargarDatosFormularioEdicion(emp);
             CargarRolesEdicion(emp.RolId);
 
@@ -359,29 +379,22 @@ namespace ControlAcceso
         {
             txtEditCedula.Text = emp.Cedula.ToString();
             txtEditNombreCompleto.Text = emp.NombreCompleto;
-
-            // Asignar la fecha de nacimiento convertida de DateOnly a DateTime?
             dpEditFechaNacimiento.SelectedDate = emp.FechaNacimiento.ToDateTime(TimeOnly.MinValue);
-
             txtEditTelefono.Text = emp.Telefono;
             txtEditTelefonoEmergencia.Text = emp.TelefonoEmergencia;
             txtEditDireccion.Text = emp.Direccion;
-
-            // Asignar la selección del ComboBox según el RolId (restando 1 por índice base 0)
             cmbEditRol.SelectedIndex = Math.Max(0, emp.RolId - 1);
         }
+
         private void CargarCombosRoles(bool soloActivos, int? rolSeleccionado = null)
         {
             var roles = _controller.ObtenerCargos(soloActivos);
-
-            // Para el combo de registro
             cmbRol.ItemsSource = roles;
             if (rolSeleccionado.HasValue)
                 cmbRol.SelectedValue = rolSeleccionado.Value;
             else
-                cmbRol.SelectedIndex = 0; // o seleccionar el primero
+                cmbRol.SelectedIndex = 0;
 
-            // Para el combo de edición
             cmbEditRol.ItemsSource = roles;
             if (rolSeleccionado.HasValue)
                 cmbEditRol.SelectedValue = rolSeleccionado.Value;
@@ -389,7 +402,7 @@ namespace ControlAcceso
 
         private void CargarRolesRegistro()
         {
-            var roles = _controller.ObtenerCargos(true); // solo activos
+            var roles = _controller.ObtenerCargos(true);
             cmbRol.ItemsSource = roles;
             cmbRol.DisplayMemberPath = "Nombre";
             cmbRol.SelectedValuePath = "Id";
@@ -399,11 +412,94 @@ namespace ControlAcceso
 
         private void CargarRolesEdicion(int rolActualId)
         {
-            var roles = _controller.ObtenerCargos(false); // todos (activos + inactivos)
+            var roles = _controller.ObtenerCargos(false);
             cmbEditRol.ItemsSource = roles;
             cmbEditRol.DisplayMemberPath = "Nombre";
             cmbEditRol.SelectedValuePath = "Id";
             cmbEditRol.SelectedValue = rolActualId;
         }
+
+        #region --- Pestaña de Cargos (eventos ya integrados) ---
+
+        private void cmbFiltroEstadoCargo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_controller == null) return;
+            string filtro = (cmbFiltroEstadoCargo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Todos";
+            _controller.CambiarFiltroCargo(filtro);
+        }
+
+        private void btnAgregarCargo_Click(object sender, RoutedEventArgs e)
+        {
+            _cargoEditandoId = null;
+            lblModoCargo.Text = "Nuevo Cargo";
+            txtNombreCargo.Text = string.Empty;
+            PanelEdicionCargo.Visibility = Visibility.Visible;
+            txtNombreCargo.Focus();
+        }
+
+        private void btnEditarCargo_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int id))
+            {
+                var cargo = (dgCargos.ItemsSource as IEnumerable<CargoViewDto>)?.FirstOrDefault(c => c.Id == id);
+                if (cargo != null)
+                {
+                    _cargoEditandoId = id;
+                    lblModoCargo.Text = "Editar Cargo";
+                    txtNombreCargo.Text = cargo.Nombre;
+                    PanelEdicionCargo.Visibility = Visibility.Visible;
+                    txtNombreCargo.Focus();
+                    txtNombreCargo.SelectAll();
+                }
+            }
+        }
+
+        private void btnGuardarCargo_Click(object sender, RoutedEventArgs e)
+        {
+            string nombre = txtNombreCargo.Text.Trim();
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                MostrarError("El nombre del cargo no puede estar vacío.");
+                return;
+            }
+
+            bool exito;
+            if (_cargoEditandoId.HasValue)
+                exito = _controller.EditarCargo(_cargoEditandoId.Value, nombre);
+            else
+                exito = _controller.AgregarCargo(nombre);
+
+            if (exito)
+            {
+                PanelEdicionCargo.Visibility = Visibility.Collapsed;
+                _cargoEditandoId = null;
+                MostrarMensaje("Cargo guardado correctamente.");
+            }
+            else
+            {
+                MostrarError("No se pudo guardar el cargo. Verifique que no exista uno con el mismo nombre.");
+            }
+        }
+
+        private void btnCancelarEdicionCargo_Click(object sender, RoutedEventArgs e)
+        {
+            PanelEdicionCargo.Visibility = Visibility.Collapsed;
+            _cargoEditandoId = null;
+        }
+
+        private void btnCambiarEstadoCargo_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int id))
+            {
+                _controller.CambiarEstadoCargo(id);
+            }
+        }
+
+        public void MostrarListaCargos(List<CargoViewDto> lista)
+        {
+            dgCargos.ItemsSource = lista;
+        }
+
+        #endregion
     }
 }

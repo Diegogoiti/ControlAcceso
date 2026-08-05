@@ -197,100 +197,107 @@ namespace ControlAcceso.Application
         }
 
         public async Task<bool> CambiarEstadoEmpleadoAsync(int idEmpleado, bool activo)
-{
-    bool exito = await Task.Run(() => DatabaseService.CambiarEstado(idEmpleado, activo));
-    if (exito)
-    {
-        // Actualiza la lista en memoria (EmpleadosViewCache)
-        CargarEmpleadosViewCache();
-    }
-    return exito;
-}
-
-public EmpleadoDto? ObtenerEmpleadoPorId(int id)
-{
-    return DatabaseService.ObtenerEmpleadoPorId(id);
-}
-
-public (bool Exito, string Mensaje) EditarEmpleado(EmpleadoSaveDto emp)
-{
-    var exito = DatabaseService.ActualizarEmpleado(emp, out string mensajeError);
-    if (exito)
-    {
-        // Refrescar el caché en memoria tras editar[cite: 9]
-        CargarEmpleadosViewCache();
-    }
-    return (exito, mensajeError);
-}
-
-public bool GuardarConfiguracion(string password, TimeSpan horaEntrada, TimeSpan horaLimite, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin)
-{
-    return DatabaseService.GuardarConfiguracion(horaEntrada, horaLimite, password, huellasAdmin);
-}
-
-public List<HuellaEmpleadoDto> ObtenerHuellasAdmin()
-{
-    return DatabaseService.ObtenerHuellasAdmin();
-}
-
-public bool RegistrarAsistenciaAdministrador(int empleadoId, int tipoAsistencia, string observacion)
-{
-    var asistencia = new AsistenciaDto
-    {
-        EmpleadoID = empleadoId,
-        Tipo = tipoAsistencia,
-        PorAdministrador = true,
-        Observacion = observacion?.Trim()
-    };
-
-    bool exito = DatabaseService.RegistrarAsistencia(asistencia);
-    if (exito)
-    {
-        CargarEmpleadosViewCache();
-    }
-
-    return exito;
-}
-
-public bool ValidarPasswordAdmin(string password)
-{
-    var config = ObtenerConfiguracion();
-    if (config == null) return false;
-
-    return string.Equals(password ?? string.Empty, config.Value.Password ?? string.Empty, StringComparison.Ordinal);
-}
-
-public async Task<(bool Exito, string Mensaje)> AutenticarAdministradorPorHuellaAsync(System.Threading.CancellationToken cancellationToken = default)
-{
-    byte[]? rawImage = await CaptahuellasService.IniciarCapturaAsync(cancellationToken);
-    if (rawImage == null || rawImage.Length == 0)
-    {
-        return (false, "No se pudo capturar la huella del administrador.");
-    }
-
-    if (!BiometricService.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string mensajeError))
-    {
-        return (false, mensajeError);
-    }
-
-    var huellasAdmin = DatabaseService.ObtenerHuellasAdmin();
-    foreach (var huella in huellasAdmin)
-    {
-        if (huella.TemplateHuella == null || huella.TemplateHuella.Length == 0)
-            continue;
-
-        if (BiometricService.VerificarCoincidencia(templateCapturado!, huella.TemplateHuella, 50.0))
         {
-            return (true, "Huella de administrador reconocida.");
+            bool exito = await Task.Run(() => DatabaseService.CambiarEstado(idEmpleado, activo));
+            if (exito)
+            {
+                // Actualiza la lista en memoria (EmpleadosViewCache)
+                CargarEmpleadosViewCache();
+            }
+            return exito;
         }
-    }
 
-    return (false, "La huella no coincide con la registrada para el administrador.");
-}
+        public EmpleadoDto? ObtenerEmpleadoPorId(int id)
+        {
+            return DatabaseService.ObtenerEmpleadoPorId(id);
+        }
 
-public (string? Password, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion()
-{
-    return DatabaseService.ObtenerConfiguracion();
-}
+        public (bool Exito, string Mensaje) EditarEmpleado(EmpleadoSaveDto emp)
+        {
+            var exito = DatabaseService.ActualizarEmpleado(emp, out string mensajeError);
+            if (exito)
+            {
+                // Refrescar el caché en memoria tras editar[cite: 9]
+                CargarEmpleadosViewCache();
+            }
+            return (exito, mensajeError);
+        }
+
+        public bool GuardarConfiguracion(string password, TimeSpan horaEntrada, TimeSpan horaLimite, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin)
+        {
+            return DatabaseService.GuardarConfiguracion(horaEntrada, horaLimite, password, huellasAdmin);
+        }
+
+        public List<HuellaEmpleadoDto> ObtenerHuellasAdmin()
+        {
+            return DatabaseService.ObtenerHuellasAdmin();
+        }
+
+        public bool RegistrarAsistenciaAdministrador(int empleadoId, int tipoAsistencia, string observacion)
+        {
+            var asistencia = new AsistenciaDto
+            {
+                EmpleadoID = empleadoId,
+                Tipo = tipoAsistencia,
+                PorAdministrador = true,
+                Observacion = observacion?.Trim()
+            };
+
+            bool exito = DatabaseService.RegistrarAsistencia(asistencia);
+            if (exito)
+            {
+                CargarEmpleadosViewCache();
+            }
+
+            return exito;
+        }
+
+        public bool ValidarPasswordAdmin(string password)
+        {
+            var config = ObtenerConfiguracion();
+            if (config == null) return false;
+
+            return string.Equals(password ?? string.Empty, config.Value.Password ?? string.Empty, StringComparison.Ordinal);
+        }
+
+        public async Task<(bool Exito, string Mensaje)> AutenticarAdministradorPorHuellaAsync(System.Threading.CancellationToken cancellationToken = default)
+        {
+            byte[]? rawImage = await CaptahuellasService.IniciarCapturaAsync(cancellationToken);
+            if (rawImage == null || rawImage.Length == 0)
+            {
+                return (false, "No se pudo capturar la huella del administrador.");
+            }
+
+            if (!BiometricService.ProcesarHuellaBruta(rawImage, out byte[]? templateCapturado, out string mensajeError))
+            {
+                return (false, mensajeError);
+            }
+
+            var huellasAdmin = DatabaseService.ObtenerHuellasAdmin();
+            foreach (var huella in huellasAdmin)
+            {
+                if (huella.TemplateHuella == null || huella.TemplateHuella.Length == 0)
+                    continue;
+
+                if (BiometricService.VerificarCoincidencia(templateCapturado!, huella.TemplateHuella, 50.0))
+                {
+                    return (true, "Huella de administrador reconocida.");
+                }
+            }
+
+            return (false, "La huella no coincide con la registrada para el administrador.");
+        }
+
+        public (string? Password, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion()
+        {
+            return DatabaseService.ObtenerConfiguracion();
+        }
+
+        // Dentro de la clase MyApp:
+        public List<CargoDto> ObtenerTodosLosCargos() => DatabaseService.ObtenerCargos(false);
+        public bool CrearCargo(string nombre) => DatabaseService.CrearCargo(nombre);
+        public bool ActualizarCargo(int id, string nombre) => DatabaseService.ActualizarCargo(id, nombre);
+        public bool CambiarEstadoCargo(int id, bool activo) => DatabaseService.CambiarEstadoCargo(id, activo);
+
     }
 }

@@ -30,5 +30,6 @@ namespace ControlAcceso.Database
         List<CargoDto> ObtenerCargos(bool soloActivos = false);
         bool CrearCargo(string nombre);
         bool CambiarEstadoCargo(int id, bool activo);
+        bool ActualizarCargo(int id, string nuevoNombre);
     }
 }
