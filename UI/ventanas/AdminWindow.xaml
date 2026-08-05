@@ -274,7 +274,7 @@
                                 <DataGridTextColumn Header="Tel. Emergencia" Binding="{Binding TelefonoEmergencia}" Width="Auto" MinWidth="130"/>
                                 <DataGridTextColumn Header="F. Nacimiento" Binding="{Binding FechaNacimiento, StringFormat=dd/MM/yyyy}" Width="Auto" MinWidth="120"/>
                                 <DataGridTextColumn Header="Dirección" Binding="{Binding Direccion}" Width="Auto" MinWidth="200"/>
-                                <DataGridTextColumn Header="Rol" Binding="{Binding RolNombre}" Width="Auto" MinWidth="110"/>
+                                <DataGridTextColumn Header="Rol" Binding="{Binding NombreRol}" Width="Auto" MinWidth="110"/>
                                 <DataGridTextColumn Header="F. Ingreso" Binding="{Binding FechaIngreso, StringFormat=dd/MM/yyyy}" Width="Auto" MinWidth="110"/>
                                 <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="Auto" MinWidth="90"/>
                             </DataGrid.Columns>
@@ -386,10 +386,9 @@
                                 <DatePicker x:Name="dpFechaNacimiento" Style="{StaticResource ModernDatePicker}"/>
 
                                 <TextBlock Text="Rol / Permiso" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox x:Name="cmbRol" Style="{StaticResource ModernComboBox}">
-                                    <ComboBoxItem Content="Empleado" IsSelected="True"/>
-                                    <ComboBoxItem Content="Administrador"/>
-                                </ComboBox>
+                                <ComboBox x:Name="cmbRol" Style="{StaticResource ModernComboBox}"
+          DisplayMemberPath="Nombre" SelectedValuePath="Id" />
+
                             </StackPanel>
 
                             <!-- Columna Derecha -->
@@ -472,10 +471,8 @@
                                 <DatePicker x:Name="dpEditFechaNacimiento" Style="{StaticResource ModernDatePicker}"/>
 
                                 <TextBlock Text="Rol / Permiso" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox x:Name="cmbEditRol" Style="{StaticResource ModernComboBox}">
-                                    <ComboBoxItem Content="Empleado"/>
-                                    <ComboBoxItem Content="Administrador"/>
-                                </ComboBox>
+                                <ComboBox x:Name="cmbEditRol" Style="{StaticResource ModernComboBox}"
+          DisplayMemberPath="Nombre" SelectedValuePath="Id" />
                             </StackPanel>
 
                             <!-- Columna Derecha -->

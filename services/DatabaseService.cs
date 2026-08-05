@@ -131,5 +131,20 @@ namespace ControlAcceso.Services
         }
 
         #endregion
+
+        public List<CargoDto> ObtenerCargos(bool soloActivos = false)
+        {
+            return _dbAdapter.ObtenerCargos(soloActivos);
+        }
+
+        public bool CrearCargo(string nombre)
+        {
+            return _dbAdapter.CrearCargo(nombre);
+        }
+
+        public bool CambiarEstadoCargo(int id, bool activo)
+        {
+            return _dbAdapter.CambiarEstadoCargo(id, activo);
+        }
     }
 }

@@ -54,40 +54,24 @@ namespace ControlAcceso.UI.controladores
 
         #region Métodos de Empleados
 
-        public async Task<bool> RegistrarEmpleadoAsync(string cedula, string nombre, string apellido, string cargo)
-        {
-            if (string.IsNullOrWhiteSpace(cedula) || string.IsNullOrWhiteSpace(nombre))
-            {
-                throw new ArgumentException("La cédula y el nombre son campos obligatorios.");
-            }
-
-            await Task.Delay(100);
-            return true;
-        }
-
-        public async Task<List<object>> ObtenerEmpleadosAsync(string filtroNombre = "", string estado = "Todos")
-        {
-            await Task.Delay(100);
-            return new List<object>();
-        }
 
         public async Task<bool> CambiarEstadoEmpleadoAsync(int empleadoId)
-{
-    var empleado = _app.ObtenerEmpleadoPorId(empleadoId);
-    if (empleado == null) return false;
+        {
+            var empleado = _app.ObtenerEmpleadoPorId(empleadoId);
+            if (empleado == null) return false;
 
-    bool nuevoEstado = !empleado.Activo;
-    bool exito = await _app.CambiarEstadoEmpleadoAsync(empleadoId, nuevoEstado);
+            bool nuevoEstado = !empleado.Activo;
+            bool exito = await _app.CambiarEstadoEmpleadoAsync(empleadoId, nuevoEstado);
 
-    if (exito)
-    {
-        // Re-sincroniza el DataGrid con el estado actualizado
-        _app.CargarHuellasActivas();
-        CargarListaEmpleados();
-    }
+            if (exito)
+            {
+                // Re-sincroniza el DataGrid con el estado actualizado
+                _app.CargarHuellasActivas();
+                CargarListaEmpleados();
+            }
 
-    return exito;
-}
+            return exito;
+        }
 
         #endregion
 
@@ -231,54 +215,54 @@ namespace ControlAcceso.UI.controladores
         }
 
         public void ProcesarEdicionEmpleado()
-{
-    if (_adminWindow == null || !_adminWindow.EmpleadoEditandoId.HasValue) return; //
-
-    EmpleadoSaveDto emp = _adminWindow.ObtenerDatosEdicionFormulario(); //[cite: 13]
-
-    if (!EsFormularioValido(emp, requiereHuellas: false)) //[cite: 13]
-    {
-        return;
-    }
-
-    try
-    {
-        emp.Huellas = new HuellaEmpleadoDto[3];
-
-        if (_huellasCapturadas.Count > 0)
         {
-            int index = 0;
-            foreach (var huella in _huellasCapturadas.OrderBy(h => h.Key))
+            if (_adminWindow == null || !_adminWindow.EmpleadoEditandoId.HasValue) return; //
+
+            EmpleadoSaveDto emp = _adminWindow.ObtenerDatosEdicionFormulario(); //[cite: 13]
+
+            if (!EsFormularioValido(emp, requiereHuellas: false)) //[cite: 13]
             {
-                emp.Huellas[index] = new HuellaEmpleadoDto
+                return;
+            }
+
+            try
+            {
+                emp.Huellas = new HuellaEmpleadoDto[3];
+
+                if (_huellasCapturadas.Count > 0)
                 {
-                    Dedo = huella.Key,
-                    TemplateHuella = huella.Value
-                };
-                index++;
+                    int index = 0;
+                    foreach (var huella in _huellasCapturadas.OrderBy(h => h.Key))
+                    {
+                        emp.Huellas[index] = new HuellaEmpleadoDto
+                        {
+                            Dedo = huella.Key,
+                            TemplateHuella = huella.Value
+                        };
+                        index++;
+                    }
+                }
+
+                // Se llama al nuevo método en MyApp para actualización
+                var (exito, mensaje) = _app.EditarEmpleado(emp);
+
+                if (!exito)
+                {
+                    _adminWindow.MostrarError($"Error al actualizar: {mensaje}");
+                    return;
+                }
+
+                _adminWindow.MostrarMensaje("Empleado actualizado correctamente."); //[cite: 13]
+                _adminWindow.OcultarModalEdicion(); //[cite: 13]
+                _app.CargarEmpleadosViewCache();
+                _app.CargarHuellasActivas();  //[cite: 13]
+                CargarListaEmpleados(); //[cite: 13]
+            }
+            catch (Exception ex)
+            {
+                _adminWindow.MostrarError($"Error al actualizar el empleado: {ex.Message}"); //[cite: 13]
             }
         }
-
-        // Se llama al nuevo método en MyApp para actualización
-        var (exito, mensaje) = _app.EditarEmpleado(emp);
-
-        if (!exito)
-        {
-            _adminWindow.MostrarError($"Error al actualizar: {mensaje}");
-            return;
-        }
-
-        _adminWindow.MostrarMensaje("Empleado actualizado correctamente."); //[cite: 13]
-        _adminWindow.OcultarModalEdicion(); //[cite: 13]
-        _app.CargarEmpleadosViewCache();
-        _app.CargarHuellasActivas();  //[cite: 13]
-        CargarListaEmpleados(); //[cite: 13]
-    }
-    catch (Exception ex)
-    {
-        _adminWindow.MostrarError($"Error al actualizar el empleado: {ex.Message}"); //[cite: 13]
-    }
-}
 
         private bool EsFormularioValido(EmpleadoSaveDto emp, bool requiereHuellas = true)
         {
@@ -571,20 +555,22 @@ namespace ControlAcceso.UI.controladores
         }
 
         public void AbrirEdicionEmpleado(int idEmpleado)
-{
-    if (_adminWindow == null) return;
+        {
+            if (_adminWindow == null) return;
 
-    // Obtener los datos completos de la base de datos o servicios
-    var empleado = _app.ObtenerEmpleadoPorId(idEmpleado);
+            // Obtener los datos completos de la base de datos o servicios
+            var empleado = _app.ObtenerEmpleadoPorId(idEmpleado);
 
-    if (empleado == null)
-    {
-        _adminWindow.MostrarError("No se pudieron obtener los datos del empleado seleccionado.");
-        return;
-    }
+            if (empleado == null)
+            {
+                _adminWindow.MostrarError("No se pudieron obtener los datos del empleado seleccionado.");
+                return;
+            }
 
-    // Pasar el objeto completo para llenar la modal
-    _adminWindow.MostrarModalEdicion(empleado);
-}
+            // Pasar el objeto completo para llenar la modal
+            _adminWindow.MostrarModalEdicion(empleado);
+        }
+
+public List<CargoDto> ObtenerCargos(bool soloActivos) => _app.Db.ObtenerCargos(soloActivos);
     }
 }

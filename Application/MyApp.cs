@@ -60,41 +60,42 @@ namespace ControlAcceso.Application
         }
 
         public void CargarEmpleadosViewCache()
-{
-    try
-    {
-        var empleadosActivos = DatabaseService.ObtenerEmpleados(new EmpleadoFilter { });
-
-        EmpleadosViewCache = empleadosActivos.Select(emp => new EmpleadoViewDto
         {
-            Id = emp.Id,
-            Nombre = emp.NombreCompleto,
-            Cedula = emp.Cedula.ToString(),
-            Estado = emp.Activo ? "Activo" : "Inactivo",
-            FechaNacimiento = emp.FechaNacimiento,
-            Direccion = emp.Direccion,
-            Telefono = emp.Telefono,
-            TelefonoEmergencia = emp.TelefonoEmergencia,
-            RolNombre = emp.RolId,
-            FechaIngreso = emp.FechaIngreso
-        }).ToList();
-    }
-    catch (MySql.Data.MySqlClient.MySqlException ex)
-    {
-        System.Windows.MessageBox.Show(
-            $"Error de conexión a la Base de Datos:\n{ex.Message}\n\nVerifica que MySQL esté corriendo.",
-            "Error de Conexión", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-        EmpleadosViewCache = new List<EmpleadoViewDto>();
-    }
-    catch (Exception ex)
-    {
-        System.Windows.MessageBox.Show(
-            $"Ocurrió un error inesperado al cargar la vista de empleados:\n{ex.Message}",
-            "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-        EmpleadosViewCache = new List<EmpleadoViewDto>();
-    }
-}
+            try
+            {
+                var empleados = DatabaseService.ObtenerEmpleados(new EmpleadoFilter { });
+                // Obtener todos los roles (activos e inactivos) para que el nombre del rol se muestre incluso si el rol fue desactivado después
+                var roles = DatabaseService.ObtenerCargos(false);
 
+                EmpleadosViewCache = empleados.Select(emp => new EmpleadoViewDto
+                {
+                    Id = emp.Id,
+                    Nombre = emp.NombreCompleto,
+                    Cedula = emp.Cedula.ToString(),
+                    Estado = emp.Activo ? "Activo" : "Inactivo",
+                    FechaNacimiento = emp.FechaNacimiento,
+                    Direccion = emp.Direccion,
+                    Telefono = emp.Telefono,
+                    TelefonoEmergencia = emp.TelefonoEmergencia,
+                    NombreRol = roles.FirstOrDefault(r => r.Id == emp.RolId)?.Nombre ?? "Sin rol",
+                    FechaIngreso = emp.FechaIngreso
+                }).ToList();
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Error de conexión a la Base de Datos:\n{ex.Message}\n\nVerifica que MySQL esté corriendo.",
+                    "Error de Conexión", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                EmpleadosViewCache = new List<EmpleadoViewDto>();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Ocurrió un error inesperado al cargar la vista de empleados:\n{ex.Message}",
+                    "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                EmpleadosViewCache = new List<EmpleadoViewDto>();
+            }
+        }
         #endregion
 
         #region --- Casos de Uso del Sistema ---

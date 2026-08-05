@@ -72,7 +72,7 @@ namespace ControlAcceso
                 Telefono = txtTelefono.Text,
                 TelefonoEmergencia = txtTelefonoEmergencia.Text,
                 Direccion = txtDireccion.Text,
-                RolId = cmbRol.SelectedIndex + 1,
+                RolId = cmbRol.SelectedValue is int id ? id : 1,
                 //FechaIngreso = DateOnly.FromDateTime(DateTime.Today)
             };
         }
@@ -90,7 +90,7 @@ namespace ControlAcceso
                 Telefono = txtEditTelefono.Text,
                 TelefonoEmergencia = txtEditTelefonoEmergencia.Text,
                 Direccion = txtEditDireccion.Text,
-                RolId = cmbEditRol.SelectedIndex + 1
+                RolId = cmbEditRol.SelectedValue is int id ? id : 1,
             };
         }
 
@@ -221,6 +221,7 @@ namespace ControlAcceso
             _controller.LimpiarHuellasEnMemoria();
 
             LimpiarFormularioRegistro();
+            CargarRolesRegistro();
             OverlayEditarEmpleado.Visibility = Visibility.Collapsed;
             OverlayRegistrarEmpleado.Visibility = Visibility.Visible;
         }
@@ -254,6 +255,7 @@ namespace ControlAcceso
 
             // Llenar los campos de la interfaz
             CargarDatosFormularioEdicion(emp);
+            CargarRolesEdicion(emp.RolId);
 
             OverlayRegistrarEmpleado.Visibility = Visibility.Collapsed;
             OverlayEditarEmpleado.Visibility = Visibility.Visible;
@@ -367,6 +369,41 @@ namespace ControlAcceso
 
             // Asignar la selección del ComboBox según el RolId (restando 1 por índice base 0)
             cmbEditRol.SelectedIndex = Math.Max(0, emp.RolId - 1);
+        }
+        private void CargarCombosRoles(bool soloActivos, int? rolSeleccionado = null)
+        {
+            var roles = _controller.ObtenerCargos(soloActivos);
+
+            // Para el combo de registro
+            cmbRol.ItemsSource = roles;
+            if (rolSeleccionado.HasValue)
+                cmbRol.SelectedValue = rolSeleccionado.Value;
+            else
+                cmbRol.SelectedIndex = 0; // o seleccionar el primero
+
+            // Para el combo de edición
+            cmbEditRol.ItemsSource = roles;
+            if (rolSeleccionado.HasValue)
+                cmbEditRol.SelectedValue = rolSeleccionado.Value;
+        }
+
+        private void CargarRolesRegistro()
+        {
+            var roles = _controller.ObtenerCargos(true); // solo activos
+            cmbRol.ItemsSource = roles;
+            cmbRol.DisplayMemberPath = "Nombre";
+            cmbRol.SelectedValuePath = "Id";
+            if (roles.Any())
+                cmbRol.SelectedIndex = 0;
+        }
+
+        private void CargarRolesEdicion(int rolActualId)
+        {
+            var roles = _controller.ObtenerCargos(false); // todos (activos + inactivos)
+            cmbEditRol.ItemsSource = roles;
+            cmbEditRol.DisplayMemberPath = "Nombre";
+            cmbEditRol.SelectedValuePath = "Id";
+            cmbEditRol.SelectedValue = rolActualId;
         }
     }
 }

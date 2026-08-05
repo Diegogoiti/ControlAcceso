@@ -6,22 +6,29 @@ namespace ControlAcceso.Database
 {
     public interface IDatabase
     {
-        // Métodos que faltaban en IDatabase:
+        // --- Empleados ---
         bool AgregarEmpleado(EmpleadoSaveDto empleado);
         bool ActualizarEmpleado(EmpleadoSaveDto empleado);
         bool CambiarEstadoEmpleado(int id, bool activo);
-
-        // Corrige la firma de RegistrarAsistencia para incluir tipoAsistencia si aplica, o sus parámetros requeridos:
-        bool RegistrarAsistencia(AsistenciaDto asistencia);
-
-        bool GuardarConfiguracion(string adminPassword, TimeSpan horaEntrada, TimeSpan horaLimite, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin);
-        List<HuellaEmpleadoDto> ObtenerHuellasAdmin();
-
-        // Asegúrate de que los métodos de consulta existentes usen las firmas correctas:
         List<EmpleadoDto> ObtenerEmpleados(EmpleadoFilter filtro);
-        List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter filtro);
-        List<HuellaEmpleadoDto> ObtenerHuellasActivas();
-        (string AdminPassword, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion();
         EmpleadoDto? ObtenerEmpleadoPorId(int id);
+
+        // --- Asistencia ---
+        bool RegistrarAsistencia(AsistenciaDto asistencia);
+        List<AsistenciaDto> ObtenerAsistencias(AsistenciaFilter filtro);
+
+        // --- Huellas ---
+        List<HuellaEmpleadoDto> ObtenerHuellasActivas();
+        List<HuellaEmpleadoDto> ObtenerHuellasAdmin();
+        bool InsertarHuella(int empleadoId, int dedo, byte[] template); // Opcional, pero puede ser útil
+
+        // --- Configuración ---
+        bool GuardarConfiguracion(string adminPassword, TimeSpan horaEntrada, TimeSpan horaLimite, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin);
+        (string AdminPassword, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion();
+
+        // --- NUEVOS: Gestión de Roles / Cargos ---
+        List<CargoDto> ObtenerCargos(bool soloActivos = false);
+        bool CrearCargo(string nombre);
+        bool CambiarEstadoCargo(int id, bool activo);
     }
 }

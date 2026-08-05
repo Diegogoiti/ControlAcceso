@@ -313,7 +313,7 @@ namespace ControlAcceso.Database
             }, "Error agregando empleado en la base de datos");
         }
 
-       public bool ActualizarEmpleado(EmpleadoSaveDto empleado)
+        public bool ActualizarEmpleado(EmpleadoSaveDto empleado)
         {
             return RunDb(() =>
             {
@@ -606,5 +606,72 @@ namespace ControlAcceso.Database
                 return null;
             }, "Error obteniendo empleado por id desde la base de datos");
         }
+        #region --- Gestión de Roles / Cargos ---
+
+        public List<CargoDto> ObtenerCargos(bool soloActivos = false)
+        {
+            return RunDb(() =>
+            {
+                var cargos = new List<CargoDto>();
+                using var conn = GetConnection();
+                conn.Open();
+
+                string query = "SELECT id, nombre_rol, activo FROM roles";
+                if (soloActivos)
+                    query += " WHERE activo = 1";
+                query += " ORDER BY nombre_rol";
+
+                using var cmd = new MySqlCommand(query, conn);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    cargos.Add(new CargoDto
+                    {
+                        Id = reader.GetInt32("id"),
+                        Nombre = reader.GetString("nombre_rol"),
+                        Activo = reader.GetBoolean("activo")
+                    });
+                }
+                return cargos;
+            }, "Error obteniendo cargos desde la base de datos");
+        }
+
+        public bool CrearCargo(string nombre)
+        {
+            return RunDb(() =>
+            {
+                using var conn = GetConnection();
+                conn.Open();
+
+                // Verificar duplicados (case-insensitive)
+                string checkQuery = "SELECT COUNT(*) FROM roles WHERE LOWER(nombre_rol) = LOWER(@nombre)";
+                using var checkCmd = new MySqlCommand(checkQuery, conn);
+                checkCmd.Parameters.AddWithValue("@nombre", nombre);
+                int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+                if (count > 0)
+                    throw new DatabaseException("Ya existe un cargo con ese nombre.");
+
+                string query = "INSERT INTO roles (nombre_rol, activo) VALUES (@nombre, 1)";
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@nombre", nombre);
+                return cmd.ExecuteNonQuery() > 0;
+            }, "Error creando nuevo cargo");
+        }
+
+        public bool CambiarEstadoCargo(int id, bool activo)
+        {
+            return RunDb(() =>
+            {
+                using var conn = GetConnection();
+                conn.Open();
+                string query = "UPDATE roles SET activo = @activo WHERE id = @id";
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@activo", activo ? 1 : 0);
+                cmd.Parameters.AddWithValue("@id", id);
+                return cmd.ExecuteNonQuery() > 0;
+            }, "Error cambiando estado del cargo");
+        }
+
+        #endregion
     }
 }

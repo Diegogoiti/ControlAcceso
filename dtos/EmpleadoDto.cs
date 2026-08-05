@@ -9,7 +9,7 @@ namespace ControlAcceso.DTOs
         public string Direccion { get; set; } = string.Empty;
         public string Telefono { get; set; } = string.Empty;
         public string TelefonoEmergencia { get; set; } = string.Empty;
-        public int RolId { get; set; }
+        public int RolId { get; set; }          // ← Solo el ID del rol
         public DateOnly FechaIngreso { get; set; }
         public bool Activo { get; set; }
     }
