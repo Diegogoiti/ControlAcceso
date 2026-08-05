@@ -16,7 +16,7 @@ namespace ControlAcceso.Services
 
         public List<ReporteEmpleadoDto> GenerarDatosReporteSemanal(DateTime fechaInicioSemana)
         {
-            // Ajustar al lunes de la semana pasada por la fecha seleccionada
+            // Ajustar al lunes de la semana seleccionada
             while (fechaInicioSemana.DayOfWeek != DayOfWeek.Monday)
             {
                 fechaInicioSemana = fechaInicioSemana.AddDays(-1);
@@ -26,8 +26,12 @@ namespace ControlAcceso.Services
 
             var filtroEmpleados = new EmpleadoFilter { SoloActivos = true };
             var empleados = _databaseService.ObtenerEmpleados(filtroEmpleados);
+
+            // Obtener todos los cargos (roles) para mapear el nombre real
+            var cargos = _databaseService.ObtenerCargos(false); // incluye inactivos por si algún empleado tiene uno desactivado
+
             var config = _databaseService.ObtenerConfiguracion();
-            TimeSpan horaLimite = config.HasValue ? config.Value.HoraLimite : new TimeSpan(9, 0, 0); // Default 9am si no hay
+            TimeSpan horaLimite = config.HasValue ? config.Value.HoraLimite : new TimeSpan(9, 0, 0); // Default 9am
 
             var asistenciasFiltro = new AsistenciaFilter
             {
@@ -40,11 +44,14 @@ namespace ControlAcceso.Services
 
             foreach (var emp in empleados)
             {
+                // Obtener el nombre del cargo desde la lista de cargos
+                string nombreCargo = cargos.FirstOrDefault(c => c.Id == emp.RolId)?.Nombre ?? "Sin cargo";
+
                 var reporte = new ReporteEmpleadoDto
                 {
                     Cedula = emp.Cedula.ToString(),
                     Nombre = emp.NombreCompleto,
-                    Posicion = emp.RolId == 1 ? "EMPLEADO" : "ADMINISTRADOR",
+                    Posicion = nombreCargo, // ← Ahora usa el nombre real de la tabla roles
                     DiasAsistidos = 0,
                     DiasFaltados = 0,
                     Tardanzas = 0,
@@ -58,10 +65,9 @@ namespace ControlAcceso.Services
                 for (int i = 0; i < 6; i++) // Lunes a Sábado
                 {
                     DateTime diaActual = fechaInicioSemana.AddDays(i);
-                    int diaDeLaSemana = (int)diaActual.DayOfWeek; // 1 = Lunes ... 6 = Sabado
+                    int diaDeLaSemana = (int)diaActual.DayOfWeek; // 1 = Lunes ... 6 = Sábado
 
-                    // Si el día actual que estamos evaluando es mayor al día de hoy (futuro),
-                    // lo dejamos en blanco y no evaluamos faltas.
+                    // Si el día es futuro, lo dejamos en blanco
                     if (diaActual.Date > DateTime.Today)
                     {
                         reporte.DiasAsistencia[diaDeLaSemana] = "";
@@ -70,7 +76,7 @@ namespace ControlAcceso.Services
 
                     diasEvaluados++;
 
-                    // Buscamos si hay alguna entrada (Tipo == 1) o si es por administrador
+                    // Buscar si hay una entrada (Tipo == 1) o si es por administrador
                     var asistenciaDia = asistenciasEmpleado.FirstOrDefault(a => a.Timestamp.Date == diaActual.Date && (a.Tipo == 1 || a.PorAdministrador));
 
                     if (asistenciaDia != null)
