@@ -299,5 +299,10 @@ namespace ControlAcceso.Application
         public bool ActualizarCargo(int id, string nombre) => DatabaseService.ActualizarCargo(id, nombre);
         public bool CambiarEstadoCargo(int id, bool activo) => DatabaseService.CambiarEstadoCargo(id, activo);
 
+        public List<EmpleadoDto> ObtenerEmpleadosPorRol(int rolId)
+        {
+            return DatabaseService.ObtenerEmpleados(new EmpleadoFilter { RolId = rolId, SoloActivos = true });
+        }
+
     }
 }

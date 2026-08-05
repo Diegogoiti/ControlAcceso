@@ -59,11 +59,21 @@ namespace ControlAcceso.Database
                     query += " AND (nombre_completo LIKE @busqueda OR CAST(cedula AS CHAR) LIKE @busqueda)";
                 }
 
+                if (filtro.RolId.HasValue)
+                {
+                    query += " AND rol_id = @rolId";
+                }
+
                 using var cmd = new MySqlCommand(query, conn);
 
                 if (!string.IsNullOrWhiteSpace(filtro.NombreOCedula))
                 {
                     cmd.Parameters.AddWithValue("@busqueda", $"%{filtro.NombreOCedula.Trim()}%");
+                }
+
+                if (filtro.RolId.HasValue)
+                {
+                    cmd.Parameters.AddWithValue("@rolId", filtro.RolId.Value);
                 }
 
                 using var reader = cmd.ExecuteReader();

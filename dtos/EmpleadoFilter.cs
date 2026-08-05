@@ -7,5 +7,6 @@ namespace ControlAcceso.DTOs
         public string? Nombre { get; set; }
         public bool SoloActivos { get; set; } = false;
         public string? NombreOCedula { get; set; }
+        public int? RolId { get; set; }
     }
 }

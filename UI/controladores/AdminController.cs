@@ -622,10 +622,37 @@ namespace ControlAcceso.UI.controladores
         {
             var cargo = _app.ObtenerTodosLosCargos().FirstOrDefault(c => c.Id == id);
             if (cargo == null) return false;
-            bool nuevoEstado = !cargo.Activo;
-            bool exito = _app.CambiarEstadoCargo(id, nuevoEstado);
-            if (exito) CargarListaCargos();
-            return exito;
+
+            // Si el cargo está inactivo, solo lo reactivamos (sin restricciones)
+            if (!cargo.Activo)
+            {
+                bool exito = _app.CambiarEstadoCargo(id, true);
+                if (exito) CargarListaCargos();
+                return exito;
+            }
+
+            // Si el cargo está activo, verificamos si tiene empleados activos
+            var empleadosActivos = _app.ObtenerEmpleadosPorRol(id);
+            if (empleadosActivos.Count > 0)
+            {
+                // Construir mensaje con la lista de empleados (máximo 5 nombres para no saturar)
+                var nombres = empleadosActivos.Take(5).Select(e => $"• {e.NombreCompleto} (Cédula: {e.Cedula})").ToList();
+                string lista = string.Join("\n", nombres);
+                if (empleadosActivos.Count > 5)
+                    lista += $"\n... y {empleadosActivos.Count - 5} empleados más.";
+
+                _adminWindow?.MostrarError(
+                    $"No se puede desactivar el cargo '{cargo.Nombre}' porque tiene {empleadosActivos.Count} empleados activos asignados.\n\n" +
+                    $"Empleados afectados:\n{lista}\n\n" +
+                    "Primero debe reasignar o desactivar a estos empleados."
+                );
+                return false;
+            }
+
+            // No hay empleados activos → desactivar sin problemas
+            bool exitoDesactivar = _app.CambiarEstadoCargo(id, false);
+            if (exitoDesactivar) CargarListaCargos();
+            return exitoDesactivar;
         }
 
     }

@@ -149,5 +149,10 @@ namespace ControlAcceso.Services
 
         // Dentro de DatabaseService:
         public bool ActualizarCargo(int id, string nombre) => _dbAdapter.ActualizarCargo(id, nombre);
+
+        public List<EmpleadoDto> ObtenerEmpleadosPorRol(int rolId)
+        {
+            return _dbAdapter.ObtenerEmpleados(new EmpleadoFilter { RolId = rolId, SoloActivos = true });
+        }
     }
 }
