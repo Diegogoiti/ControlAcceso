@@ -205,8 +205,7 @@ namespace ControlAcceso.UI.controladores
             {
                 _app.GuardarEmpleado(emp);
                 _adminWindow.MostrarMensaje("Empleado guardado exitosamente.");
-                _app.CargarEmpleadosViewCache();
-                _app.CargarHuellasActivas();
+
                 CargarListaEmpleados();
             }
             catch (Exception ex)

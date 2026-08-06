@@ -193,6 +193,13 @@ namespace ControlAcceso.Application
         {
             var mensajeError = string.Empty;
             var exito = DatabaseService.RegistrarEmpleado(emp, out mensajeError);
+
+            if (exito)
+            {
+                CargarEmpleadosViewCache();
+                CargarHuellasActivas();
+            }
+
             return (exito, mensajeError);
         }
 
