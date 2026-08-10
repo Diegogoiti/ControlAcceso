@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ControlAcceso.DTOs;
 using ControlAcceso.Services;
+using Microsoft.AspNetCore.Identity;
 
 public record ResultadoMarcaje(bool Exito, string Nombre, DateTime? Hora, string Mensaje);
 
@@ -12,6 +13,10 @@ namespace ControlAcceso.Application
 {
     public class MyApp
     {
+        // Hasher estándar de ASP.NET Core Identity: sal aleatoria, PBKDF2 con
+        // 100k iteraciones y formato versionado, mantenido por Microsoft.
+        private static readonly PasswordHasher<object> _hasher = new();
+
         private DatabaseService DatabaseService { get; }
         private BiometricService BiometricService { get; }
         private CaptahuellasService CaptahuellasService { get; }
@@ -264,7 +269,73 @@ namespace ControlAcceso.Application
             var config = ObtenerConfiguracion();
             if (config == null) return false;
 
-            return string.Equals(password ?? string.Empty, config.Value.Password ?? string.Empty, StringComparison.Ordinal);
+            string? almacenada = config.Value.Password;
+            if (string.IsNullOrEmpty(almacenada)) return false;
+
+            // 1) Formato estándar de Identity: verificación directa. Si el hash
+            //    es válido pero usa parámetros antiguos, Identity avisa con
+            //    SuccessRehashNeeded y aprovechamos para actualizarlo en caliente.
+            var resultado = _hasher.VerifyHashedPassword(null!, almacenada, password);
+            if (resultado == PasswordVerificationResult.Success)
+                return true;
+
+            if (resultado == PasswordVerificationResult.SuccessRehashNeeded)
+            {
+                DatabaseService.ActualizarPasswordAdmin(_hasher.HashPassword(null!, password));
+                return true;
+            }
+
+            // 2) Formato legacy (Base64 de texto plano de instalaciones viejas):
+            //    comparar en claro y migrar al hash de Identity si coincide.
+            if (VerificarPasswordLegacy(almacenada, password, out bool coincide))
+            {
+                if (coincide)
+                {
+                    DatabaseService.ActualizarPasswordAdmin(_hasher.HashPassword(null!, password));
+                }
+                return coincide;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Intenta interpretar un valor almacenado como el formato viejo (Base64
+        /// de texto plano). Devuelve true si pudo decodificarlo y, en ese caso,
+        /// indica en <paramref name="coincide"/> si la contraseña ingresada es la
+        /// misma. Devuelve false si ni siquiera es Base64 válido (no es legacy).
+        /// </summary>
+        private static bool VerificarPasswordLegacy(string almacenada, string password, out bool coincide)
+        {
+            coincide = false;
+            try
+            {
+                string textoPlano = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(almacenada));
+                coincide = string.Equals(password ?? string.Empty, textoPlano, StringComparison.Ordinal);
+                return true;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Cambia la contraseña de administrador. Quien llega a la ventana de
+        /// configuración ya pasó la autenticación, por lo que no se exige la
+        /// contraseña actual para autorizar el cambio.
+        /// </summary>
+        public (bool Exito, string Mensaje) CambiarPasswordAdmin(string nuevaPassword)
+        {
+            if (string.IsNullOrWhiteSpace(nuevaPassword))
+            {
+                return (false, "La nueva contraseña no puede estar vacía.");
+            }
+
+            bool exito = DatabaseService.ActualizarPasswordAdmin(_hasher.HashPassword(null!, nuevaPassword));
+            return exito
+                ? (true, "Contraseña actualizada correctamente.")
+                : (false, "No se pudo actualizar la contraseña en la base de datos.");
         }
 
         public async Task<(bool Exito, string Mensaje)> AutenticarAdministradorPorHuellaAsync(System.Threading.CancellationToken cancellationToken = default)

@@ -25,6 +25,7 @@ namespace ControlAcceso.Database
         // --- Configuración ---
         bool GuardarConfiguracion(string adminPassword, TimeSpan horaEntrada, TimeSpan horaLimite, IReadOnlyList<HuellaEmpleadoDto> huellasAdmin);
         (string AdminPassword, TimeSpan HoraEntrada, TimeSpan HoraLimite)? ObtenerConfiguracion();
+        bool ActualizarPasswordAdmin(string hashedPassword);
 
         // --- NUEVOS: Gestión de Roles / Cargos ---
         List<CargoDto> ObtenerCargos(bool soloActivos = false);

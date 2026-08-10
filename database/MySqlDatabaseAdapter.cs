@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using ControlAcceso.DTOs;
+using Microsoft.AspNetCore.Identity;
 using MySql.Data.MySqlClient;
 
 namespace ControlAcceso.Database
 {
     public class MySqlDatabaseAdapter : IDatabase
     {
+        // Hasher estándar de ASP.NET Core Identity: sal aleatoria, PBKDF2 con
+        // 100k iteraciones y formato versionado, mantenido por Microsoft.
+        private static readonly PasswordHasher<object> _hasher = new();
+
         private readonly string _connectionString;
 
         private T RunDb<T>(Func<T> action, string contextMessage)
@@ -468,7 +472,22 @@ namespace ControlAcceso.Database
 
                 try
                 {
-                    string passwordGuardado = Convert.ToBase64String(Encoding.UTF8.GetBytes(adminPassword));
+                    // La contraseña se guarda hasheada con el hasher de Identity.
+                    // Si no se provee una nueva (la ventana de configuración ya no
+                    // edita la contraseña), se conserva el valor existente para no
+                    // pisarlo.
+                    string passwordGuardado;
+                    if (string.IsNullOrEmpty(adminPassword))
+                    {
+                        string queryPasswordActual = "SELECT admin_password FROM configuracion WHERE id = 1 LIMIT 1";
+                        using var cmdPasswordActual = new MySqlCommand(queryPasswordActual, conn, transaction);
+                        object? actual = cmdPasswordActual.ExecuteScalar();
+                        passwordGuardado = actual is string s ? s : string.Empty;
+                    }
+                    else
+                    {
+                        passwordGuardado = _hasher.HashPassword(null!, adminPassword);
+                    }
 
                     string query = @"
                     INSERT INTO configuracion (id, admin_password, hora_entrada, hora_limite)
@@ -562,21 +581,29 @@ namespace ControlAcceso.Database
                     TimeSpan entrada = reader.GetTimeSpan("hora_entrada");
                     TimeSpan limite = reader.GetTimeSpan("hora_limite");
 
-                    string password = passwordStored;
-                    try
-                    {
-                        password = Encoding.UTF8.GetString(Convert.FromBase64String(passwordStored));
-                    }
-                    catch
-                    {
-                        password = passwordStored;
-                    }
-
-                    return ((string, TimeSpan, TimeSpan)?)(password, entrada, limite);
+                    // Se devuelve el valor tal cual está almacenado (hash PBKDF2 o,
+                    // en instalaciones viejas, Base64 legacy). La interpretación y
+                    // migración la hace la capa de aplicación.
+                    return ((string, TimeSpan, TimeSpan)?)(passwordStored, entrada, limite);
                 }
 
                 return null;
             }, "Error obteniendo configuración desde la base de datos");
+        }
+
+        public bool ActualizarPasswordAdmin(string hashedPassword)
+        {
+            return RunDb(() =>
+            {
+                using var conn = GetConnection();
+                conn.Open();
+
+                string query = "UPDATE configuracion SET admin_password = @adminPassword WHERE id = 1";
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@adminPassword", hashedPassword);
+
+                return cmd.ExecuteNonQuery() > 0;
+            }, "Error actualizando la contraseña de administrador");
         }
 
         public EmpleadoDto? ObtenerEmpleadoPorId(int id)

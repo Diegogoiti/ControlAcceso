@@ -281,8 +281,6 @@ namespace ControlAcceso
             OverlayEditarEmpleado.Visibility = Visibility.Visible;
         }
 
-        public string ObtenerPasswordConfiguracion() => pwdAdminPassword.Password;
-
         public string ObtenerHoraEntrada()
         {
             return $"{cmbHoraEntrada.SelectedItem ?? "08"}:{cmbMinutoEntrada.SelectedItem ?? "00"}";
@@ -293,10 +291,8 @@ namespace ControlAcceso
             return $"{cmbHoraLimite.SelectedItem ?? "08"}:{cmbMinutoLimite.SelectedItem ?? "30"}";
         }
 
-        public void CargarConfiguracion(string password, string horaEntrada, string horaLimite)
+        public void CargarConfiguracion(string horaEntrada, string horaLimite)
         {
-            pwdAdminPassword.Password = password ?? string.Empty;
-
             if (TimeSpan.TryParse(horaEntrada, out TimeSpan entrada))
             {
                 cmbHoraEntrada.SelectedItem = entrada.Hours.ToString("D2");
@@ -308,6 +304,17 @@ namespace ControlAcceso
                 cmbHoraLimite.SelectedItem = limite.Hours.ToString("D2");
                 cmbMinutoLimite.SelectedItem = limite.Minutes.ToString("D2");
             }
+        }
+
+        public void MostrarEstadoPassword(bool configurada)
+        {
+            txtEstadoPassword.Text = configurada ? "✅ Configurada" : "⚠️ No configurada";
+            txtEstadoPassword.Foreground = configurada ? new SolidColorBrush(Color.FromRgb(0x16, 0xA3, 0x4A)) : new SolidColorBrush(Color.FromRgb(0xD9, 0x77, 0x06));
+        }
+
+        private void btnCambiarPassword_Click(object sender, RoutedEventArgs e)
+        {
+            _controller.ProcesarCambioPassword();
         }
 
         public void EstablecerEstadoEsperandoHuellaAdmin(int dedo)

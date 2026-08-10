@@ -120,6 +120,15 @@ namespace ControlAcceso.Services
             return (password, horaEntrada, horaLimite);
         }
 
+        /// <summary>
+        /// Reemplaza la contraseña de administrador por un valor ya hasheado
+        /// (el hashing lo hace la capa de aplicación con el hasher de Identity).
+        /// </summary>
+        public bool ActualizarPasswordAdmin(string hashedPassword)
+        {
+            return _dbAdapter.ActualizarPasswordAdmin(hashedPassword);
+        }
+
         public List<HuellaEmpleadoDto> ObtenerHuellasActivas()
         {
             return _dbAdapter.ObtenerHuellasActivas();

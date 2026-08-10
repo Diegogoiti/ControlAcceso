@@ -443,7 +443,7 @@
                     <Border Background="#F8FAFC" CornerRadius="18" Padding="24" BorderBrush="#E2E8F0" BorderThickness="1">
                         <StackPanel HorizontalAlignment="Center" Width="620">
                             <TextBlock Text="⚙️ Configuración del sistema" FontSize="22" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,6" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Ajusta la contraseña, los horarios de acceso y las huellas del administrador." FontSize="13" Foreground="#64748B" Margin="0,0,0,18" TextAlignment="Center"/>
+                            <TextBlock Text="Ajusta los horarios de acceso y las huellas del administrador. La contraseña se cambia desde el botón." FontSize="13" Foreground="#64748B" Margin="0,0,0,18" TextAlignment="Center"/>
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -476,9 +476,12 @@
                                     </StackPanel>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,12" HorizontalAlignment="Center" Width="320">
-                                    <TextBlock Text="Contraseña" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                                    <PasswordBox x:Name="pwdAdminPassword" Height="40" Padding="10,0" VerticalContentAlignment="Center" BorderBrush="#CBD5E1" BorderThickness="1"/>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,12" HorizontalAlignment="Center">
+                                    <TextBlock Text="Contraseña de administrador" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                        <TextBlock x:Name="txtEstadoPassword" Text="Configurada" Foreground="#16A34A" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <Button x:Name="btnCambiarPassword" Content="🔑 Cambiar contraseña" Height="38" Padding="16,0" Style="{StaticResource ActionPillButton}" Background="#EFF6FF" Foreground="#1E40AF" BorderBrush="#BFDBFE" Cursor="Hand" Click="btnCambiarPassword_Click"/>
+                                    </StackPanel>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,6" HorizontalAlignment="Center">

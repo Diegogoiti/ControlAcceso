@@ -82,7 +82,6 @@ namespace ControlAcceso.UI.controladores
         {
             if (_adminWindow == null) return;
 
-            string password = _adminWindow.ObtenerPasswordConfiguracion();
             string horaEntradaTexto = _adminWindow.ObtenerHoraEntrada();
             string horaLimiteTexto = _adminWindow.ObtenerHoraLimite();
 
@@ -95,12 +94,6 @@ namespace ControlAcceso.UI.controladores
             if (!TimeSpan.TryParse(horaLimiteTexto, out TimeSpan horaLimite))
             {
                 _adminWindow.MostrarError("La hora límite de ingreso debe tener formato HH:mm.");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                _adminWindow.MostrarError("La contraseña de administrador es obligatoria.");
                 return;
             }
 
@@ -133,7 +126,9 @@ namespace ControlAcceso.UI.controladores
                 .OrderBy(h => h.Dedo)
                 .ToList();
 
-            bool exito = _app.GuardarConfiguracion(password, horaEntrada, horaLimite, huellasAdmin);
+            // La contraseña ya no se edita desde esta ventana; se pasa vacía para
+            // que el adaptador conserve el hash existente.
+            bool exito = _app.GuardarConfiguracion(string.Empty, horaEntrada, horaLimite, huellasAdmin);
             if (exito)
             {
                 _adminWindow.MostrarMensaje("Configuración guardada correctamente.");
@@ -163,18 +158,55 @@ namespace ControlAcceso.UI.controladores
             var config = _app.ObtenerConfiguracion();
             if (config.HasValue)
             {
-                var (password, horaEntrada, horaLimite) = config.Value;
-                _adminWindow.CargarConfiguracion(password ?? string.Empty, horaEntrada.ToString("hh\\:mm"), horaLimite.ToString("hh\\:mm"));
+                var (_, horaEntrada, horaLimite) = config.Value;
+                _adminWindow.CargarConfiguracion(horaEntrada.ToString("hh\\:mm"), horaLimite.ToString("hh\\:mm"));
             }
             else
             {
-                _adminWindow.CargarConfiguracion(string.Empty, "08:00", "08:30");
+                _adminWindow.CargarConfiguracion("08:00", "08:30");
             }
+
+            // La contraseña nunca se muestra; solo su estado (configurada o no).
+            ActualizarEstadoPassword();
 
             for (int dedo = 1; dedo <= 3; dedo++)
             {
                 _adminWindow.ActualizarEstadoHuellaAdmin(dedo, _huellasAdminCapturadas.ContainsKey(dedo));
             }
+        }
+
+        /// <summary>
+        /// Abre la ventana emergente para cambiar la contraseña de administrador.
+        /// </summary>
+        public void ProcesarCambioPassword()
+        {
+            if (_adminWindow == null) return;
+
+            var dialog = new CambiarPasswordWindow
+            {
+                Owner = _adminWindow
+            };
+
+            if (dialog.ShowDialog() != true) return;
+
+            var (exito, mensaje) = _app.CambiarPasswordAdmin(dialog.NuevaPassword);
+            if (exito)
+            {
+                ActualizarEstadoPassword();
+                _adminWindow.MostrarMensaje(mensaje);
+            }
+            else
+            {
+                _adminWindow.MostrarError(mensaje);
+            }
+        }
+
+        private void ActualizarEstadoPassword()
+        {
+            if (_adminWindow == null) return;
+
+            var config = _app.ObtenerConfiguracion();
+            _adminWindow.MostrarEstadoPassword(config.HasValue && !string.IsNullOrEmpty(config.Value.Password));
         }
 
         #endregion
