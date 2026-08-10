@@ -122,5 +122,67 @@ namespace ControlAcceso.Services
 
             return reportes;
         }
+
+        /// <summary>
+        /// Datos del dashboard de un día: estadísticas, los marcajes en orden de
+        /// hora (más reciente primero) y los empleados activos que aún no marcan.
+        /// El estado de cada marcaje usa la misma regla que el reporte semanal:
+        /// después de la hora límite configurada es "Tarde"; los registros hechos
+        /// por el administrador (con observación) son "Por admin".
+        /// </summary>
+        public DashboardDiaDto GenerarDatosDashboardDia(DateTime fecha)
+        {
+            var config = _databaseService.ObtenerConfiguracion();
+            TimeSpan horaLimite = config.HasValue ? config.Value.HoraLimite : new TimeSpan(9, 0, 0);
+
+            var empleados = _databaseService.ObtenerEmpleados(new EmpleadoFilter { SoloActivos = true });
+            var cargos = _databaseService.ObtenerCargos(false);
+            var asistencias = _databaseService.ObtenerAsistenciasDelDia(fecha);
+
+            var marcajes = asistencias
+                .Select(a =>
+                {
+                    var empleado = empleados.FirstOrDefault(e => e.Id == a.EmpleadoID);
+                    return new AsistenciaDiaDto
+                    {
+                        Id = a.Id,
+                        EmpleadoId = a.EmpleadoID,
+                        Hora = a.Timestamp,
+                        NombreEmpleado = empleado?.NombreCompleto ?? "Empleado desconocido",
+                        Cargo = empleado != null
+                            ? (cargos.FirstOrDefault(c => c.Id == empleado.RolId)?.Nombre ?? "Sin cargo")
+                            : string.Empty,
+                        Estado = a.PorAdministrador
+                            ? "Por admin"
+                            : (a.Timestamp.TimeOfDay > horaLimite ? "Tarde" : "A tiempo"),
+                        Observacion = a.Observacion
+                    };
+                })
+                .OrderByDescending(a => a.Hora)
+                .ToList();
+
+            var idsMarcados = asistencias.Select(a => a.EmpleadoID).Distinct().ToHashSet();
+            var sinMarcar = empleados
+                .Where(e => !idsMarcados.Contains(e.Id))
+                .Select(e => new EmpleadoPendienteDto
+                {
+                    Id = e.Id,
+                    Nombre = e.NombreCompleto,
+                    Cargo = cargos.FirstOrDefault(c => c.Id == e.RolId)?.Nombre ?? "Sin cargo"
+                })
+                .OrderBy(e => e.Nombre)
+                .ToList();
+
+            return new DashboardDiaDto
+            {
+                Fecha = fecha,
+                EmpleadosActivos = empleados.Count,
+                MarcajesHoy = asistencias.Count,
+                TardanzasHoy = marcajes.Count(m => m.Estado == "Tarde"),
+                PorAdminHoy = marcajes.Count(m => m.Estado == "Por admin"),
+                Marcajes = marcajes,
+                SinMarcar = sinMarcar
+            };
+        }
     }
 }
