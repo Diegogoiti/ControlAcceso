@@ -217,7 +217,7 @@ namespace ControlAcceso.UI.controladores
 
             EmpleadoSaveDto emp = _adminWindow.ObtenerDatosFormulario();
 
-            if (!EsFormularioValido(emp, requiereHuellas: true))
+            if (!EsFormularioValido(emp, requiereHuellas: false))
             {
                 return;
             }
