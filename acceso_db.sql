@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-08-2026 a las 15:57:36
+-- Tiempo de generación: 11-08-2026 a las 17:26:41
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -114,7 +114,13 @@ INSERT INTO `asistencia` (`id`, `empleado_id`, `fecha`, `hora`, `por_administrad
 (48, 11, '2026-08-03', '16:20:19', 0, NULL),
 (49, 12, '2026-08-03', '16:44:24', 1, 'no le agarro la huella'),
 (50, 3, '2026-08-03', '22:39:43', 0, NULL),
-(51, 6, '2026-08-03', '22:52:57', 0, NULL);
+(51, 6, '2026-08-03', '22:52:57', 0, NULL),
+(52, 3, '2026-08-05', '13:25:19', 0, NULL),
+(53, 3, '2026-08-10', '18:18:31', 0, NULL),
+(54, 6, '2026-08-10', '18:18:49', 0, NULL),
+(55, 6, '2026-08-10', '18:18:54', 0, NULL),
+(56, 3, '2026-08-10', '21:47:52', 0, NULL),
+(57, 3, '2026-08-10', '21:49:24', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -134,7 +140,7 @@ CREATE TABLE `configuracion` (
 --
 
 INSERT INTO `configuracion` (`id`, `admin_password`, `hora_entrada`, `hora_limite`) VALUES
-(1, 'YWRtaW4=', '08:00:00', '08:30:00');
+(1, 'AQAAAAIAAYagAAAAEOSTD5Wxgs7VZFR3Z2iWuEGWHFwJfuJZvqgOH6jGDqtcpk9nOEHc0UTTKzWI42oYFw==', '08:00:00', '08:30:00');
 
 -- --------------------------------------------------------
 
@@ -160,7 +166,7 @@ CREATE TABLE `empleados` (
 --
 
 INSERT INTO `empleados` (`id`, `cedula`, `nombre_completo`, `fecha_nacimiento`, `direccion`, `telefono`, `telefono_emergencia`, `rol_id`, `fecha_ingreso`, `activo`) VALUES
-(3, '33177721', 'Diego Goitia', '2009-01-27', 'La cumaca', '04144335345', '04244190717', 1, '2026-07-29', 0),
+(3, '33177721', 'Diego Goitia', '2009-01-27', 'La cumaca', '04144335345', '04244190717', 1, '2026-07-29', 1),
 (4, '8836220', 'Carmen Teresa Marquez', '1965-10-15', 'la cumaca San Diego 135 B', '04263458572', '04144335345', 1, '2026-07-29', 0),
 (5, '1039635', 'Carlos Reyes', '2009-07-07', 'Lima Peru calle 87/92', '0574144924089', '02418356592', 1, '2026-07-29', 1),
 (6, '1234567', 'test_user', '2026-06-29', ' direccion', '041012345678', '041012345678', 1, '2026-07-29', 1),
@@ -168,7 +174,7 @@ INSERT INTO `empleados` (`id`, `cedula`, `nombre_completo`, `fecha_nacimiento`, 
 (10, '123456789', 'test_user', '2004-06-15', 'Direccion', '041012345678', '041012345678', 1, '2026-07-29', 1),
 (11, '987654321', 'test_user_edicion', '2010-01-19', 'direccion', '04144335345', '04244190717', 1, '2026-07-30', 1),
 (12, '11804918', 'Erasmo Goitia', '1972-02-26', 'San Diego', '04127365561', '04144335345', 1, '2026-07-30', 1),
-(17, '123', 'test_registrar_modal', '2026-08-18', 'direccion', '04140000000000', '0141000000000', 1, '2026-08-03', 1);
+(17, '123', 'test_registrar_modal', '2026-08-18', 'direccion', '04140000000000', '0141000000000', 1, '2026-08-03', 0);
 
 -- --------------------------------------------------------
 
@@ -233,7 +239,9 @@ CREATE TABLE `roles` (
 --
 
 INSERT INTO `roles` (`id`, `nombre_rol`, `activo`) VALUES
-(1, 'General', 1);
+(1, 'test_cargo', 1),
+(2, 'administrador', 1),
+(3, 'empleado', 1);
 
 --
 -- Índices para tablas volcadas
@@ -294,7 +302,7 @@ ALTER TABLE `admin_huellas`
 -- AUTO_INCREMENT de la tabla `asistencia`
 --
 ALTER TABLE `asistencia`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT de la tabla `configuracion`
@@ -318,7 +326,7 @@ ALTER TABLE `huellas`
 -- AUTO_INCREMENT de la tabla `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
