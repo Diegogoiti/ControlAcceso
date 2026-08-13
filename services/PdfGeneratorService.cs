@@ -106,7 +106,7 @@ namespace ControlAcceso.Services
                     header.Cell().Element(BlockHeader).Text("Días\nAsistidos");
                     header.Cell().Element(BlockHeader).Text("Días\nFaltados");
                     header.Cell().Element(BlockHeader).Text("Tardanzas");
-                    header.Cell().Element(BlockHeader).Text("Exepciones");
+                    header.Cell().Element(BlockHeader).Text("Ret.\nJustif.");
                     header.Cell().Element(BlockHeader).Text("% Asistencia");
                 });
 
@@ -132,8 +132,22 @@ namespace ControlAcceso.Services
                         }
                         else
                         {
-                            string colorFondo = estado == "A" ? Colors.Green.Lighten4 : (estado == "T" ? Colors.Yellow.Lighten3 : Colors.Red.Lighten4);
-                            string colorTexto = estado == "A" ? Colors.Green.Darken2 : (estado == "T" ? Colors.Orange.Darken2 : Colors.Red.Darken2);
+                            // A = a tiempo (verde), T = retardo (amarillo), RJ = retardo
+                            // justificado por administrador (azul), F = falta (rojo).
+                            string colorFondo = estado switch
+                            {
+                                "A" => Colors.Green.Lighten4,
+                                "T" => Colors.Yellow.Lighten3,
+                                "RJ" => Colors.Blue.Lighten3,
+                                _ => Colors.Red.Lighten4
+                            };
+                            string colorTexto = estado switch
+                            {
+                                "A" => Colors.Green.Darken2,
+                                "T" => Colors.Orange.Darken2,
+                                "RJ" => Colors.Blue.Darken2,
+                                _ => Colors.Red.Darken2
+                            };
 
                             table.Cell().Background(colorFondo).Border(1).BorderColor(Colors.Grey.Lighten3)
                                  .AlignCenter().AlignMiddle()
@@ -158,6 +172,147 @@ namespace ControlAcceso.Services
                     });
                 }
             });
+        }
+
+        /// <summary>
+        /// Reporte detallado por empleado: por cada día del rango muestra la hora
+        /// de entrada, el estado (a tiempo / retardo / retardo justificado / falta)
+        /// y la observación, con totales al final. Los registros manuales del
+        /// administrador se computan como retardo justificado.
+        /// </summary>
+        public void GenerarReporteDetalladoPdf(ReporteDetalladoEmpleadoDto datos, string rutaDestino)
+        {
+            string subtitulo = $"{datos.Nombre} — Cédula {datos.Cedula} ({datos.Cargo})\n" +
+                               $"Del {datos.Desde:dd/MM/yyyy} al {datos.Hasta:dd/MM/yyyy}";
+
+            Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(1, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    page.Header().Element(c => ComposeHeaderDetallado(c, subtitulo));
+                    page.Content().Element(c => ComposeContentDetallado(c, datos));
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Página ");
+                        x.CurrentPageNumber();
+                        x.Span(" de ");
+                        x.TotalPages();
+                    });
+                });
+            })
+            .GeneratePdf(rutaDestino);
+
+            try
+            {
+                Process.Start(new ProcessStartInfo(rutaDestino) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("No se pudo abrir el PDF automáticamente: " + ex.Message);
+            }
+        }
+
+        private void ComposeHeaderDetallado(IContainer container, string subtitulo)
+        {
+            container.Row(row =>
+            {
+                row.RelativeItem().Column(column =>
+                {
+                    column.Item().Text("REPORTE DE ASISTENCIA DETALLADO").FontSize(20).SemiBold().FontColor(Colors.Blue.Darken2);
+                    column.Item().Text(subtitulo).FontSize(13).FontColor(Colors.Grey.Medium);
+                });
+            });
+        }
+
+        private void ComposeContentDetallado(IContainer container, ReporteDetalladoEmpleadoDto datos)
+        {
+            container.Column(column =>
+            {
+                // Tarjetas de resumen. Se usa RelativeItem() para que las 4 tarjetas
+                // repartan el ancho disponible de la página (los anchos fijos en
+                // puntos desbordaban el A4 y causaban "conflicting size constraints").
+                column.Item().PaddingVertical(0.5f, Unit.Centimetre).Row(row =>
+                {
+                    row.RelativeItem().Element(c => CardResumen(c, "Días trabajados", datos.DiasTrabajados.ToString(), Colors.Green.Darken2, Colors.Green.Lighten4));
+                    row.ConstantItem(16);
+                    row.RelativeItem().Element(c => CardResumen(c, "Faltas", datos.Faltas.ToString(), Colors.Red.Darken2, Colors.Red.Lighten4));
+                    row.ConstantItem(16);
+                    row.RelativeItem().Element(c => CardResumen(c, "Retardos", datos.Retardos.ToString(), Colors.Orange.Darken2, Colors.Yellow.Lighten3));
+                    row.ConstantItem(16);
+                    row.RelativeItem().Element(c => CardResumen(c, "Retardos justif.", datos.RetardosJustificados.ToString(), Colors.Blue.Darken2, Colors.Blue.Lighten3));
+                });
+
+                column.Item().PaddingVertical(0.5f, Unit.Centimetre).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.ConstantColumn(70);  // Fecha
+                        columns.ConstantColumn(80);  // Día
+                        columns.ConstantColumn(70);  // Hora
+                        columns.RelativeColumn();    // Estado
+                        columns.ConstantColumn(45);  // Min
+                        columns.RelativeColumn(1.5f); // Observación
+                    });
+
+                    table.Header(header =>
+                    {
+                        header.Cell().Element(BlockHeader).Text("Fecha");
+                        header.Cell().Element(BlockHeader).Text("Día");
+                        header.Cell().Element(BlockHeader).Text("Hora entrada");
+                        header.Cell().Element(BlockHeader).Text("Estado");
+                        header.Cell().Element(BlockHeader).Text("Min");
+                        header.Cell().Element(BlockHeader).Text("Observación / Motivo");
+                    });
+
+                    foreach (var dia in datos.Dias)
+                    {
+                        table.Cell().Element(BlockCell).Text(dia.Fecha.ToString("dd/MM/yyyy"));
+                        table.Cell().Element(BlockCell).Text(dia.Dia);
+                        table.Cell().Element(BlockCell).AlignCenter().Text(dia.HoraEntrada.HasValue ? dia.HoraEntrada.Value.ToString(@"hh\:mm") : "—");
+
+                        string colorFondo = dia.Estado switch
+                        {
+                            "A tiempo" => Colors.Green.Lighten4,
+                            "Retardo" => Colors.Yellow.Lighten3,
+                            "Retardo justificado" => Colors.Blue.Lighten3,
+                            _ => Colors.Red.Lighten4
+                        };
+                        string colorTexto = dia.Estado switch
+                        {
+                            "A tiempo" => Colors.Green.Darken2,
+                            "Retardo" => Colors.Orange.Darken2,
+                            "Retardo justificado" => Colors.Blue.Darken2,
+                            _ => Colors.Red.Darken2
+                        };
+
+                        table.Cell().Background(colorFondo).Border(1).BorderColor(Colors.Grey.Lighten3)
+                            .Padding(2).AlignMiddle().AlignCenter()
+                            .Text(dia.Estado).FontColor(colorTexto).Bold().FontSize(9);
+
+                        table.Cell().Element(BlockNumCell).Text(dia.MinutosRetraso > 0 ? dia.MinutosRetraso.ToString() + "'" : "—");
+                        table.Cell().Element(BlockCell).Text(string.IsNullOrWhiteSpace(dia.Observacion) ? "—" : dia.Observacion);
+                    }
+                });
+
+                column.Item().PaddingTop(0.6f, Unit.Centimetre).Text(
+                    $"Total: {datos.DiasTrabajados} días trabajados · {datos.Faltas} faltas · {datos.Retardos} retardos · {datos.RetardosJustificados} retardos justificados · {datos.PorcentajeAsistencia}% asistencia")
+                    .FontSize(10).SemiBold().FontColor(Colors.Grey.Darken2);
+            });
+        }
+
+        private static void CardResumen(IContainer container, string titulo, string valor, string colorTexto, string colorFondo)
+        {
+            container.Background(colorFondo).Border(1).BorderColor(Colors.Grey.Lighten3)
+                .Padding(8).Column(c =>
+                {
+                    c.Item().Text(titulo).FontSize(9).FontColor(Colors.Grey.Darken2);
+                    c.Item().Text(valor).FontSize(16).Bold().FontColor(colorTexto);
+                });
         }
 
         // Estilos auxiliares para QuestPDF

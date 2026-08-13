@@ -194,6 +194,21 @@ namespace ControlAcceso.Application
             return BiometricService.ProcesarHuellaBruta(rawImage, out templateCapturado, out mensajeError);
         }
 
+        /// <summary>
+        /// Verificación 1:1 entre dos templates de la misma huella. Se usa para
+        /// validar que una lectura recién capturada es consistente (doble lectura)
+        /// antes de guardarla definitivamente.
+        /// </summary>
+        public bool VerificarCoincidenciaHuella(byte[] templateCapturado, byte[] templateVerificacion)
+        {
+            return BiometricService.VerificarCoincidencia(templateCapturado, templateVerificacion, 50.0);
+        }
+
+        public List<HuellaEmpleadoDto> ObtenerHuellasDeEmpleado(int empleadoId)
+        {
+            return DatabaseService.ObtenerHuellasDeEmpleado(empleadoId);
+        }
+
         public (bool, string) GuardarEmpleado(EmpleadoSaveDto emp)
         {
             var mensajeError = string.Empty;

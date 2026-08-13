@@ -16,8 +16,22 @@ namespace ControlAcceso
 
         private void btnAceptar_Click(object sender, RoutedEventArgs e)
         {
-            TipoAsistencia = 1;
             Observacion = txtObservacion.Text?.Trim() ?? string.Empty;
+
+            // El motivo es obligatorio porque el registro se computa como un
+            // retardo justificado y la observación es la justificación.
+            if (string.IsNullOrWhiteSpace(Observacion))
+            {
+                MessageBox.Show(
+                    "Debe escribir el motivo de la asistencia, ya que el registro se computará como un retardo justificado.",
+                    "Motivo obligatorio",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                txtObservacion.Focus();
+                return;
+            }
+
+            TipoAsistencia = 1;
             DialogResult = true;
             Close();
         }

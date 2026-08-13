@@ -135,6 +135,40 @@ namespace ControlAcceso.Database
             }, "Error leyendo huellas activas desde la base de datos");
         }
 
+        public List<HuellaEmpleadoDto> ObtenerHuellasDeEmpleado(int empleadoId)
+        {
+            return RunDb(() =>
+            {
+                var huellas = new List<HuellaEmpleadoDto>();
+
+                using var conn = GetConnection();
+                conn.Open();
+
+                string query = @"
+                SELECT id, empleado_id, dedo, template
+                FROM huellas
+                WHERE empleado_id = @empleadoId
+                ORDER BY dedo ASC";
+
+                using var cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@empleadoId", empleadoId);
+
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    huellas.Add(new HuellaEmpleadoDto
+                    {
+                        Id = reader.GetInt32("id"),
+                        EmpleadoId = reader.GetInt32("empleado_id"),
+                        Dedo = reader.GetInt32("dedo"),
+                        TemplateHuella = (byte[])reader["template"]
+                    });
+                }
+
+                return huellas;
+            }, "Error leyendo huellas del empleado desde la base de datos");
+        }
+
         public List<HuellaEmpleadoDto> ObtenerHuellasAdmin()
         {
             return RunDb(() =>

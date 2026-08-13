@@ -139,6 +139,11 @@ namespace ControlAcceso.Services
             return _dbAdapter.ObtenerHuellasAdmin();
         }
 
+        public List<HuellaEmpleadoDto> ObtenerHuellasDeEmpleado(int empleadoId)
+        {
+            return _dbAdapter.ObtenerHuellasDeEmpleado(empleadoId);
+        }
+
         #endregion
 
         public List<CargoDto> ObtenerCargos(bool soloActivos = false)

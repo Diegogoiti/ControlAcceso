@@ -181,6 +181,30 @@ namespace ControlAcceso
             }
         }
 
+        private async void btnVerificarHuella_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int numeroDedo))
+            {
+                await _controller.VerificarHuellaDedoAsync(numeroDedo);
+            }
+        }
+
+        private async void btnVerificarEditHuella_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int numeroDedo))
+            {
+                await _controller.VerificarHuellaDedoAsync(numeroDedo);
+            }
+        }
+
+        private async void btnVerificarAdminHuella_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int numeroDedo))
+            {
+                await _controller.VerificarHuellaAdminAsync(numeroDedo);
+            }
+        }
+
         private void btnCancelarEdicion_Click(object sender, RoutedEventArgs e)
         {
             OcultarModalEdicion();
@@ -321,6 +345,24 @@ namespace ControlAcceso
         {
             Button? btn = dedo switch { 1 => btnAdminHuella1, 2 => btnAdminHuella2, 3 => btnAdminHuella3, _ => null };
             if (btn != null) btn.Content = $"⏳ Huella {dedo}...";
+        }
+
+        /// <summary>
+        /// Al abrir la edición, pinta el estado real de las huellas del empleado
+        /// y muestra el aviso si no tiene ninguna registrada.
+        /// </summary>
+        public void ActualizarEstadoHuellasEdicion(Dictionary<int, byte[]> huellas)
+        {
+            MostrarAvisoHuellasEdicion(huellas.Count > 0);
+            for (int dedo = 1; dedo <= 3; dedo++)
+            {
+                ActualizarEstadoHuellaEdicion(dedo, huellas.ContainsKey(dedo));
+            }
+        }
+
+        public void MostrarAvisoHuellasEdicion(bool tieneHuellas)
+        {
+            txtAvisoHuellasEdicion.Visibility = tieneHuellas ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public void ActualizarEstadoHuellaAdmin(int dedo, bool registrada)
@@ -470,21 +512,34 @@ namespace ControlAcceso
                 return;
             }
 
-            bool exito;
-            if (_cargoEditandoId.HasValue)
-                exito = _controller.EditarCargo(_cargoEditandoId.Value, nombre);
-            else
-                exito = _controller.AgregarCargo(nombre);
+            try
+            {
+                bool exito;
+                if (_cargoEditandoId.HasValue)
+                    exito = _controller.EditarCargo(_cargoEditandoId.Value, nombre);
+                else
+                    exito = _controller.AgregarCargo(nombre);
 
-            if (exito)
-            {
-                PanelEdicionCargo.Visibility = Visibility.Collapsed;
-                _cargoEditandoId = null;
-                MostrarMensaje("Cargo guardado correctamente.");
+                if (exito)
+                {
+                    PanelEdicionCargo.Visibility = Visibility.Collapsed;
+                    _cargoEditandoId = null;
+                    MostrarMensaje("Cargo guardado correctamente.");
+                }
+                else
+                {
+                    MostrarError("No se pudo guardar el cargo. Verifique que no exista uno con el mismo nombre.");
+                }
             }
-            else
+            catch (Database.DatabaseException dbEx)
             {
-                MostrarError("No se pudo guardar el cargo. Verifique que no exista uno con el mismo nombre.");
+                // Errores de negocio conocidos (ej. "Ya existe un cargo con ese nombre.")
+                MostrarError(dbEx.Message);
+            }
+            catch (Exception ex)
+            {
+                // Cualquier otro error no debe tumbar la aplicación.
+                MostrarError($"Error inesperado al guardar el cargo: {ex.Message}");
             }
         }
 

@@ -5,7 +5,7 @@ namespace ControlAcceso.DTOs
     /// <summary>
     /// Vista de un marcaje de asistencia para el dashboard del día:
     /// incluye el nombre y cargo del empleado y un estado calculado
-    /// ("A tiempo", "Tarde" o "Por admin").
+    /// ("A tiempo", "Tarde" o "Retardo justificado").
     /// </summary>
     public class AsistenciaDiaDto
     {

@@ -20,6 +20,7 @@ namespace ControlAcceso.Database
         // --- Huellas ---
         List<HuellaEmpleadoDto> ObtenerHuellasActivas();
         List<HuellaEmpleadoDto> ObtenerHuellasAdmin();
+        List<HuellaEmpleadoDto> ObtenerHuellasDeEmpleado(int empleadoId);
         bool InsertarHuella(int empleadoId, int dedo, byte[] template); // Opcional, pero puede ser útil
 
         // --- Configuración ---

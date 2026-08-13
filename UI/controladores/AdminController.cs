@@ -236,8 +236,10 @@ namespace ControlAcceso.UI.controladores
             try
             {
                 _app.GuardarEmpleado(emp);
-                _adminWindow.MostrarMensaje("Empleado guardado exitosamente.");
 
+                // Tras guardar, la modal se cierra y la lista se refresca.
+                _adminWindow.OcultarModalRegistro();
+                _adminWindow.MostrarMensaje("Empleado guardado exitosamente.");
                 CargarListaEmpleados();
             }
             catch (Exception ex)
@@ -398,6 +400,9 @@ namespace ControlAcceso.UI.controladores
                     return;
                 }
 
+                // La huella se guarda en memoria tras una sola lectura. La
+                // verificación (comparar con otra lectura) es opcional y se hace
+                // desde el botón "✅ Verificar" de cada dedo, no durante la captura.
                 if (!token.IsCancellationRequested)
                 {
                     _huellasCapturadas[numeroDedo] = templateCapturado;
@@ -420,6 +425,8 @@ namespace ControlAcceso.UI.controladores
                     if (_adminWindow?.EmpleadoEditandoId.HasValue == true)
                     {
                         _adminWindow.ActualizarEstadoHuellaEdicion(numeroDedo, registrada: estaRegistradoActualmente);
+                        // Refrescar el aviso: si ya hay al menos una huella, se oculta.
+                        _adminWindow.MostrarAvisoHuellasEdicion(_huellasCapturadas.Count > 0);
                     }
                     else
                     {
@@ -472,6 +479,8 @@ namespace ControlAcceso.UI.controladores
                     return;
                 }
 
+                // La huella del administrador se guarda en memoria tras una sola
+                // lectura; la verificación opcional se hace con el botón "✅ Verificar".
                 if (!token.IsCancellationRequested)
                 {
                     _huellasAdminCapturadas[numeroDedo] = templateCapturado;
@@ -521,6 +530,154 @@ namespace ControlAcceso.UI.controladores
                 _ctsCaptura.Cancel();
                 _ctsCaptura.Dispose();
                 _ctsCaptura = null;
+            }
+        }
+
+        /// <summary>
+        /// Verifica un dedo capturado: toma una lectura nueva del sensor y la
+        /// compara contra la que está en memoria (la recién capturada o la que
+        /// ya tenía el empleado en la base al editar).
+        /// </summary>
+        public async Task VerificarHuellaDedoAsync(int numeroDedo)
+        {
+            if (_adminWindow == null) return;
+
+            if (!_huellasCapturadas.TryGetValue(numeroDedo, out byte[]? templateGuardado))
+            {
+                _adminWindow.MostrarError($"Primero capture el dedo {numeroDedo} para poder verificarlo.");
+                return;
+            }
+
+            _ctsCaptura?.Cancel();
+            _ctsCaptura?.Dispose();
+            _ctsCaptura = new CancellationTokenSource();
+            var token = _ctsCaptura.Token;
+
+            try
+            {
+                byte[]? rawImage = await _app.IniciarCapturaAsync(token);
+                if (token.IsCancellationRequested) return;
+
+                if (rawImage == null || rawImage.Length == 0)
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow.MostrarError("No se logró capturar la huella para la verificación.");
+                    }
+                    return;
+                }
+
+                if (!_app.ProcesarHuellaBruta(rawImage, out byte[]? templateVerificacion, out string msgError))
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow.MostrarError(msgError);
+                    }
+                    return;
+                }
+
+                if (templateVerificacion == null)
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow.MostrarError("Ocurrió un error al procesar la huella de verificación.");
+                    }
+                    return;
+                }
+
+                if (!token.IsCancellationRequested)
+                {
+                    bool coincide = _app.VerificarCoincidenciaHuella(templateGuardado, templateVerificacion);
+                    if (coincide)
+                    {
+                        _adminWindow.MostrarMensaje($"✅ Dedo {numeroDedo} verificado: la huella coincide con la capturada.");
+                    }
+                    else
+                    {
+                        _adminWindow.MostrarError($"❌ El dedo {numeroDedo} NO coincide con la huella capturada. Capture el dedo nuevamente con buena presión y vuelva a verificar.");
+                    }
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    _adminWindow.MostrarError($"Error al verificar la huella: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verifica una huella de administrador capturada contra la que está en memoria.
+        /// </summary>
+        public async Task VerificarHuellaAdminAsync(int numeroDedo)
+        {
+            if (_adminWindow == null) return;
+
+            if (!_huellasAdminCapturadas.TryGetValue(numeroDedo, out byte[]? templateGuardado))
+            {
+                _adminWindow.MostrarError($"Primero capture la huella {numeroDedo} para poder verificarla.");
+                return;
+            }
+
+            _ctsCaptura?.Cancel();
+            _ctsCaptura?.Dispose();
+            _ctsCaptura = new CancellationTokenSource();
+            var token = _ctsCaptura.Token;
+
+            try
+            {
+                byte[]? rawImage = await _app.IniciarCapturaAsync(token);
+                if (token.IsCancellationRequested) return;
+
+                if (rawImage == null || rawImage.Length == 0)
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow.MostrarError("No se logró capturar la huella para la verificación.");
+                    }
+                    return;
+                }
+
+                if (!_app.ProcesarHuellaBruta(rawImage, out byte[]? templateVerificacion, out string msgError))
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow.MostrarError(msgError);
+                    }
+                    return;
+                }
+
+                if (templateVerificacion == null)
+                {
+                    if (!token.IsCancellationRequested)
+                    {
+                        _adminWindow.MostrarError("Ocurrió un error al procesar la huella de verificación.");
+                    }
+                    return;
+                }
+
+                if (!token.IsCancellationRequested)
+                {
+                    bool coincide = _app.VerificarCoincidenciaHuella(templateGuardado, templateVerificacion);
+                    if (coincide)
+                    {
+                        _adminWindow.MostrarMensaje($"✅ Huella {numeroDedo} verificada: coincide con la capturada.");
+                    }
+                    else
+                    {
+                        _adminWindow.MostrarError($"❌ La huella {numeroDedo} NO coincide con la capturada. Capture nuevamente con buena presión y vuelva a verificar.");
+                    }
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    _adminWindow.MostrarError($"Error al verificar la huella: {ex.Message}");
+                }
             }
         }
 
@@ -601,6 +758,19 @@ namespace ControlAcceso.UI.controladores
 
             // Pasar el objeto completo para llenar la modal
             _adminWindow.MostrarModalEdicion(empleado);
+
+            // Cargar las huellas reales del empleado: así la modal muestra qué
+            // dedos tiene registrados y avisa si no tiene ninguna.
+            var huellas = _app.ObtenerHuellasDeEmpleado(idEmpleado);
+            foreach (var huella in huellas)
+            {
+                if (huella.TemplateHuella != null && huella.TemplateHuella.Length > 0 && huella.Dedo >= 1 && huella.Dedo <= 3)
+                {
+                    _huellasCapturadas[huella.Dedo] = huella.TemplateHuella;
+                }
+            }
+
+            _adminWindow.ActualizarEstadoHuellasEdicion(_huellasCapturadas);
         }
 
         public List<CargoDto> ObtenerCargos(bool soloActivos) => _app.Db.ObtenerCargos(soloActivos);

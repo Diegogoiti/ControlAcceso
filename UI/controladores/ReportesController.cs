@@ -76,7 +76,7 @@ namespace ControlAcceso.UI.controladores
             List<AsistenciaDiaDto> marcajes = filtro switch
             {
                 "Solo tardanzas" => _dashboard.Marcajes.Where(m => m.Estado == "Tarde").ToList(),
-                "Solo por admin" => _dashboard.Marcajes.Where(m => m.Estado == "Por admin").ToList(),
+                "Solo por admin" => _dashboard.Marcajes.Where(m => m.Estado == "Retardo justificado").ToList(),
                 _ => _dashboard.Marcajes
             };
 
@@ -92,12 +92,19 @@ namespace ControlAcceso.UI.controladores
             });
         }
 
-        public void GenerarReporte(DateTime fechaSeleccionada)
+        /// <summary>
+        /// Datos del reporte semanal (para la vista previa de la pestaña y el PDF).
+        /// </summary>
+        public List<ReporteEmpleadoDto> ObtenerDatosReporteSemanal(DateTime fechaSeleccionada)
         {
             var reportService = new ReportService(_app.Db);
-            var pdfService = new PdfGeneratorService();
+            return reportService.GenerarDatosReporteSemanal(fechaSeleccionada);
+        }
 
-            var datos = reportService.GenerarDatosReporteSemanal(fechaSeleccionada);
+        public void GenerarReporte(DateTime fechaSeleccionada)
+        {
+            var pdfService = new PdfGeneratorService();
+            var datos = ObtenerDatosReporteSemanal(fechaSeleccionada);
 
             string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string reportPath = Path.Combine(docPath, "ControlAcceso_Reportes");
@@ -117,6 +124,47 @@ namespace ControlAcceso.UI.controladores
             string archivo = Path.Combine(reportPath, $"Reporte_Semanal_{fechaInicioSemana:yyyy_MM_dd}.pdf");
 
             pdfService.GenerarReporteSemanalPdf(datos, fechaInicioSemana, archivo);
+        }
+
+        /// <summary>
+        /// Empleados activos para el selector del reporte detallado.
+        /// </summary>
+        public List<EmpleadoViewDto> ObtenerEmpleadosParaReporte()
+        {
+            return _app.EmpleadosViewCache
+                .Where(e => e.Estado.Equals("Activo", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(e => e.Nombre)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Consulta el reporte detallado por empleado y rango de fechas.
+        /// </summary>
+        public ReporteDetalladoEmpleadoDto ConsultarReporteDetallado(int empleadoId, DateTime desde, DateTime hasta)
+        {
+            var reportService = new ReportService(_app.Db);
+            return reportService.GenerarDatosReporteDetallado(empleadoId, desde, hasta);
+        }
+
+        /// <summary>
+        /// Genera el PDF del reporte detallado y devuelve la ruta del archivo.
+        /// </summary>
+        public string GenerarReporteDetalladoPdf(ReporteDetalladoEmpleadoDto datos)
+        {
+            var pdfService = new PdfGeneratorService();
+
+            string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string reportPath = Path.Combine(docPath, "ControlAcceso_Reportes");
+            if (!Directory.Exists(reportPath))
+            {
+                Directory.CreateDirectory(reportPath);
+            }
+
+            string archivo = Path.Combine(reportPath,
+                $"Reporte_Detallado_{datos.EmpleadoId}_{datos.Desde:yyyy_MM_dd}_{datos.Hasta:yyyy_MM_dd}.pdf");
+
+            pdfService.GenerarReporteDetalladoPdf(datos, archivo);
+            return archivo;
         }
     }
 }

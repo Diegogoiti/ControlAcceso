@@ -486,11 +486,20 @@
 
                                 <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,6" HorizontalAlignment="Center">
                                     <TextBlock Text="Huellas de administrador (3)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                                    <WrapPanel Margin="0,8,0,0" HorizontalAlignment="Center">
-                                        <Button x:Name="btnAdminHuella1" Content="📷 Huella 1" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnCapturarAdminHuella_Click"/>
-                                        <Button x:Name="btnAdminHuella2" Content="📷 Huella 2" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnCapturarAdminHuella_Click"/>
-                                        <Button x:Name="btnAdminHuella3" Content="📷 Huella 3" Width="110" Height="40" Margin="0,0,10,10" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnCapturarAdminHuella_Click"/>
-                                    </WrapPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                        <StackPanel Margin="0,0,10,0">
+                                            <Button x:Name="btnAdminHuella1" Content="📷 Huella 1" Width="130" Height="40" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnCapturarAdminHuella_Click"/>
+                                            <Button x:Name="btnVerificarAdminHuella1" Content="✅ Verificar" Width="130" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnVerificarAdminHuella_Click"/>
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,10,0">
+                                            <Button x:Name="btnAdminHuella2" Content="📷 Huella 2" Width="130" Height="40" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnCapturarAdminHuella_Click"/>
+                                            <Button x:Name="btnVerificarAdminHuella2" Content="✅ Verificar" Width="130" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnVerificarAdminHuella_Click"/>
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,10,0">
+                                            <Button x:Name="btnAdminHuella3" Content="📷 Huella 3" Width="130" Height="40" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnCapturarAdminHuella_Click"/>
+                                            <Button x:Name="btnVerificarAdminHuella3" Content="✅ Verificar" Width="130" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnVerificarAdminHuella_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
                             </Grid>
 
@@ -559,9 +568,18 @@
                                 <TextBlock Text="Registro Biométrico" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button x:Name="btnHuella1" Content="👍 Dedo 1 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="1"/>
-                                    <Button x:Name="btnHuella2" Content="👍 Dedo 2 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="2"/>
-                                    <Button x:Name="btnHuella3" Content="👍 Dedo 3 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="3"/>
+                                    <StackPanel Margin="0,0,10,0">
+                                        <Button x:Name="btnHuella1" Content="👍 Dedo 1 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="1"/>
+                                        <Button x:Name="btnVerificarHuella1" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnVerificarHuella_Click"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,10,0">
+                                        <Button x:Name="btnHuella2" Content="👍 Dedo 2 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="2"/>
+                                        <Button x:Name="btnVerificarHuella2" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnVerificarHuella_Click"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,10,0">
+                                        <Button x:Name="btnHuella3" Content="👍 Dedo 3 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="3"/>
+                                        <Button x:Name="btnVerificarHuella3" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnVerificarHuella_Click"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -640,12 +658,25 @@
                         <!-- SECCIÓN MULTI-HUELLA BIOMÉTRICA (EDICIÓN) -->
                         <Border Background="#F1F5F9" CornerRadius="8" Padding="16" Margin="0,10,0,15">
                             <StackPanel>
+                                <TextBlock x:Name="txtAvisoHuellasEdicion" Visibility="Collapsed"
+                                           Background="#FEF3C7" Foreground="#92400E" FontSize="13" FontWeight="SemiBold"
+                                           TextWrapping="Wrap" Padding="10,8" Margin="0,0,0,10"
+                                           Text="⚠️ Este empleado no tiene huellas dactilares registradas. Sin ellas no podrá marcar asistencia con el sensor; puedes registrarlas ahora o después."/>
                                 <TextBlock Text="Actualizar Registro Biométrico" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button x:Name="btnEditHuella1" Content="👍 Dedo 1 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="1"/>
-                                    <Button x:Name="btnEditHuella2" Content="👍 Dedo 2 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="2"/>
-                                    <Button x:Name="btnEditHuella3" Content="👍 Dedo 3 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="3"/>
+                                    <StackPanel Margin="0,0,10,0">
+                                        <Button x:Name="btnEditHuella1" Content="👍 Dedo 1 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="1"/>
+                                        <Button x:Name="btnVerificarEditHuella1" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnVerificarEditHuella_Click"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,10,0">
+                                        <Button x:Name="btnEditHuella2" Content="👍 Dedo 2 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="2"/>
+                                        <Button x:Name="btnVerificarEditHuella2" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnVerificarEditHuella_Click"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,10,0">
+                                        <Button x:Name="btnEditHuella3" Content="👍 Dedo 3 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="3"/>
+                                        <Button x:Name="btnVerificarEditHuella3" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnVerificarEditHuella_Click"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
