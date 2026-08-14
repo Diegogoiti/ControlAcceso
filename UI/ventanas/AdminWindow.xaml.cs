@@ -19,6 +19,25 @@ namespace ControlAcceso
             InitializeComponent();
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
             InicializarCombosHora();
+
+            // Marca la pestaña de empleados como activa al abrir la ventana
+            SetTabActiva(btnTabEmpleados, true);
+            SetTabActiva(btnTabCargos, false);
+            SetTabActiva(btnTabConfig, false);
+        }
+
+        // Resalta la pestaña activa con el mismo estilo que el Centro de Reportes
+        private static void SetTabActiva(Button btn, bool activa)
+        {
+            btn.Background = activa
+                ? new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xEB))
+                : new SolidColorBrush(Color.FromRgb(0xE2, 0xE8, 0xF0));
+            btn.Foreground = activa
+                ? Brushes.White
+                : new SolidColorBrush(Color.FromRgb(0x33, 0x41, 0x55));
+            btn.BorderBrush = activa
+                ? new SolidColorBrush(Color.FromRgb(0x1D, 0x4E, 0xD8))
+                : new SolidColorBrush(Color.FromRgb(0xCB, 0xD5, 0xE1));
         }
 
         private void InicializarCombosHora()
@@ -53,6 +72,10 @@ namespace ControlAcceso
             // Mostrar solo el de empleados
             PanelEmpleados.Visibility = Visibility.Visible;
             _controller.CargarListaEmpleados();
+
+            SetTabActiva(btnTabEmpleados, true);
+            SetTabActiva(btnTabCargos, false);
+            SetTabActiva(btnTabConfig, false);
         }
 
         private void btnTabCargos_Click(object sender, RoutedEventArgs e)
@@ -65,6 +88,10 @@ namespace ControlAcceso
             // Mostrar solo el de cargos
             PanelCargos.Visibility = Visibility.Visible;
             _controller.CargarListaCargos();
+
+            SetTabActiva(btnTabEmpleados, false);
+            SetTabActiva(btnTabCargos, true);
+            SetTabActiva(btnTabConfig, false);
         }
 
         private void btnTabConfig_Click(object sender, RoutedEventArgs e)
@@ -77,6 +104,10 @@ namespace ControlAcceso
             // Mostrar solo el de configuración
             PanelConfiguracion.Visibility = Visibility.Visible;
             _controller.CargarConfiguracion();
+
+            SetTabActiva(btnTabEmpleados, false);
+            SetTabActiva(btnTabCargos, false);
+            SetTabActiva(btnTabConfig, true);
         }
 
         #endregion

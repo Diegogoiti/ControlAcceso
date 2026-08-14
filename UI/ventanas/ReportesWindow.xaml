@@ -9,122 +9,6 @@
         TextOptions.TextRenderingMode="ClearType"
         UseLayoutRounding="True">
 
-    <Window.Resources>
-        <!-- Botones de acción tipo píldora -->
-        <Style x:Key="DashButton" TargetType="Button">
-            <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" TargetName="border" Value="0.85"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Opacity" TargetName="border" Value="0.7"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" TargetName="border" Value="0.5"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Botón de pestaña -->
-        <Style x:Key="TabButton" TargetType="Button">
-            <Setter Property="Padding" Value="22,9"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" TargetName="border" Value="0.85"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Opacity" TargetName="border" Value="0.7"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Cabecera de tabla (slate oscuro) -->
-        <Style x:Key="GridHeaderStyle" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="#334155"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="BorderThickness" Value="0,0,1,1"/>
-            <Setter Property="BorderBrush" Value="#475569"/>
-        </Style>
-
-        <!-- Celdas de tabla -->
-        <Style x:Key="GridCellStyle" TargetType="DataGridCell">
-            <Setter Property="Padding" Value="10,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="DataGridCell">
-                        <Border Padding="{TemplateBinding Padding}"
-                                Background="{TemplateBinding Background}"
-                                SnapsToDevicePixels="True">
-                            <ContentPresenter VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#1E40AF"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Tarjeta de estadística -->
-        <Style x:Key="StatCard" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="16"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Color="#000000" Opacity="0.05"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
-
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -144,8 +28,6 @@
                 <TextBlock Text="Asistencia del día, reporte semanal y detalle por empleado." FontSize="13" Foreground="#64748B" Margin="0,4,0,0"/>
             </StackPanel>
 
-            <Button Grid.Column="1" x:Name="btnCerrar" Content="Cerrar" Style="{StaticResource DashButton}"
-                    Background="#FEE2E2" Foreground="#DC2626" BorderBrush="#FCA5A5" Margin="0" VerticalAlignment="Center" Click="btnCerrar_Click"/>
         </Grid>
 
         <!-- ============ PESTAÑAS ============ -->
@@ -164,8 +46,8 @@
             <Grid x:Name="PanelHoy">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <!-- Cabecera de la pestaña -->
@@ -178,7 +60,7 @@
                         <TextBlock x:Name="lblFechaHoy" Text="" FontSize="16" FontWeight="SemiBold" Foreground="#1E293B"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button x:Name="btnActualizar" Content="🔄 Actualizar" Style="{StaticResource DashButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" Click="btnActualizar_Click"/>
+                        <Button x:Name="btnActualizar" Content="🔄 Actualizar" Style="{StaticResource PrimaryButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" BorderThickness="1" Margin="0" Click="btnActualizar_Click"/>
                     </StackPanel>
                 </Grid>
 
@@ -243,177 +125,165 @@
                     </Border>
                 </Grid>
 
-                <!-- Tabla de marcajes -->
-                <Border Grid.Row="2" Background="White" CornerRadius="12" Padding="20" Margin="0,0,0,14">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
-                    </Border.Effect>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+                <!-- Contenido inferior: tabla de marcajes (izq) + pendientes (der) -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                        <Grid Grid.Row="0" Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                    <!-- Tabla de marcajes -->
+                    <Border Grid.Column="0" Style="{StaticResource CardPanel}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Column="0" Text="Mostrar:" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,10,0"/>
-                            <ComboBox Grid.Column="1" x:Name="cmbFiltro" Width="180" Height="34" FontSize="13" Padding="6,2" SelectedIndex="0" SelectionChanged="cmbFiltro_SelectionChanged">
-                                <ComboBoxItem Content="Todos"/>
-                                <ComboBoxItem Content="Solo tardanzas"/>
-                                <ComboBoxItem Content="Solo por admin"/>
-                            </ComboBox>
+                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="2" x:Name="txtRegistros" Text="" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="13" Foreground="#64748B"/>
-                        </Grid>
+                                <TextBlock Grid.Column="0" Text="Mostrar:" VerticalAlignment="Center" Style="{StaticResource FieldLabel}" Margin="0,0,10,0"/>
+                                <ComboBox Grid.Column="1" x:Name="cmbFiltro" Width="180" Height="34" FontSize="13" Padding="6,2" SelectedIndex="0" SelectionChanged="cmbFiltro_SelectionChanged">
+                                    <ComboBoxItem Content="Todos"/>
+                                    <ComboBoxItem Content="Solo tardanzas"/>
+                                    <ComboBoxItem Content="Solo por admin"/>
+                                </ComboBox>
 
-                        <DataGrid Grid.Row="1"
-                                  x:Name="dgAsistencias"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  IsReadOnly="True"
-                                  GridLinesVisibility="All"
-                                  HorizontalGridLinesBrush="#94A3B8"
-                                  VerticalGridLinesBrush="#CBD5E1"
-                                  HeadersVisibility="Column"
-                                  Background="White"
-                                  RowBackground="#FFFFFF"
-                                  AlternatingRowBackground="#E2E8F0"
-                                  BorderBrush="#64748B"
-                                  BorderThickness="1"
-                                  RowHeight="38"
-                                  HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollBarVisibility="Auto">
+                                <TextBlock Grid.Column="2" x:Name="txtRegistros" Text="" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="13" Foreground="#64748B"/>
+                            </Grid>
 
-                            <DataGrid.ColumnHeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="Background" Value="#334155"/>
-                                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Padding" Value="10,8"/>
-                                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                                    <Setter Property="BorderBrush" Value="#475569"/>
-                                </Style>
-                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid Grid.Row="1"
+                                      x:Name="dgAsistencias"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      IsReadOnly="True"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="#94A3B8"
+                                      VerticalGridLinesBrush="#CBD5E1"
+                                      HeadersVisibility="Column"
+                                      Background="White"
+                                      RowBackground="#FFFFFF"
+                                      AlternatingRowBackground="#E2E8F0"
+                                      BorderBrush="#64748B"
+                                      BorderThickness="1"
+                                      RowHeight="38"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Auto">
 
-                            <DataGrid.CellStyle>
-                                <Style TargetType="DataGridCell">
-                                    <Setter Property="Padding" Value="10,6"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="DataGridCell">
-                                                <Border Padding="{TemplateBinding Padding}"
-                                                        Background="{TemplateBinding Background}"
-                                                        SnapsToDevicePixels="True">
-                                                    <ContentPresenter VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="#1E40AF"/>
-                                            <Setter Property="Foreground" Value="#FFFFFF"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.CellStyle>
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="DataGridHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
 
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Hora" Binding="{Binding Hora, StringFormat=hh:mm tt}" Width="Auto" MinWidth="90">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                                            <Setter Property="FontWeight" Value="SemiBold"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="DataGridCellStyle"/>
+                                </DataGrid.CellStyle>
 
-                                <DataGridTextColumn Header="Empleado" Binding="{Binding NombreEmpleado}" Width="Auto" MinWidth="200"/>
-                                <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" Width="Auto" MinWidth="120"/>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Hora" Binding="{Binding Hora, StringFormat=hh:mm tt}" Width="Auto" MinWidth="90">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
 
-                                <DataGridTemplateColumn Header="Estado" Width="Auto" MinWidth="160">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border CornerRadius="10" Padding="10,3" Margin="0,3" HorizontalAlignment="Center">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Estado}" Value="A tiempo">
-                                                                <Setter Property="Background" Value="#DCFCE7"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Estado}" Value="Tarde">
-                                                                <Setter Property="Background" Value="#FEE2E2"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Estado}" Value="Retardo justificado">
-                                                                <Setter Property="Background" Value="#EFF6FF"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock FontSize="12" FontWeight="SemiBold">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
+                                    <DataGridTextColumn Header="Empleado" Binding="{Binding NombreEmpleado}" Width="Auto" MinWidth="200"/>
+                                    <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" Width="Auto" MinWidth="120"/>
+
+                                    <DataGridTemplateColumn Header="Estado" Width="Auto" MinWidth="160">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="10" Padding="10,3" Margin="0,3" HorizontalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Estado}" Value="A tiempo">
-                                                                    <Setter Property="Foreground" Value="#166534"/>
+                                                                    <Setter Property="Background" Value="#DCFCE7"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Estado}" Value="Tarde">
-                                                                    <Setter Property="Foreground" Value="#DC2626"/>
+                                                                    <Setter Property="Background" Value="#FEE2E2"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Estado}" Value="Retardo justificado">
-                                                                    <Setter Property="Foreground" Value="#1E40AF"/>
+                                                                    <Setter Property="Background" Value="#EFF6FF"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </TextBlock.Style>
-                                                    <Run Text="{Binding Estado, Mode=OneWay}"/>
-                                                </TextBlock>
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                                    </Border.Style>
+                                                    <TextBlock FontSize="12" FontWeight="SemiBold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="A tiempo">
+                                                                        <Setter Property="Foreground" Value="#166534"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Tarde">
+                                                                        <Setter Property="Foreground" Value="#DC2626"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Retardo justificado">
+                                                                        <Setter Property="Foreground" Value="#1E40AF"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                        <Run Text="{Binding Estado, Mode=OneWay}"/>
+                                                    </TextBlock>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Observación" Binding="{Binding Observacion}" Width="*" MinWidth="220"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </Border>
+                                    <DataGridTextColumn Header="Observación" Binding="{Binding Observacion}" Width="*" MinWidth="220"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
 
-                <!-- Empleados que aún no marcan -->
-                <Border Grid.Row="3" Background="White" CornerRadius="12" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
-                    </Border.Effect>
-                    <StackPanel>
-                        <TextBlock x:Name="txtSinMarcarTitulo" Text="⏳ Empleados que aún no han marcado (0)" FontSize="14" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,10"/>
-                        <ItemsControl x:Name="itemsSinMarcar">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Background="#F1F5F9" CornerRadius="12" Padding="10,6" Margin="0,0,8,8">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="⏳" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#334155" Text="{Binding Nombre}"/>
-                                            <TextBlock FontSize="12" Foreground="#94A3B8" Text=" — "/>
-                                            <TextBlock FontSize="12" Foreground="#64748B" Text="{Binding Cargo}"/>
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <TextBlock x:Name="txtSinMarcarVacio" Text="✅ Todos los empleados activos han marcado hoy." FontSize="13" Foreground="#16A34A" Visibility="Collapsed"/>
-                    </StackPanel>
-                </Border>
+                    <!-- Empleados que aún no han marcado -->
+                    <Border Grid.Column="2" Width="300" Background="White" CornerRadius="12" Padding="16"
+                            BorderBrush="#E2E8F0" BorderThickness="1">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
+                        </Border.Effect>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" x:Name="txtSinMarcarTitulo" Text="⏳ Empleados que aún no han marcado (0)" FontSize="14" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,10"/>
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <ItemsControl x:Name="itemsSinMarcar">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#F1F5F9" CornerRadius="12" Padding="10,6" Margin="0,0,0,8">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="⏳" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                        <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#334155" Text="{Binding Nombre}"/>
+                                                        <TextBlock FontSize="12" Foreground="#94A3B8" Text=" — "/>
+                                                        <TextBlock FontSize="12" Foreground="#64748B" Text="{Binding Cargo}"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock x:Name="txtSinMarcarVacio" Text="✅ Todos los empleados activos han marcado hoy." FontSize="13" Foreground="#16A34A" Visibility="Collapsed" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Grid>
 
             <!-- ############################################################ -->
@@ -440,8 +310,8 @@
 
                         <TextBlock Grid.Column="0" Text="Semana:" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,10,0"/>
                         <DatePicker Grid.Column="1" x:Name="dpFechaSemana" Height="36" Width="135" FontSize="13" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                        <Button Grid.Column="2" x:Name="btnConsultarSemana" Content="🔍 Consultar" Style="{StaticResource DashButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" Click="btnConsultarSemana_Click"/>
-                        <Button Grid.Column="4" x:Name="btnExportarSemana" Content="📄 Exportar semana (PDF)" Style="{StaticResource DashButton}" Background="#10B981" Foreground="White" BorderBrush="#059669" Margin="0" Click="btnExportarSemana_Click"/>
+                        <Button Grid.Column="2" x:Name="btnConsultarSemana" Content="🔍 Consultar" Style="{StaticResource PrimaryButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" BorderThickness="1" Margin="0,0,10,0" Click="btnConsultarSemana_Click"/>
+                        <Button Grid.Column="4" x:Name="btnExportarSemana" Content="📄 Exportar semana (PDF)" Style="{StaticResource PrimaryButton}" Background="#10B981" Foreground="White" BorderBrush="#059669" BorderThickness="1" Margin="0" Click="btnExportarSemana_Click"/>
                     </Grid>
                 </Border>
 
@@ -581,227 +451,200 @@
                             <DropShadowEffect BlurRadius="10" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
                         </Border.Effect>
                         <StackPanel>
-                            <TextBlock Text="2. Rango de fechas" FontSize="14" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,10"/>
-                            <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="2. Rango de fechas" FontSize="14" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Text="Desde:" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,8,0"/>
                                 <DatePicker x:Name="dpDesde" Height="34" Width="130" FontSize="13" VerticalAlignment="Center" Margin="0,0,16,0"/>
                                 <TextBlock Text="Hasta:" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,8,0"/>
                                 <DatePicker x:Name="dpHasta" Height="34" Width="130" FontSize="13" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                <Button x:Name="btnConsultarDetalle" Content="🔍 Consultar" Style="{StaticResource DashButton}" Background="#2563EB" Foreground="White" BorderBrush="#1D4ED8" Margin="0,0,10,0" Click="btnConsultarDetalle_Click"/>
-                                <Button x:Name="btnExportarDetalle" Content="📄 Exportar PDF" Style="{StaticResource DashButton}" Background="#10B981" Foreground="White" BorderBrush="#059669" Margin="0" Click="btnExportarDetalle_Click"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+                                <Button x:Name="btnConsultarDetalle" Content="🔍 Consultar" Style="{StaticResource PrimaryButton}" Background="#2563EB" Foreground="White" BorderBrush="#1D4ED8" BorderThickness="1" Margin="0,0,10,0" Click="btnConsultarDetalle_Click"/>
+                                <Button x:Name="btnExportarDetalle" Content="📄 Exportar PDF" Style="{StaticResource PrimaryButton}" Background="#10B981" Foreground="White" BorderBrush="#059669" BorderThickness="1" Margin="0" Click="btnExportarDetalle_Click"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
                     <!-- Resumen -->
                     <Grid Grid.Row="1" Margin="0,0,0,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Style="{StaticResource StatCard}">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="40" Height="40" CornerRadius="20" Background="#DCFCE7" VerticalAlignment="Center">
-                                <TextBlock Text="📆" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                <TextBlock x:Name="txtDetTrabajados" Text="0" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
-                                <TextBlock Text="Días trabajados" FontSize="12" Foreground="#64748B"/>
+                        <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="40" Height="40" CornerRadius="20" Background="#DCFCE7" VerticalAlignment="Center">
+                                    <TextBlock Text="📆" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="txtDetTrabajados" Text="0" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
+                                    <TextBlock Text="Días trabajados" FontSize="12" Foreground="#64748B"/>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource StatCard}">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="40" Height="40" CornerRadius="20" Background="#FEE2E2" VerticalAlignment="Center">
-                                <TextBlock Text="❌" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                <TextBlock x:Name="txtDetFaltas" Text="0" FontSize="22" FontWeight="Bold" Foreground="#DC2626"/>
-                                <TextBlock Text="Faltas" FontSize="12" Foreground="#64748B"/>
+                        <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="40" Height="40" CornerRadius="20" Background="#FEE2E2" VerticalAlignment="Center">
+                                    <TextBlock Text="❌" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="txtDetFaltas" Text="0" FontSize="22" FontWeight="Bold" Foreground="#DC2626"/>
+                                    <TextBlock Text="Faltas" FontSize="12" Foreground="#64748B"/>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Border>
 
-                    <Border Grid.Column="4" Style="{StaticResource StatCard}">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="40" Height="40" CornerRadius="20" Background="#FEF3C7" VerticalAlignment="Center">
-                                <TextBlock Text="⚠️" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                <TextBlock x:Name="txtDetRetardos" Text="0" FontSize="22" FontWeight="Bold" Foreground="#D97706"/>
-                                <TextBlock Text="Retardos" FontSize="12" Foreground="#64748B"/>
+                        <Border Grid.Column="4" Style="{StaticResource StatCard}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="40" Height="40" CornerRadius="20" Background="#FEF3C7" VerticalAlignment="Center">
+                                    <TextBlock Text="⚠️" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="txtDetRetardos" Text="0" FontSize="22" FontWeight="Bold" Foreground="#D97706"/>
+                                    <TextBlock Text="Retardos" FontSize="12" Foreground="#64748B"/>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Border>
 
-                    <Border Grid.Column="6" Style="{StaticResource StatCard}">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="40" Height="40" CornerRadius="20" Background="#EFF6FF" VerticalAlignment="Center">
-                                <TextBlock Text="📝" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                <TextBlock x:Name="txtDetJustificados" Text="0" FontSize="22" FontWeight="Bold" Foreground="#1E40AF"/>
-                                <TextBlock Text="Retardos justif." FontSize="12" Foreground="#64748B"/>
+                        <Border Grid.Column="6" Style="{StaticResource StatCard}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="40" Height="40" CornerRadius="20" Background="#EFF6FF" VerticalAlignment="Center">
+                                    <TextBlock Text="📝" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="txtDetJustificados" Text="0" FontSize="22" FontWeight="Bold" Foreground="#1E40AF"/>
+                                    <TextBlock Text="Retardos justif." FontSize="12" Foreground="#64748B"/>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                        </Border>
+                    </Grid>
 
-                <!-- Tabla detallada -->
-                <Border Grid.Row="2" Background="White" CornerRadius="12" Padding="20">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
-                    </Border.Effect>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+                    <!-- Tabla detallada -->
+                    <Border Grid.Row="2" Background="White" CornerRadius="12" Padding="20">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Color="#000000" Opacity="0.04"/>
+                        </Border.Effect>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
 
-                        <Grid Grid.Row="0" Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" x:Name="lblTituloDetalle" Text="Seleccione empleado y rango de fechas, luego pulse Consultar." FontSize="14" FontWeight="Bold" Foreground="#0F172A"/>
-                            <TextBlock Grid.Column="1" x:Name="txtDetPorcentaje" Text="" FontSize="13" FontWeight="SemiBold" Foreground="#2563EB"/>
-                        </Grid>
+                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" x:Name="lblTituloDetalle" Text="Seleccione empleado y rango de fechas, luego pulse Consultar." FontSize="14" FontWeight="Bold" Foreground="#0F172A"/>
+                                <TextBlock Grid.Column="1" x:Name="txtDetPorcentaje" Text="" FontSize="13" FontWeight="SemiBold" Foreground="#2563EB"/>
+                            </Grid>
 
-                        <DataGrid Grid.Row="1"
-                                  x:Name="dgDetalle"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  IsReadOnly="True"
-                                  GridLinesVisibility="All"
-                                  HorizontalGridLinesBrush="#94A3B8"
-                                  VerticalGridLinesBrush="#CBD5E1"
-                                  HeadersVisibility="Column"
-                                  Background="White"
-                                  RowBackground="#FFFFFF"
-                                  AlternatingRowBackground="#E2E8F0"
-                                  BorderBrush="#64748B"
-                                  BorderThickness="1"
-                                  RowHeight="38"
-                                  HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollBarVisibility="Auto">
+                            <DataGrid Grid.Row="1"
+                                      x:Name="dgDetalle"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      IsReadOnly="True"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="#94A3B8"
+                                      VerticalGridLinesBrush="#CBD5E1"
+                                      HeadersVisibility="Column"
+                                      Background="White"
+                                      RowBackground="#FFFFFF"
+                                      AlternatingRowBackground="#E2E8F0"
+                                      BorderBrush="#64748B"
+                                      BorderThickness="1"
+                                      RowHeight="38"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Auto">
 
-                            <DataGrid.ColumnHeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="Background" Value="#334155"/>
-                                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Padding" Value="10,8"/>
-                                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                                    <Setter Property="BorderBrush" Value="#475569"/>
-                                </Style>
-                            </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="DataGridHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
 
-                            <DataGrid.CellStyle>
-                                <Style TargetType="DataGridCell">
-                                    <Setter Property="Padding" Value="10,6"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="DataGridCell">
-                                                <Border Padding="{TemplateBinding Padding}"
-                                                        Background="{TemplateBinding Background}"
-                                                        SnapsToDevicePixels="True">
-                                                    <ContentPresenter VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="#1E40AF"/>
-                                            <Setter Property="Foreground" Value="#FFFFFF"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.CellStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="DataGridCellStyle"/>
+                                </DataGrid.CellStyle>
 
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Fecha" Binding="{Binding Fecha, StringFormat=dd/MM/yyyy}" Width="Auto" MinWidth="90"/>
-                                <DataGridTextColumn Header="Día" Binding="{Binding Dia}" Width="Auto" MinWidth="90"/>
-                                <DataGridTextColumn Header="Hora entrada" Binding="{Binding HoraEntrada, StringFormat=hh\\:mm}" Width="Auto" MinWidth="100">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                                            <Setter Property="FontWeight" Value="SemiBold"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Fecha" Binding="{Binding Fecha, StringFormat=dd/MM/yyyy}" Width="Auto" MinWidth="90"/>
+                                    <DataGridTextColumn Header="Día" Binding="{Binding Dia}" Width="Auto" MinWidth="90"/>
+                                    <DataGridTextColumn Header="Hora entrada" Binding="{Binding HoraEntrada, StringFormat=hh\\:mm}" Width="Auto" MinWidth="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
 
-                                <DataGridTemplateColumn Header="Estado" Width="Auto" MinWidth="170">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Border CornerRadius="10" Padding="10,3" Margin="0,3" HorizontalAlignment="Center">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Estado}" Value="A tiempo">
-                                                                <Setter Property="Background" Value="#DCFCE7"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Estado}" Value="Retardo">
-                                                                <Setter Property="Background" Value="#FEF3C7"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Estado}" Value="Retardo justificado">
-                                                                <Setter Property="Background" Value="#EFF6FF"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Estado}" Value="Falta">
-                                                                <Setter Property="Background" Value="#FEE2E2"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock FontSize="12" FontWeight="SemiBold">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
+                                    <DataGridTemplateColumn Header="Estado" Width="Auto" MinWidth="170">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="10" Padding="10,3" Margin="0,3" HorizontalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Estado}" Value="A tiempo">
-                                                                    <Setter Property="Foreground" Value="#166534"/>
+                                                                    <Setter Property="Background" Value="#DCFCE7"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Estado}" Value="Retardo">
-                                                                    <Setter Property="Foreground" Value="#D97706"/>
+                                                                    <Setter Property="Background" Value="#FEF3C7"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Estado}" Value="Retardo justificado">
-                                                                    <Setter Property="Foreground" Value="#1E40AF"/>
+                                                                    <Setter Property="Background" Value="#EFF6FF"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Estado}" Value="Falta">
-                                                                    <Setter Property="Foreground" Value="#DC2626"/>
+                                                                    <Setter Property="Background" Value="#FEE2E2"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </TextBlock.Style>
-                                                    <Run Text="{Binding Estado, Mode=OneWay}"/>
-                                                </TextBlock>
-                                            </Border>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                                    </Border.Style>
+                                                    <TextBlock FontSize="12" FontWeight="SemiBold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="A tiempo">
+                                                                        <Setter Property="Foreground" Value="#166534"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Retardo">
+                                                                        <Setter Property="Foreground" Value="#D97706"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Retardo justificado">
+                                                                        <Setter Property="Foreground" Value="#1E40AF"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Falta">
+                                                                        <Setter Property="Foreground" Value="#DC2626"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                        <Run Text="{Binding Estado, Mode=OneWay}"/>
+                                                    </TextBlock>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Min" Binding="{Binding MinutosRetraso}" Width="Auto" MinWidth="55">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Min" Binding="{Binding MinutosRetraso}" Width="Auto" MinWidth="55">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
 
-                                <DataGridTextColumn Header="Observación / Motivo" Binding="{Binding Observacion}" Width="*" MinWidth="220"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </Border>
+                                    <DataGridTextColumn Header="Observación / Motivo" Binding="{Binding Observacion}" Width="*" MinWidth="220"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Grid>
         </Grid>

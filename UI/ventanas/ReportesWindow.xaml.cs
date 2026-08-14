@@ -290,11 +290,6 @@ namespace ControlAcceso
 
         #endregion
 
-        private void btnCerrar_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
         private static void MostrarMensaje(string mensaje)
         {
             MessageBox.Show(mensaje, "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);

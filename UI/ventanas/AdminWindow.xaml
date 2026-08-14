@@ -9,148 +9,9 @@
         UseLayoutRounding="True">
 
     <Window.Resources>
-        <!-- Estilo base para los campos de texto -->
-        <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Margin" Value="0,4,0,14"/>
-            <Style.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="6"/>
-                </Style>
-            </Style.Resources>
-        </Style>
-
-        <!-- Estilo para DatePicker -->
-        <Style x:Key="ModernDatePicker" TargetType="DatePicker">
-            <Setter Property="Padding" Value="6,4"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="0,4,0,14"/>
-        </Style>
-
-        <!-- Estilo para ComboBox -->
-        <Style x:Key="ModernComboBox" TargetType="ComboBox">
-            <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="0,4,0,14"/>
-        </Style>
-
-        <!-- Etiquetas -->
-        <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#475569"/>
-        </Style>
-
-        <!-- Botones de Pestaña (barra superior) -->
-        <Style x:Key="TabNavButton" TargetType="Button">
-            <Setter Property="Background" Value="#F1F5F9"/>
-            <Setter Property="Foreground" Value="#64748B"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="16,10"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" TargetName="border" Value="0.85"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Opacity" TargetName="border" Value="0.7"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Botones de acción (barra sobre la lista de empleados) -->
-        <Style x:Key="ActionPillButton" TargetType="Button">
-            <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" TargetName="border" Value="0.85"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Opacity" TargetName="border" Value="0.7"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Botones secundarios de Huella -->
-        <Style x:Key="FingerprintButton" TargetType="Button">
-            <Setter Property="Background" Value="#EFF6FF"/>
-            <Setter Property="Foreground" Value="#1E40AF"/>
-            <Setter Property="BorderBrush" Value="#BFDBFE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" TargetName="border" Value="#DBEAFE"/>
-                                <Setter Property="BorderBrush" TargetName="border" Value="#93C5FD"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" TargetName="border" Value="#BFDBFE"/>
-                                <Setter Property="BorderBrush" TargetName="border" Value="#60A5FA"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <!-- Todos los estilos viven en UI/Styles/Controls.xaml (diccionario central). -->
+        <!-- Esta ventana solo conserva aliases con el mismo nombre que sus contrapartes centrales
+             cuando necesita un detalle propio (ej. separación entre dedos). -->
     </Window.Resources>
 
     <Grid>
@@ -167,9 +28,9 @@
                     <DropShadowEffect BlurRadius="10" ShadowDepth="1" Color="#000000" Opacity="0.05"/>
                 </Border.Effect>
                 <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btnTabEmpleados" Content="👥 Lista de Empleados" Style="{StaticResource TabNavButton}" Click="btnTabEmpleados_Click"/>
-                    <Button x:Name="btnTabCargos" Content="💼 Cargos" Style="{StaticResource TabNavButton}" Click="btnTabCargos_Click"/>
-                    <Button x:Name="btnTabConfig" Content="⚙️ Configuración" Style="{StaticResource TabNavButton}" Click="btnTabConfig_Click"/>
+                    <Button x:Name="btnTabEmpleados" Content="👥 Lista de Empleados" Style="{StaticResource TabButton}" Click="btnTabEmpleados_Click"/>
+                    <Button x:Name="btnTabCargos" Content="💼 Cargos" Style="{StaticResource TabButton}" Click="btnTabCargos_Click"/>
+                    <Button x:Name="btnTabConfig" Content="⚙️ Configuración" Style="{StaticResource TabButton}" Click="btnTabConfig_Click"/>
                 </StackPanel>
             </Border>
 
@@ -226,38 +87,11 @@
                                   HorizontalScrollBarVisibility="Auto">
 
                             <DataGrid.ColumnHeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="Background" Value="#334155"/>
-                                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Padding" Value="10,8"/>
-                                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                                    <Setter Property="BorderBrush" Value="#475569"/>
-                                </Style>
+                                <StaticResource ResourceKey="DataGridHeaderStyle"/>
                             </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.CellStyle>
-                                <Style TargetType="DataGridCell">
-                                    <Setter Property="Padding" Value="10,6"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="DataGridCell">
-                                                <Border Padding="{TemplateBinding Padding}"
-                                                        Background="{TemplateBinding Background}"
-                                                        SnapsToDevicePixels="True">
-                                                    <ContentPresenter VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="#1E40AF"/>
-                                            <Setter Property="Foreground" Value="#FFFFFF"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
+                                <StaticResource ResourceKey="DataGridCellStyle"/>
                             </DataGrid.CellStyle>
 
                             <DataGrid.Columns>
@@ -282,10 +116,10 @@
                         </DataGrid>
 
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-                            <Button x:Name="btnRegistrarAsistencia" Content="🕒 Registrar Asistencia" Style="{StaticResource ActionPillButton}" Background="#E0F2FE" Foreground="#0C4A6E" BorderBrush="#7DD3FC" Click="btnRegistrarAsistencia_Click"/>
-                            <Button x:Name="btnNuevoEmpleado" Content="➕ Nuevo Empleado" Style="{StaticResource ActionPillButton}" Background="#DCFCE7" Foreground="#166534" BorderBrush="#86EFAC" Click="btnNuevoEmpleado_Click"/>
-                            <Button x:Name="btnEditarEmpleado" Content="✏️ Editar" Style="{StaticResource ActionPillButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" Click="btnEditarEmpleado_Click"/>
-                            <Button x:Name="btnCambiarEstado" Content="🚫 Cambiar Estado" Style="{StaticResource ActionPillButton}" Background="#FEE2E2" Foreground="#DC2626" BorderBrush="#FCA5A5" Margin="0" Click="btnCambiarEstado_Click"/>
+                            <Button x:Name="btnRegistrarAsistencia" Content="🕒 Registrar Asistencia" Style="{StaticResource PrimaryButton}" Background="#E0F2FE" Foreground="#0C4A6E" BorderBrush="#7DD3FC" BorderThickness="1" Margin="0,0,10,0" Click="btnRegistrarAsistencia_Click"/>
+                            <Button x:Name="btnNuevoEmpleado" Content="➕ Nuevo Empleado" Style="{StaticResource PrimaryButton}" Background="#DCFCE7" Foreground="#166534" BorderBrush="#86EFAC" BorderThickness="1" Margin="0,0,10,0" Click="btnNuevoEmpleado_Click"/>
+                            <Button x:Name="btnEditarEmpleado" Content="✏️ Editar" Style="{StaticResource PrimaryButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" BorderThickness="1" Margin="0,0,10,0" Click="btnEditarEmpleado_Click"/>
+                            <Button x:Name="btnCambiarEstado" Content="🚫 Cambiar Estado" Style="{StaticResource PrimaryButton}" Background="#FEE2E2" Foreground="#DC2626" BorderBrush="#FCA5A5" BorderThickness="1" Margin="0" Click="btnCambiarEstado_Click"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -318,7 +152,7 @@
                 <ComboBoxItem Content="Inactivo"/>
             </ComboBox>
 
-            <Button Grid.Column="3" x:Name="btnAgregarCargo" Content="➕ Agregar Cargo" Style="{StaticResource ActionPillButton}" Background="#DCFCE7" Foreground="#166534" BorderBrush="#86EFAC" Click="btnAgregarCargo_Click"/>
+            <Button Grid.Column="3" x:Name="btnAgregarCargo" Content="➕ Agregar Cargo" Style="{StaticResource PrimaryButton}" Background="#DCFCE7" Foreground="#166534" BorderBrush="#86EFAC" BorderThickness="1" Margin="0,0,10,0" Click="btnAgregarCargo_Click"/>
         </Grid>
 
         <DataGrid Grid.Row="1"
@@ -339,38 +173,11 @@
                   HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Background" Value="#334155"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                    <Setter Property="FontWeight" Value="Bold"/>
-                    <Setter Property="Padding" Value="10,8"/>
-                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                    <Setter Property="BorderBrush" Value="#475569"/>
-                </Style>
+                <StaticResource ResourceKey="DataGridHeaderStyle"/>
             </DataGrid.ColumnHeaderStyle>
 
             <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell">
-                    <Setter Property="Padding" Value="10,6"/>
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="DataGridCell">
-                                <Border Padding="{TemplateBinding Padding}"
-                                        Background="{TemplateBinding Background}"
-                                        SnapsToDevicePixels="True">
-                                    <ContentPresenter VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="#1E40AF"/>
-                            <Setter Property="Foreground" Value="#FFFFFF"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
+                <StaticResource ResourceKey="DataGridCellStyle"/>
             </DataGrid.CellStyle>
 
             <DataGrid.Columns>
@@ -427,8 +234,8 @@
                 <TextBlock x:Name="lblModoCargo" Text="Nuevo Cargo" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,8"/>
                 <StackPanel Orientation="Horizontal">
                     <TextBox x:Name="txtNombreCargo" Width="250" Style="{StaticResource ModernTextBox}" Margin="0,0,10,0"/>
-                    <Button x:Name="btnGuardarCargo" Content="Guardar" Style="{StaticResource ActionPillButton}" Background="#2563EB" Foreground="White" BorderBrush="#2563EB" Click="btnGuardarCargo_Click" Margin="0,0,5,0"/>
-                    <Button x:Name="btnCancelarEdicionCargo" Content="Cancelar" Style="{StaticResource ActionPillButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" Click="btnCancelarEdicionCargo_Click"/>
+                    <Button x:Name="btnGuardarCargo" Content="Guardar" Style="{StaticResource PrimaryButton}" Background="#2563EB" Foreground="White" BorderBrush="#2563EB" BorderThickness="1" Click="btnGuardarCargo_Click" Margin="0,0,5,0"/>
+                    <Button x:Name="btnCancelarEdicionCargo" Content="Cancelar" Style="{StaticResource PrimaryButton}" Background="#E2E8F0" Foreground="#334155" BorderBrush="#CBD5E1" BorderThickness="1" Click="btnCancelarEdicionCargo_Click"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -480,7 +287,7 @@
                                     <TextBlock Text="Contraseña de administrador" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
                                         <TextBlock x:Name="txtEstadoPassword" Text="Configurada" Foreground="#16A34A" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                        <Button x:Name="btnCambiarPassword" Content="🔑 Cambiar contraseña" Height="38" Padding="16,0" Style="{StaticResource ActionPillButton}" Background="#EFF6FF" Foreground="#1E40AF" BorderBrush="#BFDBFE" Cursor="Hand" Click="btnCambiarPassword_Click"/>
+                                        <Button x:Name="btnCambiarPassword" Content="🔑 Cambiar contraseña" Height="38" Padding="16,0" Style="{StaticResource PrimaryButton}" Background="#EFF6FF" Foreground="#1E40AF" BorderBrush="#BFDBFE" BorderThickness="1" Cursor="Hand" Click="btnCambiarPassword_Click"/>
                                     </StackPanel>
                                 </StackPanel>
 
@@ -569,15 +376,15 @@
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <StackPanel Margin="0,0,10,0">
-                                        <Button x:Name="btnHuella1" Content="👍 Dedo 1 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="1"/>
+                                        <Button x:Name="btnHuella1" Content="👍 Dedo 1 (No registrado)" Style="{StaticResource FingerprintButton}" Margin="0,0,8,0" Click="btnCapturarDedo_Click" Tag="1"/>
                                         <Button x:Name="btnVerificarHuella1" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnVerificarHuella_Click"/>
                                     </StackPanel>
                                     <StackPanel Margin="0,0,10,0">
-                                        <Button x:Name="btnHuella2" Content="👍 Dedo 2 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="2"/>
+                                        <Button x:Name="btnHuella2" Content="👍 Dedo 2 (No registrado)" Style="{StaticResource FingerprintButton}" Margin="0,0,8,0" Click="btnCapturarDedo_Click" Tag="2"/>
                                         <Button x:Name="btnVerificarHuella2" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnVerificarHuella_Click"/>
                                     </StackPanel>
                                     <StackPanel Margin="0,0,10,0">
-                                        <Button x:Name="btnHuella3" Content="👍 Dedo 3 (No registrado)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedo_Click" Tag="3"/>
+                                        <Button x:Name="btnHuella3" Content="👍 Dedo 3 (No registrado)" Style="{StaticResource FingerprintButton}" Margin="0,0,8,0" Click="btnCapturarDedo_Click" Tag="3"/>
                                         <Button x:Name="btnVerificarHuella3" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnVerificarHuella_Click"/>
                                     </StackPanel>
                                 </StackPanel>
@@ -666,15 +473,15 @@
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <StackPanel Margin="0,0,10,0">
-                                        <Button x:Name="btnEditHuella1" Content="👍 Dedo 1 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="1"/>
+                                        <Button x:Name="btnEditHuella1" Content="👍 Dedo 1 (Sin cambios)" Style="{StaticResource FingerprintButton}" Margin="0,0,8,0" Click="btnCapturarDedoEdicion_Click" Tag="1"/>
                                         <Button x:Name="btnVerificarEditHuella1" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="1" Click="btnVerificarEditHuella_Click"/>
                                     </StackPanel>
                                     <StackPanel Margin="0,0,10,0">
-                                        <Button x:Name="btnEditHuella2" Content="👍 Dedo 2 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="2"/>
+                                        <Button x:Name="btnEditHuella2" Content="👍 Dedo 2 (Sin cambios)" Style="{StaticResource FingerprintButton}" Margin="0,0,8,0" Click="btnCapturarDedoEdicion_Click" Tag="2"/>
                                         <Button x:Name="btnVerificarEditHuella2" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="2" Click="btnVerificarEditHuella_Click"/>
                                     </StackPanel>
                                     <StackPanel Margin="0,0,10,0">
-                                        <Button x:Name="btnEditHuella3" Content="👍 Dedo 3 (Sin cambios)" Style="{StaticResource FingerprintButton}" Click="btnCapturarDedoEdicion_Click" Tag="3"/>
+                                        <Button x:Name="btnEditHuella3" Content="👍 Dedo 3 (Sin cambios)" Style="{StaticResource FingerprintButton}" Margin="0,0,8,0" Click="btnCapturarDedoEdicion_Click" Tag="3"/>
                                         <Button x:Name="btnVerificarEditHuella3" Content="✅ Verificar" Width="150" Height="30" Margin="0,6,0,0" FontSize="11" Background="#F8FAFC" Foreground="#334155" BorderThickness="1" BorderBrush="#CBD5E1" Cursor="Hand" Tag="3" Click="btnVerificarEditHuella_Click"/>
                                     </StackPanel>
                                 </StackPanel>

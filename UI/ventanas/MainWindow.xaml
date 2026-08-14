@@ -1,4 +1,4 @@
-﻿<Window x:Class="ControlAcceso.MainWindow"
+<Window x:Class="ControlAcceso.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Control de Acceso" Height="600" Width="800"
@@ -17,19 +17,9 @@
                 Grid.Row="0"
                 Content="MARCAR ENTRADA"
                 Click="btnMarcarEntrada_Click"
+                Style="{StaticResource PrimaryButton}"
                 Height="80"
-                FontSize="24"
-                FontWeight="Bold"
-                Foreground="White"
-                Background="#2563EB"
-                BorderThickness="0"
-                Cursor="Hand">
-            <Button.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="12"/>
-                </Style>
-            </Button.Resources>
-        </Button>
+                FontSize="24"/>
 
         <!-- PANEL CENTRAL: RELOJ O MENSAJE SENSOR -->
         <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -71,68 +61,59 @@
                 <Button x:Name="btnCancelarCaptura"
                         Content="Cancelar Marcaje"
                         Click="btnCancelarCaptura_Click"
+                        Style="{StaticResource DangerButton}"
+                        BorderThickness="0"
                         Margin="0,25,0,0"
                         Padding="20,10"
-                        FontSize="16"
-                        FontWeight="SemiBold"
-                        Foreground="#DC2626"
-                        Background="#FEE2E2"
-                        BorderThickness="0"
-                        Cursor="Hand">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="8"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
+                        FontSize="16"/>
             </StackPanel>
 
             <StackPanel x:Name="PanelExito" Visibility="Collapsed">
-        <TextBlock x:Name="TxtNombreEmpleado"
-                   FontSize="32"
-                   FontWeight="Bold"
-                   Foreground="#2E7D32"
-                   HorizontalAlignment="Center"/>
-        <TextBlock x:Name="TxtHoraEntrada"
-                   FontSize="24"
-                   Foreground="#4A4A4A"
-                   Margin="0,15,0,0"
-                   HorizontalAlignment="Center"/>
-    </StackPanel>
+                <TextBlock x:Name="TxtNombreEmpleado"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           Foreground="#166534"
+                           HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TxtHoraEntrada"
+                           FontSize="24"
+                           Foreground="#475569"
+                           Margin="0,15,0,0"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
 
-    <!-- 3. PANEL DE FALLO (Se activa si la huella no se reconoce) -->
-    <StackPanel x:Name="PanelFallo" Visibility="Collapsed">
-        <TextBlock Text="Huella no reconocida"
-                   FontSize="24"
-                   FontWeight="Bold"
-                   Foreground="#C62828"
-                   HorizontalAlignment="Center"/>
-        <TextBlock x:Name="TxtMensajeError"
-                   Text="Intenta de nuevo o llama a tu supervisor"
-                   FontSize="24"
-                   Foreground="#555555"
-                   Margin="0,15,0,0"
-                   HorizontalAlignment="Center"
-                   TextAlignment="Center"
-                   TextWrapping="Wrap"/>
-    </StackPanel>
+            <!-- 3. PANEL DE FALLO (Se activa si la huella no se reconoce) -->
+            <StackPanel x:Name="PanelFallo" Visibility="Collapsed">
+                <TextBlock Text="Huella no reconocida"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#DC2626"
+                           HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TxtMensajeError"
+                           Text="Intenta de nuevo o llama a tu supervisor"
+                           FontSize="24"
+                           Foreground="#475569"
+                           Margin="0,15,0,0"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
 
-    <!-- 4. PANEL DE ACCESO DENEGADO (Se activa por hora límite) -->
-    <StackPanel x:Name="PanelDenegado" Visibility="Collapsed" MaxWidth="700">
-        <TextBlock Text="ACCESO DENEGADO"
-                   FontSize="28"
-                   FontWeight="Bold"
-                   Foreground="#D84315"
-                   HorizontalAlignment="Center"/>
-        <TextBlock x:Name="TxtMensajeDenegado"
-                   Text="Mensaje de acceso denegado"
-                   FontSize="24"
-                   Foreground="#475569"
-                   Margin="0,15,0,0"
-                   HorizontalAlignment="Center"
-                   TextAlignment="Center"
-                   TextWrapping="Wrap"/>
-    </StackPanel>
+            <!-- 4. PANEL DE ACCESO DENEGADO (Se activa por hora límite) -->
+            <StackPanel x:Name="PanelDenegado" Visibility="Collapsed" MaxWidth="700">
+                <TextBlock Text="ACCESO DENEGADO"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Foreground="#DC2626"
+                           HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TxtMensajeDenegado"
+                           Text="Mensaje de acceso denegado"
+                           FontSize="24"
+                           Foreground="#475569"
+                           Margin="0,15,0,0"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
 
         </Grid>
 
@@ -141,25 +122,15 @@
             <Button x:Name="btnReportes"
                     Content="📊 Reportes"
                     Click="btnReportes_Click"
-                    HorizontalAlignment="Left"
-                    Padding="16,8"
-                    FontSize="14"
-                    Foreground="#475569"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"/>
+                    Style="{StaticResource LinkButton}"
+                    HorizontalAlignment="Left"/>
 
             <!-- ACCESO A ADMINISTRACIÓN -->
             <Button x:Name="btnAdministrar"
                     Content="⚙️ Panel de Administración"
                     Click="btnAdministrar_Click"
-                    HorizontalAlignment="Right"
-                    Padding="16,8"
-                    FontSize="14"
-                    Foreground="#475569"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"/>
+                    Style="{StaticResource LinkButton}"
+                    HorizontalAlignment="Right"/>
         </Grid>
     </Grid>
 </Window>

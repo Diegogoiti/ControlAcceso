@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#F8FAFC">
-    <Border Background="White" CornerRadius="14" Padding="20" Margin="10">
+    <Border Style="{StaticResource CardPanel}" Margin="10">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -27,21 +27,25 @@
                 </Border>
             </StackPanel>
 
-            <Border Grid.Row="1" Background="#F1F5F9" CornerRadius="10" Padding="16" Margin="0,0,0,18">
+            <Border Grid.Row="1" Style="{StaticResource SectionPanel}" Margin="0,0,0,18">
                 <StackPanel>
-                    <TextBlock Text="Empleado seleccionado" FontSize="14" FontWeight="SemiBold" Foreground="#334155"/>
+                    <TextBlock Text="Empleado seleccionado" Style="{StaticResource FieldLabel}"/>
                     <TextBlock x:Name="txtEmpleadoSeleccionado" FontSize="16" FontWeight="Bold" Foreground="#0F172A" Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
 
             <StackPanel Grid.Row="2" Margin="0,0,0,18">
-                <TextBlock Text="Motivo / Observación (obligatorio)" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,8"/>
-                <TextBox x:Name="txtObservacion" Height="100" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Padding="10" BorderBrush="#CBD5E1" BorderThickness="1" Background="White"/>
+                <TextBlock Text="Motivo / Observación (obligatorio)" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/>
+                <TextBox x:Name="txtObservacion" Style="{StaticResource ModernTextBox}"
+                         Height="100" TextWrapping="Wrap" AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto" Margin="0"/>
             </StackPanel>
 
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="btnCancelar" Content="Cancelar" Width="110" Height="38" Background="#E2E8F0" Foreground="#334155" FontWeight="SemiBold" BorderThickness="0" Margin="0,0,10,0" Click="btnCancelar_Click"/>
-                <Button x:Name="btnAceptar" Content="Registrar" Width="120" Height="38" Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0" Click="btnAceptar_Click"/>
+                <Button x:Name="btnCancelar" Content="Cancelar" Style="{StaticResource SecondaryButton}"
+                        Width="110" Height="38" BorderThickness="0" Margin="0,0,10,0" Click="btnCancelar_Click"/>
+                <Button x:Name="btnAceptar" Content="Registrar" Style="{StaticResource PrimaryButton}"
+                        Width="120" Height="38" Click="btnAceptar_Click"/>
             </StackPanel>
         </Grid>
     </Border>
