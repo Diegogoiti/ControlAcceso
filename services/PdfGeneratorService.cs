@@ -177,7 +177,8 @@ namespace ControlAcceso.Services
         /// <summary>
         /// Reporte detallado por empleado: por cada día del rango muestra la hora
         /// de entrada, el estado (a tiempo / retardo / retardo justificado / falta)
-        /// y la observación, con totales al final. Los registros manuales del
+        /// y la observación, con totales al final. Por día se toma un solo registro
+        /// (el del admin si existe, si no la lectura más temprana). Los registros manuales del
         /// administrador se computan como retardo justificado.
         /// </summary>
         public void GenerarReporteDetalladoPdf(ReporteDetalladoEmpleadoDto datos, string rutaDestino)
@@ -255,7 +256,7 @@ namespace ControlAcceso.Services
                         columns.ConstantColumn(80);  // Día
                         columns.ConstantColumn(70);  // Hora
                         columns.RelativeColumn();    // Estado
-                        columns.ConstantColumn(45);  // Min
+                        columns.ConstantColumn(70);  // Min ret.
                         columns.RelativeColumn(1.5f); // Observación
                     });
 
@@ -265,7 +266,7 @@ namespace ControlAcceso.Services
                         header.Cell().Element(BlockHeader).Text("Día");
                         header.Cell().Element(BlockHeader).Text("Hora entrada");
                         header.Cell().Element(BlockHeader).Text("Estado");
-                        header.Cell().Element(BlockHeader).Text("Min");
+                        header.Cell().Element(BlockHeader).Text("Min ret.");
                         header.Cell().Element(BlockHeader).Text("Observación / Motivo");
                     });
 
@@ -273,7 +274,7 @@ namespace ControlAcceso.Services
                     {
                         table.Cell().Element(BlockCell).Text(dia.Fecha.ToString("dd/MM/yyyy"));
                         table.Cell().Element(BlockCell).Text(dia.Dia);
-                        table.Cell().Element(BlockCell).AlignCenter().Text(dia.HoraEntrada.HasValue ? dia.HoraEntrada.Value.ToString(@"hh\:mm") : "—");
+                        table.Cell().Element(BlockCell).AlignCenter().Text(dia.HoraEntradaTexto);
 
                         string colorFondo = dia.Estado switch
                         {
@@ -294,7 +295,7 @@ namespace ControlAcceso.Services
                             .Padding(2).AlignMiddle().AlignCenter()
                             .Text(dia.Estado).FontColor(colorTexto).Bold().FontSize(9);
 
-                        table.Cell().Element(BlockNumCell).Text(dia.MinutosRetraso > 0 ? dia.MinutosRetraso.ToString() + "'" : "—");
+                        table.Cell().Element(BlockNumCell).Text(dia.MinutosTexto);
                         table.Cell().Element(BlockCell).Text(string.IsNullOrWhiteSpace(dia.Observacion) ? "—" : dia.Observacion);
                     }
                 });

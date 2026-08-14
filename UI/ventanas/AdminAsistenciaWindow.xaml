@@ -11,37 +11,56 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Margin="0,0,0,18">
+            <StackPanel Grid.Row="0" Margin="0,0,0,14">
                 <TextBlock Text="Registrar asistencia como administrador" FontSize="20" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,8"/>
                 <Border Background="#FEF3C7" CornerRadius="8" Padding="12,10" Margin="0,4,0,0">
                     <TextBlock FontSize="13" Foreground="#92400E" TextWrapping="Wrap">
                         <Run FontWeight="Bold" Text="¿Qué hace este registro?"/>
-                        <Run Text=" Esta asistencia se computará automáticamente como un "/>
+                        <Run Text=" El tipo que elijas se refleja en los reportes: "/>
+                        <Run FontWeight="Bold" Text="asistencia normal"/>
+                        <Run Text=" cuenta como un día asistido, y "/>
                         <Run FontWeight="Bold" Text="retardo justificado"/>
-                        <Run Text=" en los reportes, y el motivo que escribas abajo quedará como observación."/>
+                        <Run Text=" se marca como RJ con el motivo como observación."/>
                     </TextBlock>
                 </Border>
             </StackPanel>
 
-            <Border Grid.Row="1" Style="{StaticResource SectionPanel}" Margin="0,0,0,18">
+            <Border Grid.Row="1" Style="{StaticResource SectionPanel}" Margin="0,0,0,14">
                 <StackPanel>
                     <TextBlock Text="Empleado seleccionado" Style="{StaticResource FieldLabel}"/>
                     <TextBlock x:Name="txtEmpleadoSeleccionado" FontSize="16" FontWeight="Bold" Foreground="#0F172A" Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
 
-            <StackPanel Grid.Row="2" Margin="0,0,0,18">
+            <StackPanel Grid.Row="2" Margin="0,0,0,14">
+                <TextBlock Text="Tipo de registro" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/>
+                <StackPanel Orientation="Horizontal">
+                    <!-- Nota: no usar IsChecked="True" aquí: dispararía el evento Checked
+                         durante InitializeComponent, antes de que existan los controles
+                         posteriores, y crashearía. El constructor lo activa al final. -->
+                    <RadioButton x:Name="rdbNormal" GroupName="TipoRegistro" Content="Asistencia normal"
+                                 FontSize="14" Foreground="#0F172A" VerticalAlignment="Center"
+                                 Checked="rdbTipo_Checked" Margin="0,0,24,0"/>
+                    <RadioButton x:Name="rdbRetardoJustificado" GroupName="TipoRegistro" Content="Retardo justificado"
+                                 FontSize="14" Foreground="#0F172A" VerticalAlignment="Center"
+                                 Checked="rdbTipo_Checked"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel x:Name="panelObservacion" Grid.Row="3" Margin="0,0,0,18" Visibility="Collapsed">
                 <TextBlock Text="Motivo / Observación (obligatorio)" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/>
                 <TextBox x:Name="txtObservacion" Style="{StaticResource ModernTextBox}"
                          Height="100" TextWrapping="Wrap" AcceptsReturn="True"
                          VerticalScrollBarVisibility="Auto" Margin="0"/>
             </StackPanel>
 
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="btnCancelar" Content="Cancelar" Style="{StaticResource SecondaryButton}"
                         Width="110" Height="38" BorderThickness="0" Margin="0,0,10,0" Click="btnCancelar_Click"/>
                 <Button x:Name="btnAceptar" Content="Registrar" Style="{StaticResource PrimaryButton}"

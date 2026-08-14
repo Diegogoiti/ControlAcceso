@@ -15,6 +15,7 @@ namespace ControlAcceso.DTOs
         public string NombreEmpleado { get; set; } = string.Empty;
         public string Cargo { get; set; } = string.Empty;
         public string Estado { get; set; } = string.Empty;
+        public bool EsPorAdmin { get; set; }
         public string? Observacion { get; set; }
     }
 }

@@ -76,7 +76,7 @@ namespace ControlAcceso.UI.controladores
             List<AsistenciaDiaDto> marcajes = filtro switch
             {
                 "Solo tardanzas" => _dashboard.Marcajes.Where(m => m.Estado == "Tarde").ToList(),
-                "Solo por admin" => _dashboard.Marcajes.Where(m => m.Estado == "Retardo justificado").ToList(),
+                "Solo por admin" => _dashboard.Marcajes.Where(m => m.EsPorAdmin).ToList(),
                 _ => _dashboard.Marcajes
             };
 

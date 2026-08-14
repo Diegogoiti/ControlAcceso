@@ -575,7 +575,7 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Fecha" Binding="{Binding Fecha, StringFormat=dd/MM/yyyy}" Width="Auto" MinWidth="90"/>
                                     <DataGridTextColumn Header="Día" Binding="{Binding Dia}" Width="Auto" MinWidth="90"/>
-                                    <DataGridTextColumn Header="Hora entrada" Binding="{Binding HoraEntrada, StringFormat=hh\\:mm}" Width="Auto" MinWidth="100">
+                                    <DataGridTextColumn Header="Hora entrada" Binding="{Binding HoraEntradaTexto}" Width="Auto" MinWidth="100">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -632,7 +632,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTextColumn Header="Min" Binding="{Binding MinutosRetraso}" Width="Auto" MinWidth="55">
+                                    <DataGridTextColumn Header="Retardo" Binding="{Binding MinutosTexto}" Width="Auto" MinWidth="90">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="HorizontalAlignment" Value="Center"/>

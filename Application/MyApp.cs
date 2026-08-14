@@ -267,7 +267,8 @@ namespace ControlAcceso.Application
                 EmpleadoID = empleadoId,
                 Tipo = tipoAsistencia,
                 PorAdministrador = true,
-                Observacion = observacion?.Trim()
+                // Observación vacía = asistencia normal; con texto = retardo justificado.
+                Observacion = string.IsNullOrWhiteSpace(observacion) ? null : observacion.Trim()
             };
 
             bool exito = DatabaseService.RegistrarAsistencia(asistencia);

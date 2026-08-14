@@ -76,19 +76,26 @@ namespace ControlAcceso.Services
 
                     diasEvaluados++;
 
-                    // Buscar si hay una entrada (Tipo == 1) o si es por administrador
-                    var asistenciaDia = asistenciasEmpleado.FirstOrDefault(a => a.Timestamp.Date == diaActual.Date && (a.Tipo == 1 || a.PorAdministrador));
+                    // Un solo registro por día: la certificación del admin si existe,
+                    // si no la lectura biométrica más temprana.
+                    var asistenciaDia = ElegirRegistroDelDia(
+                        asistenciasEmpleado.Where(a => a.Timestamp.Date == diaActual.Date));
 
                     if (asistenciaDia != null)
                     {
-                        if (asistenciaDia.PorAdministrador)
+                        if (asistenciaDia.PorAdministrador && !string.IsNullOrWhiteSpace(asistenciaDia.Observacion))
                         {
-                            // Regla de negocio: toda asistencia registrada por un
-                            // administrador se computa como RETARDO JUSTIFICADO
-                            // (el motivo va en la observación del registro).
+                            // Regla de negocio: registro manual del admin CON motivo
+                            // = RETARDO JUSTIFICADO (la observación es la justificación).
                             reporte.PorAdministrador++;
                             reporte.DiasAsistencia[diaDeLaSemana] = "RJ"; // Retardo justificado
                             reporte.DiasAsistidos++; // Aun así, el día cuenta como trabajado
+                        }
+                        else if (asistenciaDia.PorAdministrador)
+                        {
+                            // Registro manual del admin SIN motivo = asistencia normal.
+                            reporte.DiasAsistencia[diaDeLaSemana] = "A";
+                            reporte.DiasAsistidos++;
                         }
                         else if (asistenciaDia.Timestamp.TimeOfDay > horaLimite)
                         {
@@ -142,31 +149,37 @@ namespace ControlAcceso.Services
             var cargos = _databaseService.ObtenerCargos(false);
             var asistencias = _databaseService.ObtenerAsistenciasDelDia(fecha);
 
+            // Un solo registro por empleado y por día: si el admin certificó algo
+            // ese día gana esa certificación; si no, la lectura más temprana.
             var marcajes = asistencias
+                .GroupBy(a => a.EmpleadoID)
+                .Select(g => ElegirRegistroDelDia(g))
+                .Where(a => a != null)
                 .Select(a =>
                 {
-                    var empleado = empleados.FirstOrDefault(e => e.Id == a.EmpleadoID);
+                    var empleado = empleados.FirstOrDefault(e => e.Id == a!.EmpleadoID);
                     return new AsistenciaDiaDto
                     {
-                        Id = a.Id,
+                        Id = a!.Id,
                         EmpleadoId = a.EmpleadoID,
                         Hora = a.Timestamp,
                         NombreEmpleado = empleado?.NombreCompleto ?? "Empleado desconocido",
                         Cargo = empleado != null
                             ? (cargos.FirstOrDefault(c => c.Id == empleado.RolId)?.Nombre ?? "Sin cargo")
                             : string.Empty,
-                        // Regla de negocio unificada: los registros manuales del
-                        // administrador son RETARDOS JUSTIFICADOS.
-                        Estado = a.PorAdministrador
+                        // Regla de negocio: registro manual del admin con motivo =
+                        // retardo justificado; sin motivo = asistencia normal.
+                        Estado = a.PorAdministrador && !string.IsNullOrWhiteSpace(a.Observacion)
                             ? "Retardo justificado"
                             : (a.Timestamp.TimeOfDay > horaLimite ? "Tarde" : "A tiempo"),
+                        EsPorAdmin = a.PorAdministrador,
                         Observacion = a.Observacion
                     };
                 })
                 .OrderByDescending(a => a.Hora)
                 .ToList();
 
-            var idsMarcados = asistencias.Select(a => a.EmpleadoID).Distinct().ToHashSet();
+            var idsMarcados = marcajes.Select(a => a.EmpleadoId).ToHashSet();
             var sinMarcar = empleados
                 .Where(e => !idsMarcados.Contains(e.Id))
                 .Select(e => new EmpleadoPendienteDto
@@ -182,7 +195,8 @@ namespace ControlAcceso.Services
             {
                 Fecha = fecha,
                 EmpleadosActivos = empleados.Count,
-                MarcajesHoy = asistencias.Count,
+                // MarcajesHoy cuenta 1 registro por empleado (el ganador del día).
+                MarcajesHoy = marcajes.Count,
                 TardanzasHoy = marcajes.Count(m => m.Estado == "Tarde"),
                 PorAdminHoy = marcajes.Count(m => m.Estado == "Retardo justificado"),
                 Marcajes = marcajes,
@@ -194,10 +208,13 @@ namespace ControlAcceso.Services
         /// Reporte detallado de un empleado entre dos fechas. Genera una fila por
         /// día (lunes a sábado, siguiendo la convención del reporte semanal):
         /// hora de entrada, estado y observación. Reglas:
-        ///  - Registro manual del admin   → "Retardo justificado" (con su motivo).
+        ///  - Registro manual del admin con motivo → "Retardo justificado".
+        ///  - Registro manual del admin sin motivo → "A tiempo".
         ///  - Entrada con huella tras la hora límite → "Retardo" (con minutos).
         ///  - Entrada con huella a tiempo → "A tiempo".
         ///  - Sin registro                → "Falta".
+        /// Por día se toma UN solo registro: el del admin si existe (certificación),
+        /// si no la lectura biométrica más temprana.
         /// </summary>
         public ReporteDetalladoEmpleadoDto GenerarDatosReporteDetallado(int empleadoId, DateTime desde, DateTime hasta)
         {
@@ -242,33 +259,48 @@ namespace ControlAcceso.Services
                 }
                 else
                 {
-                    var porAdmin = registrosDia.FirstOrDefault(a => a.PorAdministrador);
-                    if (porAdmin != null)
+                    // Un solo registro por día: certificación del admin si existe,
+                    // si no la lectura biométrica más temprana.
+                    var registroDia = ElegirRegistroDelDia(registrosDia)!;
+
+                    if (registroDia.PorAdministrador && !string.IsNullOrWhiteSpace(registroDia.Observacion))
                     {
-                        // Regla de negocio: asistencia manual del admin = retardo justificado.
+                        // Registro manual del admin con motivo = retardo justificado.
                         fila = new ReporteDetalleDiaDto
                         {
                             Fecha = dia,
                             Dia = NombreDia(dia.DayOfWeek),
-                            HoraEntrada = porAdmin.Timestamp.TimeOfDay,
+                            HoraEntrada = registroDia.Timestamp.TimeOfDay,
                             Estado = "Retardo justificado",
                             MinutosRetraso = 0,
-                            Observacion = porAdmin.Observacion ?? string.Empty
+                            Observacion = registroDia.Observacion
+                        };
+                    }
+                    else if (registroDia.PorAdministrador)
+                    {
+                        // Registro manual del admin SIN motivo = asistencia normal.
+                        fila = new ReporteDetalleDiaDto
+                        {
+                            Fecha = dia,
+                            Dia = NombreDia(dia.DayOfWeek),
+                            HoraEntrada = registroDia.Timestamp.TimeOfDay,
+                            Estado = "A tiempo",
+                            MinutosRetraso = 0,
+                            Observacion = string.Empty
                         };
                     }
                     else
                     {
-                        var entrada = registrosDia.OrderBy(a => a.Timestamp.TimeOfDay).First();
-                        int minutos = (int)(entrada.Timestamp.TimeOfDay - horaLimite).TotalMinutes;
+                        int minutos = (int)(registroDia.Timestamp.TimeOfDay - horaLimite).TotalMinutes;
 
                         fila = new ReporteDetalleDiaDto
                         {
                             Fecha = dia,
                             Dia = NombreDia(dia.DayOfWeek),
-                            HoraEntrada = entrada.Timestamp.TimeOfDay,
+                            HoraEntrada = registroDia.Timestamp.TimeOfDay,
                             Estado = minutos > 0 ? "Retardo" : "A tiempo",
                             MinutosRetraso = minutos > 0 ? minutos : 0,
-                            Observacion = entrada.Observacion ?? string.Empty
+                            Observacion = registroDia.Observacion ?? string.Empty
                         };
                     }
                 }
@@ -298,6 +330,29 @@ namespace ControlAcceso.Services
                     ? Math.Round((double)trabajados / dias.Count * 100.0, 0)
                     : 0
             };
+        }
+
+        /// <summary>
+        /// Elige el único registro que se toma por empleado y por día:
+        ///  - Si el admin registró algo ese día (certificación oficial: RJ con
+        ///    motivo o asistencia normal), ese registro gana sobre las lecturas.
+        ///  - Si no, se toma la lectura biométrica MÁS TEMPRANA del día (si
+        ///    alguien marca 50 veces, solo cuenta la primera).
+        /// </summary>
+        private static AsistenciaDto? ElegirRegistroDelDia(IEnumerable<AsistenciaDto> registrosDia)
+        {
+            var lista = registrosDia.ToList();
+            if (lista.Count == 0) return null;
+
+            // Certificación del admin (si hay varias, la más temprana).
+            var porAdmin = lista
+                .Where(a => a.PorAdministrador)
+                .OrderBy(a => a.Timestamp.TimeOfDay)
+                .FirstOrDefault();
+            if (porAdmin != null) return porAdmin;
+
+            // Lecturas biométricas: la más temprana del día.
+            return lista.OrderBy(a => a.Timestamp.TimeOfDay).First();
         }
 
         private static string NombreDia(DayOfWeek dia)
