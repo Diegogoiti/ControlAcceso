@@ -79,8 +79,8 @@ namespace ControlAcceso.Services
                     columns.RelativeColumn();    // Empleado (toma el espacio sobrante)
                     columns.ConstantColumn(90);  // Posicion
 
-                    // Dias de la semana (L a S)
-                    for(int i = 0; i < 6; i++) columns.ConstantColumn(40);
+                    // Dias de la semana (L a S) - ancho aumentado para nombres largos como 'Miércoles'
+                    for(int i = 0; i < 6; i++) columns.ConstantColumn(48);
 
                     columns.ConstantColumn(55); // Dias Asist.
                     columns.ConstantColumn(55); // Dias Falt.
